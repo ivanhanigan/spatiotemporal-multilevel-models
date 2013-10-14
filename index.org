@@ -1,0 +1,1113 @@
+#+TITLE:Spatiotemporal Regression Modelling
+#+AUTHOR: Ivan Hanigan
+#+email: ivan.hanigan@anu.edu.au
+#+LaTeX_CLASS: article
+#+LaTeX_CLASS_OPTIONS: [a4paper]
+#+LATEX: \tableofcontents
+-----
+
+* README
+#+name:README
+#+begin_src markdown :tangle README.md :exports reports :eval no
+# Spatiotemporal Regression Modelling
+
+This is an Open Notebook for my work on Spatiotemporal Regression Modelling tips and tricks.
+
+Ivan Hanigan
+2013-10-15
+
+#+end_src
+
+* COMMENT Notes
+** Update on reflections from Bob Haining's Lecture
+[[http://ivanhanigan.github.io/2013/04/reflections-bob-haining/][Earlier this year]] Prof Bob Haining from the Geography Department Cambridge visited and gave us a great lecture on spatial regression.
+
+This Tuesday at the [[http://gis-forum.github.io][GIS Forum]] we were lucky to be joined by statistician Phil Kokic from CSIRO who had heard we'd be discussing spatial autocorrelation (Phil is my PhD supervisor). Here are some quick notes I made:
+
+*** CART Tree analysis that addresses the (potential)spatial autocorrelation problem
+We started off the discussion with an assessment of the approach described in this post [[http://thebiobucket.blogspot.com.au/2012/03/classification-trees-allowing-for.html][Classification Trees and Spatial Autocorrelation]].
+
+I've been thinking more and more about decision trees/CART/random forest methods for selecting a subset of relevant variables (and interations) for use in GLM or GAM model construction.  In a perfect world I'd have data on the main predictor I wanted to model and enough data about all the relevant other predictors (especially confounding or modifying variables) to ensure I get a 'well behaved model'. But with all the data around and so many potentially plausible relationships one might choose to include we need a way to narrow down these to just include the most important covariates, confounders and interactions.  CART or some variation on it seems a good way to do this, but is prone to the potential problem of spatially correlated errors too.
+
+The idea from that blog post is:
+
+"compute the classification tree, calculate residuals and use it for a Mantel-test and Mantel correlograms.
+The Mantel correlograms test differrences in dissimilarities of
+the residuals across several spatial distances and thus enable you to detect lag-distances where possible spatial autocorrelation vanishes.
+...If encounter autocorrelation... try to use subsamples of the data avoiding resampling within the lag-distance.."
+
+I think the workflow would be to
+
+- fit the classification tree (Question: best to use all the data or with a sample like using cross-validation)
+- get the residuals and visually assess the lagged distances plot provided by the Mantel correlogram.  Decide on a threshold (Question: is there an objective way to do this?).
+- Sample from the data and select out from this sample only data from pairs with distances greater than the threshold (have to keep one out of each close pair or else we'd only be getting data from the sparsely sampled parts of our study region).
+
+We all agreed this sounded OK, but only avoids the problem of spatial autocorrelation (and loses data).
+
+*** Modeling with control for spatial autocorrelation
+So we all agreed we'd prefer if our model can control for spatial autocorrelation.  I confessed that I'd always found the GeoBUGS tutorial and other tutorials about Bayesian methods for this very difficult and would really like a "Simple" way to make the problem go away.  So first we briefly reviewed Prof Hainings 3 equations again:
+
+NOTE: THE FOLLOWING IDEAS WORK BEST FOR AREAL DATA.
+
+*** The Spatial Error Model
+
+$Y_{i} = \beta_{0} + \beta_{1} X_{1i} + \eta_{i}$
+
+Where:
+
+$\eta_{i}$ = Spatially autocorrelated errors.
+
+
+*** The Spatial Lag Model
+
+$Y_{i} = \beta_{0} + \beta_{1} X_{1i} + \rho(Neighbours Y_{ij}) + e_{i}$
+
+Where:
+
+$\rho_(Neighbours Y_{ij})$ = is an additional explanatory variable which is the value of the dependent variable in neighbouring areas. 
+
+*** Spatially Lagged Independent Variable(s)
+
+$Y_{i} = \beta_{0} + \beta_{1} X_{1i} + \beta_{2L} X_{2ij} + e_{i}$
+
+Where:
+
+$\beta_{2L} X_{2ij}$ = is the independent variable X2 that is spatially lagged.
+
+
+*** Discussion
+- Phil agreed with Bob that the spatial error model is the best, spatial lag model is OK and spatially lagged covariates not so great.
+- For spatial error model fitting Phil suggested looking at R packages spBayes and spTimer
+- I pointed out that I am mostly interested in "spatially structured time-series models" rather than spatial models at a single point in time.  By this I mean that we have several neighbouring areal units observed over a period of time.  In this framework the general methods of time series modelling are used to control for temporal autocorrelation.  However this makes the methods of spatial error and spatial lag models tricky because the spatial autocorrelation needs to be assessed at many points in time.
+- I asked that if spatial lag is OK (and it seems easier to fit into the time-series model framework) how can I check to know if it has done the trick?  If this were purely a spatial model we could check for spatial autocorrelation in the residuals just as they described in the CART blog above, but here we have many maps we could make (one every time point), and our spatial autocorrelation measure would surely vary a lot over time.  SO would a simple way just be to asses the effect on the Standard Error on beta1 (our primary interest) and if it is bigger but still significant we can be reassured that our result isn't affected? Or perhaps we should assess the beta on the lagged variable, for instance is a significant p-value on the lagged Beta an indication that it is capturing the unmeasured spatial associations represented by the neighbourhood variable?  
+- If it hadn't done the trick Nerida pointed out this might be because the Neighbourhoods are actually not appropriately represented by the first order neighbours and therefore more neighbours could be included, like moving out several concentric circles to wider and wider neighbourhoods
+- Nasser and Phil pointed out that the lagged variable (the outcome in the neighbours) includes an element of the exposure variables, and said that it would be difficult to 'unpack' what that part of the model meant.
+- so it looks like there is no simple answer and spatial error model is still preferred.
+
+** md
+#+name:reflections-bob-haining-update-header
+#+begin_src markdown :tangle ~/projects/ivanhanigan.github.com.raw/_posts/2013-09-25-reflections-bob-haining-update.md :exports none :eval no :padline no
+  ---
+  name: reflections-bob-haining-update
+  layout: post
+  title: reflections-bob-haining-update
+  date: 2013-09-25
+  categories:
+  - spatial dependence
+  ---
+  
+  <!-- <?xml version="1.0" encoding="utf-8"?> -->
+  <!-- <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" -->
+  <!--                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"> -->
+  <!-- <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"> -->
+  <head>
+  <!-- <title>spatiotemporal </title> -->
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+  <meta name="title" content="spatiotemporal "/>
+  <meta name="generator" content="Org-mode"/>
+  <meta name="generated" content="2013-09-25T14:46+1000"/>
+  <meta name="author" content="Ivan Hanigan"/>
+  <meta name="description" content=""/>
+  <meta name="keywords" content=""/>
+  <style type="text/css">
+   <!--/*--><![CDATA[/*><!--*/
+    html { font-family: Times, serif; font-size: 12pt; }
+    .title  { text-align: center; }
+    .todo   { color: red; }
+    .done   { color: green; }
+    .tag    { background-color: #add8e6; font-weight:normal }
+    .target { }
+    .timestamp { color: #bebebe; }
+    .timestamp-kwd { color: #5f9ea0; }
+    .right  {margin-left:auto; margin-right:0px;  text-align:right;}
+    .left   {margin-left:0px;  margin-right:auto; text-align:left;}
+    .center {margin-left:auto; margin-right:auto; text-align:center;}
+    p.verse { margin-left: 3% }
+    pre {
+      border: 1pt solid #AEBDCC;
+      background-color: #F3F5F7;
+      padding: 5pt;
+      font-family: courier, monospace;
+          font-size: 90%;
+          overflow:auto;
+    }
+    table { border-collapse: collapse; }
+    td, th { vertical-align: top;  }
+    th.right  { text-align:center;  }
+    th.left   { text-align:center;   }
+    th.center { text-align:center; }
+    td.right  { text-align:right;  }
+    td.left   { text-align:left;   }
+    td.center { text-align:center; }
+    dt { font-weight: bold; }
+    div.figure { padding: 0.5em; }
+    div.figure p { text-align: center; }
+    div.inlinetask {
+      padding:10px;
+      border:2px solid gray;
+      margin:10px;
+      background: #ffffcc;
+    }
+    textarea { overflow-x: auto; }
+    .linenr { font-size:smaller }
+    .code-highlighted {background-color:#ffff00;}
+    .org-info-js_info-navigation { border-style:none; }
+    #org-info-js_console-label { font-size:10px; font-weight:bold;
+                                 white-space:nowrap; }
+    .org-info-js_search-highlight {background-color:#ffff00; color:#000000;
+                                   font-weight:bold; }
+    /*]]>*/-->
+  </style>
+  <script type="text/javascript">
+  /*
+  @licstart  The following is the entire license notice for the
+  JavaScript code in this tag.
+  
+  Copyright (C) 2012-2013 Free Software Foundation, Inc.
+  
+  The JavaScript code in this tag is free software: you can
+  redistribute it and/or modify it under the terms of the GNU
+  General Public License (GNU GPL) as published by the Free Software
+  Foundation, either version 3 of the License, or (at your option)
+  any later version.  The code is distributed WITHOUT ANY WARRANTY;
+  without even the implied warranty of MERCHANTABILITY or FITNESS
+  FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+  
+  As additional permission under GNU GPL version 3 section 7, you
+  may distribute non-source (e.g., minimized or compacted) forms of
+  that code without the copy of the GNU GPL normally required by
+  section 4, provided you include this license notice and a URL
+  through which recipients can access the Corresponding Source.
+  
+  
+  @licend  The above is the entire license notice
+  for the JavaScript code in this tag.
+  ,*/
+  <!--/*--><![CDATA[/*><!--*/
+   function CodeHighlightOn(elem, id)
+   {
+     var target = document.getElementById(id);
+     if(null != target) {
+       elem.cacheClassElem = elem.className;
+       elem.cacheClassTarget = target.className;
+       target.className = "code-highlighted";
+       elem.className   = "code-highlighted";
+     }
+   }
+   function CodeHighlightOff(elem, id)
+   {
+     var target = document.getElementById(id);
+     if(elem.cacheClassElem)
+       elem.className = elem.cacheClassElem;
+     if(elem.cacheClassTarget)
+       target.className = elem.cacheClassTarget;
+   }
+  /*]]>*///-->
+  </script>
+  <script type="text/javascript" src="http://orgmode.org/mathjax/MathJax.js">
+  /**
+   ,*
+   ,* @source: http://orgmode.org/mathjax/MathJax.js
+   ,*
+   ,* @licstart  The following is the entire license notice for the
+   ,*  JavaScript code in http://orgmode.org/mathjax/MathJax.js.
+   ,*
+   ,* Copyright (C) 2012-2013  MathJax
+   ,*
+   ,* Licensed under the Apache License, Version 2.0 (the "License");
+   ,* you may not use this file except in compliance with the License.
+   ,* You may obtain a copy of the License at
+   ,*
+   ,*     http://www.apache.org/licenses/LICENSE-2.0
+   ,*
+   ,* Unless required by applicable law or agreed to in writing, software
+   ,* distributed under the License is distributed on an "AS IS" BASIS,
+   ,* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   ,* See the License for the specific language governing permissions and
+   ,* limitations under the License.
+   ,*
+   ,* @licend  The above is the entire license notice
+   ,* for the JavaScript code in http://orgmode.org/mathjax/MathJax.js.
+   ,*
+   ,*/
+  
+  /*
+  @licstart  The following is the entire license notice for the
+  JavaScript code below.
+  
+  Copyright (C) 2012-2013 Free Software Foundation, Inc.
+  
+  The JavaScript code below is free software: you can
+  redistribute it and/or modify it under the terms of the GNU
+  General Public License (GNU GPL) as published by the Free Software
+  Foundation, either version 3 of the License, or (at your option)
+  any later version.  The code is distributed WITHOUT ANY WARRANTY;
+  without even the implied warranty of MERCHANTABILITY or FITNESS
+  FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+  
+  As additional permission under GNU GPL version 3 section 7, you
+  may distribute non-source (e.g., minimized or compacted) forms of
+  that code without the copy of the GNU GPL normally required by
+  section 4, provided you include this license notice and a URL
+  through which recipients can access the Corresponding Source.
+  
+  
+  @licend  The above is the entire license notice
+  for the JavaScript code below.
+  ,*/
+  <!--/*--><![CDATA[/*><!--*/
+      MathJax.Hub.Config({
+          // Only one of the two following lines, depending on user settings
+          // First allows browser-native MathML display, second forces HTML/CSS
+          //  config: ["MMLorHTML.js"], jax: ["input/TeX"],
+              jax: ["input/TeX", "output/HTML-CSS"],
+          extensions: ["tex2jax.js","TeX/AMSmath.js","TeX/AMSsymbols.js",
+                       "TeX/noUndefined.js"],
+          tex2jax: {
+              inlineMath: [ ["\\(","\\)"] ],
+              displayMath: [ ['$$','$$'], ["\\[","\\]"], ["\\begin{displaymath}","\\end{displaymath}"] ],
+              skipTags: ["script","noscript","style","textarea","pre","code"],
+              ignoreClass: "tex2jax_ignore",
+              processEscapes: false,
+              processEnvironments: true,
+              preview: "TeX"
+          },
+          showProcessingMessages: true,
+          displayAlign: "center",
+          displayIndent: "2em",
+  
+          "HTML-CSS": {
+               scale: 100,
+               availableFonts: ["STIX","TeX"],
+               preferredFont: "TeX",
+               webFont: "TeX",
+               imageFont: "TeX",
+               showMathMenu: true,
+          },
+          MMLorHTML: {
+               prefer: {
+                   MSIE:    "MML",
+                   Firefox: "MML",
+                   Opera:   "HTML",
+                   other:   "HTML"
+               }
+          }
+      });
+  /*]]>*///-->
+  </script>
+  </head>
+  <body>
+  
+  <div id="preamble">
+  
+  </div>
+  
+  <div id="content">
+  <!-- <h1 class="title">spatiotemporal </h1> -->
+  
+  
+  <div id="table-of-contents">
+  <h2>Table of Contents</h2>
+  <div id="text-table-of-contents">
+  <ul>
+  <li><a href="#sec-1">1 Update on reflections from Bob Haining's Lecture</a>
+  <ul>
+  <li><a href="#sec-1-1">1.1 CART Tree analysis that addresses the (potential)spatial autocorrelation problem</a></li>
+  <li><a href="#sec-1-2">1.2 Modeling with control for spatial autocorrelation</a></li>
+  <li><a href="#sec-1-3">1.3 The Spatial Error Model</a></li>
+  <li><a href="#sec-1-4">1.4 The Spatial Lag Model</a></li>
+  <li><a href="#sec-1-5">1.5 Spatially Lagged Independent Variable(s)</a></li>
+  <li><a href="#sec-1-6">1.6 Discussion</a></li>
+  </ul>
+  </li>
+  </ul>
+  </div>
+  </div>
+  
+  <div id="outline-container-1" class="outline-3">
+  <h3 id="sec-1"><span class="section-number-3">1</span> Update on reflections from Bob Haining's Lecture</h3>
+  <div class="outline-text-3" id="text-1">
+  
+  <p><a href="http://ivanhanigan.github.io/2013/04/reflections-bob-haining/">Earlier this year</a> Prof Bob Haining from the Geography Department Cambridge visited and gave us a great lecture on spatial regression.
+  </p>
+  <p>
+  This Tuesday at the <a href="http://gis-forum.github.io">GIS Forum</a> we were lucky to be joined by statistician Phil Kokic from CSIRO who had heard we'd be discussing spatial autocorrelation (Phil is my PhD supervisor). Here are some quick notes I made:
+  </p>
+  
+  </div>
+  
+  <div id="outline-container-1-1" class="outline-4">
+  <h4 id="sec-1-1"><span class="section-number-4">1.1</span> CART Tree analysis that addresses the (potential)spatial autocorrelation problem</h4>
+  <div class="outline-text-4" id="text-1-1">
+  
+  <p>We started off the discussion with an assessment of the approach described in this post <a href="http://thebiobucket.blogspot.com.au/2012/03/classification-trees-allowing-for.html">Classification Trees and Spatial Autocorrelation</a>.
+  </p>
+  <p>
+  I've been thinking more and more about decision trees/CART/random forest methods for selecting a subset of relevant variables (and interations) for use in GLM or GAM model construction.  In a perfect world I'd have data on the main predictor I wanted to model and enough data about all the relevant other predictors (especially confounding or modifying variables) to ensure I get a 'well behaved model'. But with all the data around and so many potentially plausible relationships one might choose to include we need a way to narrow down these to just include the most important covariates, confounders and interactions.  CART or some variation on it seems a good way to do this, but is prone to the potential problem of spatially correlated errors too.
+  </p>
+  <p>
+  The idea from that blog post is:
+  </p>
+  <p>
+  "compute the classification tree, calculate residuals and use it for a Mantel-test and Mantel correlograms.
+  The Mantel correlograms test differrences in dissimilarities of
+  the residuals across several spatial distances and thus enable you to detect lag-distances where possible spatial autocorrelation vanishes.
+  &hellip;If encounter autocorrelation&hellip; try to use subsamples of the data avoiding resampling within the lag-distance.."
+  </p>
+  <p>
+  I think the workflow would be to
+  </p>
+  <ul>
+  <li>fit the classification tree (Question: best to use all the data or with a sample like using cross-validation)
+  </li>
+  <li>get the residuals and visually assess the lagged distances plot provided by the Mantel correlogram.  Decide on a threshold (Question: is there an objective way to do this?).
+  </li>
+  <li>Sample from the data and select out from this sample only data from pairs with distances greater than the threshold (have to keep one out of each close pair or else we'd only be getting data from the sparsely sampled parts of our study region).
+  </li>
+  </ul>
+  
+  
+  <p>
+  We all agreed this sounded OK, but only avoids the problem of spatial autocorrelation (and loses data).
+  </p>
+  </div>
+  
+  </div>
+  
+  <div id="outline-container-1-2" class="outline-4">
+  <h4 id="sec-1-2"><span class="section-number-4">1.2</span> Modeling with control for spatial autocorrelation</h4>
+  <div class="outline-text-4" id="text-1-2">
+  
+  <p>So we all agreed we'd prefer if our model can control for spatial autocorrelation.  I confessed that I'd always found the GeoBUGS tutorial and other tutorials about Bayesian methods for this very difficult and would really like a "Simple" way to make the problem go away.  So first we briefly reviewed Prof Hainings 3 equations again:
+  </p>
+  <p>
+  NOTE: THE FOLLOWING IDEAS WORK BEST FOR AREAL DATA.
+  </p>
+  </div>
+  
+  </div>
+  
+  <div id="outline-container-1-3" class="outline-4">
+  <h4 id="sec-1-3"><span class="section-number-4">1.3</span> The Spatial Error Model</h4>
+  <div class="outline-text-4" id="text-1-3">
+  
+  
+  
+  
+  \(Y_{i} = \beta_{0} + \beta_{1} X_{1i} + \eta_{i}\)
+  
+  <p>
+  Where:
+  </p>
+  <p>
+  \(\eta_{i}\) = Spatially autocorrelated errors.
+  </p>
+  
+  </div>
+  
+  </div>
+  
+  <div id="outline-container-1-4" class="outline-4">
+  <h4 id="sec-1-4"><span class="section-number-4">1.4</span> The Spatial Lag Model</h4>
+  <div class="outline-text-4" id="text-1-4">
+  
+  
+  
+  
+  \(Y_{i} = \beta_{0} + \beta_{1} X_{1i} + \rho(Neighbours Y_{ij}) + e_{i}\)
+  
+  <p>
+  Where:
+  </p>
+  <p>
+  \(\rho_(Neighbours Y_{ij})\) = is an additional explanatory variable which is the value of the dependent variable in neighbouring areas. 
+  </p>
+  </div>
+  
+  </div>
+  
+  <div id="outline-container-1-5" class="outline-4">
+  <h4 id="sec-1-5"><span class="section-number-4">1.5</span> Spatially Lagged Independent Variable(s)</h4>
+  <div class="outline-text-4" id="text-1-5">
+  
+  
+  
+  
+  \(Y_{i} = \beta_{0} + \beta_{1} X_{1i} + \beta_{2L} X_{2ij} + e_{i}\)
+  
+  <p>
+  Where:
+  </p>
+  <p>
+  \(\beta_{2L} X_{2ij}\) = is the independent variable X2 that is spatially lagged.
+  </p>
+  
+  </div>
+  
+  </div>
+  
+  <div id="outline-container-1-6" class="outline-4">
+  <h4 id="sec-1-6"><span class="section-number-4">1.6</span> Discussion</h4>
+  <div class="outline-text-4" id="text-1-6">
+  
+  <ul>
+  <li>Phil agreed with Bob that the spatial error model is the best, spatial lag model is OK and spatially lagged covariates not so great.
+  </li>
+  <li>For spatial error model fitting Phil suggested looking at R packages spBayes and spTimer.
+  </li>
+  <li>I pointed out that I am mostly interested in "spatially structured time-series models" rather than spatial models at a single point in time.  By this I mean that we have several neighbouring areal units observed over a period of time.  In this framework the general methods of time series modelling are used to control for temporal autocorrelation.  However this makes the methods of spatial error and spatial lag models tricky because the spatial autocorrelation needs to be assessed at many points in time.
+  </li>
+  <li>I asked that if spatial lag is OK (and it seems easier to fit into the time-series model framework) how can I check to know if it has done the trick?  If this were purely a spatial model we could check for spatial autocorrelation in the residuals just as they described in the CART blog above, but here we have many maps we could make (one every time point), and our spatial autocorrelation measure would surely vary a lot over time.  SO would a simple way just be to asses the effect on the Standard Error on beta1 (our primary interest) and if it is bigger but still significant we can be reassured that our result isn't affected? Or perhaps we should assess the beta on the lagged variable, for instance is a significant p-value on the lagged Beta an indication that it is capturing the unmeasured spatial associations represented by the neighbourhood variable?  
+  </li>
+  <li>If it hadn't done the trick Nerida pointed out this might be because the Neighbourhoods are actually not appropriately represented by the first order neighbours and therefore more neighbours could be included, like moving out several concentric circles to wider and wider neighbourhoods
+  </li>
+  <li>Nasser and Phil pointed out that the lagged variable (the outcome in the neighbours) includes an element of the exposure variables, and said that it would be difficult to 'unpack' what that part of the model meant.
+  </li>
+  <li>so it looks like there is no simple answer and spatial error model is still preferred.
+  </li>
+  </ul>
+  
+  
+  </div>
+  </div>
+  </div>
+  </div>
+  
+  </body>
+  </html>
+  
+#+end_src
+
+
+
+** 2013-09-26-spatially-structured-timeseries-vs-spatiotemporal-modelling
+** Spatially Structured Timeseries Vs Spatiotemporal Modelling
+In my last post about [[http://ivanhanigan.github.io/2013/09/reflections-bob-haining-update][spatiotemporal regression modelling]] I mentioned that I am mostly interested in "spatially structured time-series models" rather than spatial models at a single point in time. By this I mean that we have several neighbouring areal units observed over a period of time. In this framework the general methods of time series modelling are used to control for temporal autocorrelation. However this makes the methods of spatial error and spatial lag models tricky because the spatial autocorrelation needs to be assessed at many points in time.
+
+I want to expand more on this topic because I want to be clear that the organisation of the material I am aiming to bring to this notebook topic is not aimed at purely spatial regression models [[https://geodacenter.asu.edu/spatial-lag-and][(there is a lot of material and tools out there already for that)]].  I am trying with these notes to document my learning steps toward integrating spatial methods with time-series methods to allow me to practice (and understand) spatiotemporal regression modelling.
+
+*** Spatially Structured Time Series
+In [[http://www.pnas.org/content/early/2012/08/08/1112965109.full.pdf+html][my most successful previous attempt to conduct a spatiotemporal analysis of Suicide and Droughts]] I built on my knowledge of time-series regression models from single-city air pollution studies where the whole city is the unit of analysis and the temporal variation is modelled with controlling techniques for temporal autocorrelation.  These techniques are also valid for multi-city studies because it is pretty safe to assume the cities are all independent at each time point.  I structured my study by Eleven large zones (Census Statistical Divisions) of NSW and assumed each of these would vary over time independent of each other, and I fitted a zone-specific time trend and cycle. This is what I call "spatially structured time-series" modelling.  
+
+I justify using this model in this case because aggregating up to these very large regions will diminish the possibility of spatial autocorrelation and because Droughts vary over large spatial zones too, we will not suffer from exposure misclassificaiton bias.
+
+So this model is a simple time-series regression (with trend and seasonality) and an additional term for spatial Zone.
+
+\begin{eqnarray*}
+        log({\color{red} O_{ijk}})  & = & s({\color{red}ExposureVariable})  + {\color{blue} OtherExplanators}  \\
+        & &   + AgeGroup_{i} + Sex_{j} \\
+        & &   + {\color{blue} SpatialZone_{k}}  \\
+        & &  + sin(Time \times 2 \times \pi) + cos(Time \times 2 \times \pi) \\
+        & &  + Trend \\
+        & &   + offset({\color{blue} log(Pop_{ijk})})\\
+\end{eqnarray*}
+
+Where:\\
+
+- ${\color{red}O_{ijk}}$ = Outcome (counts) by Age$_{i}$, Sex$_{j}$ and SpatialZone$_{k}$ \\
+- {\color{red}ExposureVariable} = Data with {\color{red}Restrictive Intellectual Property~(IP)} \\
+- {\color{blue}OtherExplanators} = Other {\color{blue}Less Restricted}  Explanatory variables \\
+- s( ) = penalized regression splines \\
+- ${\color{blue} SpatialZone_{k}}$  = {\color{blue} Less Restricted} data representing the $SpatialZone_{k}$  \\
+- Trend = Longterm smooth trend(s) \\
+- ${\color{blue}Pop_{ijk}}$ = interpolated Census populations, by time in each group\\
+
+*** TODO Spatiotemporal modelling
+In contrast to the above model for modelling exposures that have fine resolution spatial variation (such as air pollution) the exposure misclassification effect of aggregating up to very large spatial zones will conteract the benefits of avoiding spatially autocorrelated errors and this might be unacceptable for certain research questions.  Therefore it is important to move toward a spatiotemporal regression model that replaces the $SpatialZone_{k}$ term with a more spatial error or spatial lag approach.
+** md
+#+name:spatially-structured-timeseries-vs-spatiotemporal-modelling-header
+#+begin_src markdown :tangle ~/projects/ivanhanigan.github.com.raw/_posts/2013-09-26-spatially-structured-timeseries-vs-spatiotemporal-modelling.md :exports none :eval no :padline no
+---
+name: spatially-structured-timeseries-vs-spatiotemporal-modelling
+layout: post
+title: spatially-structured-timeseries-vs-spatiotemporal-modelling
+date: 2013-09-26
+categories:
+- spatial dependence
+---
+    
+<head>
+<title>Spatiotemporal Regression Modelling</title>
+<meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1"/>
+<meta name="title" content="Spatiotemporal Regression Modelling"/>
+<meta name="generator" content="Org-mode"/>
+<meta name="generated" content="2013-09-26T10:18+1000"/>
+<meta name="author" content="Ivan Hanigan"/>
+<meta name="description" content=""/>
+<meta name="keywords" content=""/>
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  html { font-family: Times, serif; font-size: 12pt; }
+  .title  { text-align: center; }
+  .todo   { color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #add8e6; font-weight:normal }
+  .target { }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .right  {margin-left:auto; margin-right:0px;  text-align:right;}
+  .left   {margin-left:0px;  margin-right:auto; text-align:left;}
+  .center {margin-left:auto; margin-right:auto; text-align:center;}
+  p.verse { margin-left: 3% }
+  pre {
+	border: 1pt solid #AEBDCC;
+	background-color: #F3F5F7;
+	padding: 5pt;
+	font-family: courier, monospace;
+        font-size: 90%;
+        overflow:auto;
+  }
+  table { border-collapse: collapse; }
+  td, th { vertical-align: top;  }
+  th.right  { text-align:center;  }
+  th.left   { text-align:center;   }
+  th.center { text-align:center; }
+  td.right  { text-align:right;  }
+  td.left   { text-align:left;   }
+  td.center { text-align:center; }
+  dt { font-weight: bold; }
+  div.figure { padding: 0.5em; }
+  div.figure p { text-align: center; }
+  div.inlinetask {
+    padding:10px;
+    border:2px solid gray;
+    margin:10px;
+    background: #ffffcc;
+  }
+  textarea { overflow-x: auto; }
+  .linenr { font-size:smaller }
+  .code-highlighted {background-color:#ffff00;}
+  .org-info-js_info-navigation { border-style:none; }
+  #org-info-js_console-label { font-size:10px; font-weight:bold;
+                               white-space:nowrap; }
+  .org-info-js_search-highlight {background-color:#ffff00; color:#000000;
+                                 font-weight:bold; }
+  /*]]>*/-->
+</style>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+<script type="text/javascript" src="http://orgmode.org/mathjax/MathJax.js">
+/**
+ *
+ * @source: http://orgmode.org/mathjax/MathJax.js
+ *
+ * @licstart  The following is the entire license notice for the
+ *  JavaScript code in http://orgmode.org/mathjax/MathJax.js.
+ *
+ * Copyright (C) 2012-2013  MathJax
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * @licend  The above is the entire license notice
+ * for the JavaScript code in http://orgmode.org/mathjax/MathJax.js.
+ *
+ */
+
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code below.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code below is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code below.
+*/
+<!--/*--><![CDATA[/*><!--*/
+    MathJax.Hub.Config({
+        // Only one of the two following lines, depending on user settings
+        // First allows browser-native MathML display, second forces HTML/CSS
+        //  config: ["MMLorHTML.js"], jax: ["input/TeX"],
+            jax: ["input/TeX", "output/HTML-CSS"],
+        extensions: ["tex2jax.js","TeX/AMSmath.js","TeX/AMSsymbols.js",
+                     "TeX/noUndefined.js"],
+        tex2jax: {
+            inlineMath: [ ["\\(","\\)"] ],
+            displayMath: [ ['$$','$$'], ["\\[","\\]"], ["\\begin{displaymath}","\\end{displaymath}"] ],
+            skipTags: ["script","noscript","style","textarea","pre","code"],
+            ignoreClass: "tex2jax_ignore",
+            processEscapes: false,
+            processEnvironments: true,
+            preview: "TeX"
+        },
+        showProcessingMessages: true,
+        displayAlign: "center",
+        displayIndent: "2em",
+
+        "HTML-CSS": {
+             scale: 100,
+             availableFonts: ["STIX","TeX"],
+             preferredFont: "TeX",
+             webFont: "TeX",
+             imageFont: "TeX",
+             showMathMenu: true,
+        },
+        MMLorHTML: {
+             prefer: {
+                 MSIE:    "MML",
+                 Firefox: "MML",
+                 Opera:   "HTML",
+                 other:   "HTML"
+             }
+        }
+    });
+/*]]>*///-->
+</script>
+</head>
+<body>
+
+<div id="preamble">
+
+</div>
+
+<div id="content">
+<h1 class="title">Spatiotemporal Regression Modelling</h1>
+
+
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1 Spatially Structured Timeseries Vs Spatiotemporal Modelling</a>
+<ul>
+<li><a href="#sec-1-1">1.1 Spatially Structured Time Series</a></li>
+<li><a href="#sec-1-2">1.2 Spatiotemporal modelling</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-1" class="outline-3">
+<h3 id="sec-1"><span class="section-number-3">1</span> Spatially Structured Timeseries Vs Spatiotemporal Modelling</h3>
+<div class="outline-text-3" id="text-1">
+
+<p>In my last post about <a href="http://ivanhanigan.github.io/2013/09/reflections-bob-haining-update">spatiotemporal regression modelling</a> I mentioned that I am mostly interested in "spatially structured time-series models" rather than spatial models at a single point in time. By this I mean that we have several neighbouring areal units observed over a period of time. In this framework the general methods of time series modelling are used to control for temporal autocorrelation. However this makes the methods of spatial error and spatial lag models tricky because the spatial autocorrelation needs to be assessed at many points in time.
+</p>
+<p>
+I want to expand more on this topic because I want to be clear that the organisation of the material I am aiming to bring to this notebook topic is not aimed at purely spatial regression models <a href="https://geodacenter.asu.edu/spatial-lag-and">(there is a lot of material and tools out there already for that)</a>.  I am trying with these notes to document my learning steps toward integrating spatial methods with time-series methods to allow me to practice (and understand) spatiotemporal regression modelling.
+</p>
+
+</div>
+
+<div id="outline-container-1-1" class="outline-4">
+<h4 id="sec-1-1"><span class="section-number-4">1.1</span> Spatially Structured Time Series</h4>
+<div class="outline-text-4" id="text-1-1">
+
+<p>In <a href="http://www.pnas.org/content/early/2012/08/08/1112965109.full.pdf+html">my most successful previous attempt to conduct a spatiotemporal analysis of Suicide and Droughts</a> I built on my knowledge of time-series regression models from single-city air pollution studies where the whole city is the unit of analysis and the temporal variation is modelled with controlling techniques for temporal autocorrelation.  These techniques are also valid for multi-city studies because it is pretty safe to assume the cities are all independent at each time point.  I structured my study by Eleven large zones (Census Statistical Divisions) of NSW and assumed each of these would vary over time independent of each other, and I fitted a zone-specific time trend and cycle. This is what I call "spatially structured time-series" modelling.  
+</p>
+<p>
+I justify using this model in this case because aggregating up to these very large regions will diminish the possibility of spatial autocorrelation and because Droughts vary over large spatial zones too, we will not suffer from exposure misclassificaiton bias.
+</p>
+<p>
+So this model is a simple time-series regression (with trend and seasonality) and an additional term for spatial Zone.
+</p>
+
+
+\begin{eqnarray*}
+        log({\color{red} O_{ijk}})  & = & s({\color{red}ExposureVariable})  + {\color{blue} OtherExplanators}  \\
+        & &   + AgeGroup_{i} + Sex_{j} \\
+        & &   + {\color{blue} SpatialZone_{k}}  \\
+        & &  + sin(Time \times 2 \times \pi) + cos(Time \times 2 \times \pi) \\
+        & &  + Trend \\
+        & &   + offset({\color{blue} log(Pop_{ijk})})\\
+\end{eqnarray*}
+
+<p>
+Where:<br/>
+</p>
+<ul>
+<li>\({\color{red}O_{ijk}}\) = Outcome (counts) by Age\(_{i}\), Sex\(_{j}\) and SpatialZone\(_{k}\) <br/>
+</li>
+<li>{\color{red}ExposureVariable} = Data with {\color{red}Restrictive Intellectual Property~(IP)} <br/>
+</li>
+<li>{\color{blue}OtherExplanators} = Other {\color{blue}Less Restricted}  Explanatory variables <br/>
+</li>
+<li>s( ) = penalized regression splines <br/>
+</li>
+<li>\({\color{blue} SpatialZone_{k}}\)  = {\color{blue} Less Restricted} data representing the \(SpatialZone_{k}\)  <br/>
+</li>
+<li>Trend = Longterm smooth trend(s) <br/>
+</li>
+<li>\({\color{blue}Pop_{ijk}}\) = interpolated Census populations, by time in each group<br/>
+</li>
+</ul>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-1-2" class="outline-4">
+<h4 id="sec-1-2"><span class="section-number-4">1.2</span> <span class="todo TODO">TODO</span> Spatiotemporal modelling</h4>
+<div class="outline-text-4" id="text-1-2">
+
+<p>In contrast to the above model for modelling exposures that have fine resolution spatial variation (such as air pollution) the exposure misclassification effect of aggregating up to very large spatial zones will conteract the benefits of avoiding spatially autocorrelated errors and this might be unacceptable for certain research questions.  Therefore it is important to move toward a spatiotemporal regression model that replaces the \(SpatialZone_{k}\) term with a more spatial error or spatial lag approach.
+</p></div>
+</div>
+</div>
+</div>
+
+</body>
+</html>
+#+end_src
+
+** 2013-10-10-simple-example-using-nmmaps
+#+name:simple-example-using-nmmaps-header
+#+begin_src R :session *R* :tangle ~/projects/ivanhanigan.github.com.raw/_posts/2013-10-10-simple-example-using-nmmaps.md :exports none :eval no :padline no
+  ---
+  name: 2013-10-10-simple-example-using-nmmaps
+  layout: post
+  title: simple-example-using-nmmaps
+  date: 2013-10-10
+  categories:
+  - spatial dependence
+  ---
+  
+  I will use the NMMAPSlite datasets for a simple example of what I am trying to do.
+    
+
+  <!-- begin_src R :session *R* :tangle NMMAPS-example/NMMAPS-example-code.r :exports none :eval no -->
+   
+  #### Code: get nmmaps data
+      # func
+      if(!require(NMMAPSlite)) install.packages('NMMAPSlite');require(NMMAPSlite)
+      require(mgcv)
+      require(splines)
+  
+      ######################################################
+      # load  
+      setwd('data')
+      initDB('data/NMMAPS') # this requires that we connect to the web,
+                            # so lets get local copies
+      setwd('..')
+      cities <- getMetaData('cities')
+      head(cities)
+      citieslist <- cities$cityname
+      # write out a few cities for access later
+      for(city_i in citieslist[sample(1:nrow(cities), 9)])
+      {
+       city <- subset(cities, cityname == city_i)$city
+       data <- readCity(city)
+       write.table(data, file.path('data', paste(city_i, '.csv',sep='')),
+       row.names = F, sep = ',')
+      }
+      # these are all tiny, go some big ones
+      for(city_i in c('New York', 'Los Angeles', 'Madison', 'Boston'))
+      {
+       city <- subset(cities, cityname == city_i)$city
+       data <- readCity(city)
+       write.table(data, file.path('data', paste(city_i, '.csv',sep='')),
+       row.names = F, sep = ',')
+      }
+  
+      ######################################################
+      # now we can use these locally
+      dir("data")
+      city <- "Chicago"
+      data <- read.csv(sprintf("data/%s.csv", city), header=T)
+      str(data)
+      data$yy <- substr(data$date,1,4)
+      data$date <- as.Date(data$date)
+      ######################################################
+      # check
+      par(mfrow=c(2,1), mar=c(4,4,3,1))
+      with(subset(data[,c(1,15:25)], agecat == '75p'),
+        plot(date, tmax)
+       )
+      with(subset(data[,c(1,4,15:25)], agecat == '75p'),
+              plot(date, cvd, type ='l', col = 'grey')
+              )
+      with(subset(data[,c(1,4,15:25)], agecat == '75p'),
+              lines(lowess(date, cvd, f = 0.015))
+              )
+      # I am worried about that outlier
+      data$date[which(data$cvd > 100)]
+      # [1] "1995-07-15" "1995-07-16"
+       
+      ######################################################
+      # do standard NMMAPS timeseries poisson GAM model
+      numYears<-length(names(table(data$yy)))
+      df <- subset(data, agecat == '75p')
+      df$time <- as.numeric(df$date)
+      fit <- gam(cvd ~ s(pm10tmean) + s(tmax) + s(dptp) + s(time, k= 7*numYears, fx=T), data = df, family = poisson)
+      # plot of response functions
+      par(mfrow=c(2,2))
+      plot(fit)
+      dev.off()
+       
+      ######################################################
+      # some diagnostics
+      summary(fit)
+      # note the R-sq.(adj) =   0.21
+      gam.check(fit)
+      # note the lack of a leverage plot.  for that we need glm
+       
+      ######################################################
+      # do same model as glm
+      fit2 <- glm(cvd ~ pm10tmean + ns(tmax, df = 8) + ns(dptp, df = 4) + ns(time, df = 7*numYears), data = df, family = poisson)
+      # plot responses
+      par(mfrow=c(2,2))
+      termplot(fit2, se =T)
+      dev.off()
+       
+      # plot prediction
+      df$predictedCvd <- predict(fit2, df, 'response')
+      # baseline is given by the intercept
+      fit3 <- glm(cvd ~ 1, data = df, family = poisson)
+      df$baseline <-  predict(fit3, df, 'response')
+      with(subset(df, date>=as.Date('1995-01-01') & date <= as.Date('1995-07-31')),
+       plot(date, cvd, type ='l', col = 'grey')
+              )
+      with(subset(df, date>=as.Date('1995-01-01') & date <= as.Date('1995-07-31')),
+              lines(date,predictedCvd)
+              )
+      with(subset(df, date>=as.Date('1995-01-01') & date <= as.Date('1995-07-31')),
+       lines(date,baseline)
+              )
+      ######################################################
+      # some diagnostics
+      # need to load a function to calculate poisson adjusted R squared
+      # original S code from
+      # The formula for pseudo-R^2 is taken from G. S. Maddalla,
+      # Limited-dependent and Qualitative Variables in Econometrics, Cambridge:Cambridge Univ. Press, 1983. page 40, equation 2.50.
+      RsquaredGlm <- function(o) {
+       n <- length(o$residuals)
+       ll <- logLik(o)[1]
+       ll_0 <- logLik(update(o,~1))[1]
+       R2 <- (1 - exp(((-2*ll) - (-2*ll_0))/n))/(1 - exp( - (-2*ll_0)/n))
+       names(R2) <- 'pseudo.Rsquared'
+       R2
+       }
+      RsquaredGlm(fit2)
+      # 0.51
+      # the difference is presumably due to the arguments about how to account for unexplainable variance in the poisson distribution?
+       
+      # significance of spline terms
+      drop1(fit2, test='Chisq')
+      # also note AIC. best model includes all of these terms
+      # BIC can be computed instead (but still labelled AIC) using
+      drop1(fit2, test='Chisq', k = log(nrow(data)))
+       
+      # diagnostic plots
+      par(mfrow=c(2,2))
+      plot(fit2)
+      dev.off()
+      # note high leverage plus residuals points are labelled
+      # leverage doesn't seem to be too high though which is good
+      # NB the numbers refer to the row.names attribute which still refer to the original dataset, not this subset
+      df[row.names(df) %in% c(9354,9356),]$date
+      # as suspected [1] "1995-07-15" "1995-07-16"
+       
+      ######################################################
+      # so lets re run without these obs
+      df2 <- df[!row.names(df) %in% c(9354,9356),]
+      # to avoid duplicating code just re run fit2, replacing data=df with df2
+      # tmax still significant but not so extreme
+      # check diagnostic plots again
+      par(mfrow=c(2,2))
+      plot(fit2)
+      dev.off()
+      # looks like a well behaved model now.
+       
+      # if we were still worried about any high leverage values we could identify these with
+      df3 <- na.omit(df2[,c('cvd','pm10tmean','tmax','dptp','time')])
+      df3$hatvalue <- hatvalues(fit2)
+      df3$res <- residuals(fit2, 'pearson')
+      with(df3, plot(hatvalue, res))
+      # this is the same as the fourth default glm diagnostic plot, which they label x-axis as leverage
+      summary(df3$hatvalue)
+      # gives us an idea of the distribution of hat values
+      # decide on a threshold and look at it
+      hatThreshold <- 0.1
+      with(subset(df3, hatvalue > hatThreshold), points(hatvalue, res, col = 'red', pch = 16))
+      abline(0,0)
+      segments(hatThreshold,-2,hatThreshold,15)
+      dev.off()
+       
+      fit3 <- glm(cvd ~ pm10tmean + ns(tmax, df = 8) + ns(dptp, df = 4) + ns(time, df = 7*numYears), data = subset(df3, hatvalue < hatThreshold), family = poisson)
+      par(mfrow=c(2,2))
+      termplot(fit3, se = T)
+      # same same
+      plot(fit3)
+      # no better
+       
+      # or we could go nuts with a whole number of ways of estimating influence
+      # check all influential observations
+      infl <- influence.measures(fit2)
+      # which observations 'are' influential
+      inflk <- which(apply(infl$is.inf, 1, any))
+      length(inflk)
+       
+       
+      ######################################################
+      # now what about serial autocorrelation in the residuals?
+       
+      par(mfrow = c(2,1))
+      with(df3, acf(res))
+      with(df3, pacf(res))
+      dev.off()
+       
+       
+       
+      ######################################################
+      # just check for overdispersion
+      fit <- gam(cvd ~ s(pm10tmean) + s(tmax) + s(dptp) + s(time, k= 7*numYears, fx=T), data = df, family = quasipoisson)
+      summary(fit)
+      # note the Scale est. = 1.1627
+      # alternatively check the glm
+      fit2 <- glm(cvd ~ pm10tmean + ns(tmax, df = 8) + ns(dptp, df = 4) + ns(time, df = 7*numYears), data = df, family = quasipoisson)
+      summary(fit2)
+      # (Dispersion parameter for quasipoisson family taken to be 1.222640)
+      # this is probably near enough to support a standard poisson model...
+       
+      # if we have overdispersion we can use QAIC (A quasi- mode does not have a likelihood and so does not have an AIC,  by definition)
+      # we can use the poisson model and calculate the overdispersion
+      fit2 <- glm(cvd ~ pm10tmean + ns(tmax, df = 8) + ns(dptp, df = 4) + ns(time, df = 7*numYears), data = df, family = poisson)
+      1- pchisq(deviance(fit2), df.residual(fit2))
+       
+      # QAIC, c is the variance inflation factor, the ratio of the residual deviance of the global (most complicated) model to the residual degrees of freedom
+      c=deviance(fit2)/df.residual(fit2)
+      QAIC.1=-2*logLik(fit2)/c + 2*(length(coef(fit2)) + 1)
+      QAIC.1
+       
+      # Actually lets use QAICc which is more conservative about parameters,
+      QAICc.1=-2*logLik(fit2)/c + 2*(length(coef(fit2)) + 1) + 2*(length(coef(fit2)) + 1)*(length(coef(fit2)) + 1 + 1)/(nrow(na.omit(df[,c('cvd','pm10tmean','tmax','dptp','time')]))- (length(coef(fit2))+1)-1)
+      QAICc.1
+       
+       
+      ######################################################
+      # the following is old work, some may be interesting
+      # such as the use of sinusoidal wave instead of smooth function of time
+       
+       
+      # # sine wave
+      # timevar <- as.data.frame(names(table(df$date)))
+      # index <- 1:length(names(table(df$date)))
+      # timevar$time2 <- index / (length(index) / (length(index)/365.25))
+      # names(timevar) <- c('date','timevar')
+      # timevar$date <- as.Date(timevar$date)
+      # df <- merge(df,timevar)
+       
+      # fit <- gam(cvd ~ s(tmax) + s(dptp) + sin(timevar * 2 * pi) + cos(timevar * 2 * pi) + ns(time, df = numYears), data = df, family = poisson)
+      # summary(fit)
+      # par(mfrow=c(3,2))
+      # plot(fit, all.terms = T)
+      # dev.off()
+       
+      # # now just explore the season fit
+      # fit <- gam(cvd ~ sin(timevar * 2 * pi) + cos(timevar * 2 * pi) + ns(time, df = numYears), data = df, family = poisson)
+      # yhat <- predict(fit)
+      # head(yhat)
+       
+      # with(df, plot(date,cvd,type = 'l',col='grey', ylim = c(15,55)))
+      # lines(df[,'date'],exp(yhat),col='red')
+       
+       
+      # # drop1(fit, test= 'Chisq')
+       
+      # # drop1 only works in glm?
+      # # fit with weather variables, use degrees of freedom estimated by gam
+      # fit <- glm(cvd ~ ns(tmax,8) + ns(dptp,2) + sin(timevar * 2 * pi) + cos(timevar * 2 * pi) + ns(time, df = numYears), data = df, family = poisson)
+      # drop1(fit, test= 'Chisq')
+      # # use plot.glm for diagnostics
+      # par(mfrow=c(2,2))
+      # plot(fit)
+      # par(mfrow=c(3,2))
+      # termplot(fit, se=T)
+      # dev.off()
+       
+      # # cyclic spline, overlay on prior sinusoidal
+      # with(df, plot(date,cvd,type = 'l',col='grey', ylim = c(0,55)))
+      # lines(df[,'date'],exp(yhat),col='red')
+       
+      # df$daynum <- as.numeric(format(df$date, "%j"))
+      # df[360:370,c('date','daynum')]
+      # fit <- gam(cvd ~ s(daynum, k=3, fx=T, bs = 'cp') +  s(time, k = numYears, fx = T), data = df, family = poisson)
+      # yhat2 <- predict(fit)
+      # head(yhat2)
+       
+      # lines(df[,'date'],exp(yhat2),col='blue')
+       
+       
+      # par(mfrow=c(1,2))
+      # plot(fit)
+       
+       
+      # # fit weather with season
+      # fit <- gam(cvd ~ s(tmax) + s(dptp) +
+        # s(daynum, k=3, fx=T, bs = 'cp') +  s(time, k = numYears, fx = T), data = df, family = poisson)
+      # par(mfrow=c(2,2))
+      # plot(fit)
+       
+      # summary(fit)
+  
+#+end_src
