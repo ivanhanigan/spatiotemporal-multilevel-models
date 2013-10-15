@@ -7,7 +7,7 @@
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="title" content="Spatiotemporal Regression Modelling"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2013-10-15T12:50+1100"/>
+<meta name="generated" content="2013-10-15T17:10+1100"/>
 <meta name="author" content="Ivan Hanigan"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -278,8 +278,8 @@ citieslist <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> cities$
 <span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">name:zones</span>
 <span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">func</span>
 setwd(<span style="color: #CC9393;">"~/projects/spatiotemporal-regression-models"</span>)
-<span style="color: #BFEBBF; font-weight: bold;">require</span>(devtools)
-install_github(<span style="color: #CC9393;">"gisviz"</span>, <span style="color: #CC9393;">"ivanhanigan"</span>)
+<span style="color: #5F7F5F;">#</span><span style="color: #7F9F7F;">require(devtools)</span>
+<span style="color: #5F7F5F;">#</span><span style="color: #7F9F7F;">install_github("gisviz", "ivanhanigan")</span>
 <span style="color: #BFEBBF; font-weight: bold;">require</span>(gisviz)
 
 <span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">load</span>
@@ -413,9 +413,17 @@ setwd(<span style="color: #CC9393;">"~/projects/spatiotemporal-regression-models
 dir()
 shp <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> readOGR(<span style="color: #CC9393;">"cities.shp"</span>, <span style="color: #CC9393;">"cities"</span>)
 
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">clean</span>
+head(shp@data)
+
 <span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">do</span>
-shp_knn <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> knearneigh(shp, k = 4)
-nb <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> knn2nb(shp_knn)
+<span style="color: #5F7F5F;">## </span><span style="color: #7F9F7F;">I will use nearest neighbour within a distance threshold, but</span>
+<span style="color: #5F7F5F;">## </span><span style="color: #7F9F7F;">usually polygon datasets would use poly2nb</span>
+nb <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> dnearneigh(shp, d1 = 1, d2 = 1000)                      
+head(nb)
+shp[[1]][1]
+shp[[1]][nb[[1]]]
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">map</span>
 nudge <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> 10
 png(<span style="color: #CC9393;">"images/nmmaps-eg-neighbourhood.png"</span>)
 plotMyMap(
@@ -423,6 +431,9 @@ plotMyMap(
     yl = c(min(shp@coords[,2])-nudge, max(shp@coords[,2])+nudge)
     )
 plot(nb, shp@coords, add=<span style="color: #7CB8BB;">TRUE</span>)
+text(shp@data$long, shp@data$lat, shp@data$address, pos=3)
+points(shp@coords[nb[[1]],], col = <span style="color: #CC9393;">'green'</span>, pch = 16)
+points(shp@data[1,c(<span style="color: #CC9393;">"long"</span>,<span style="color: #CC9393;">"lat"</span>)],col = <span style="color: #CC9393;">'blue'</span>, pch = 16)
 dev.off()
 
 
