@@ -14,9 +14,17 @@
 This is an Open Notebook for my work on Spatiotemporal Regression Modelling tips and tricks.
 
 Ivan Hanigan
-2013-10-15
-
 #+end_src
+
+#+begin_src R :session *R* :exports none
+rbind("Date", as.character(Sys.Date()))
+#+end_src
+
+
+|       Date |
+| 2013-10-15 |
+
+
 
 * COMMENT Notes
 ** Update on reflections from Bob Haining's Lecture
@@ -1111,7 +1119,7 @@ Where:<br/>
       # summary(fit)
   
 #+end_src
-* Case Study 1: NMMAPS
+* Case Study 1: Spatially Structured Timeseries with NMMAPS
 I will use the NMMAPSlite datasets for a simple example of what I am trying to do.
 ** Outcome Data
 *** Original Data
@@ -1161,6 +1169,39 @@ That is such a shame, lucky I saved some of the data using the following code:
        row.names = F, sep = ',')
       }
 #+end_src
+*** Pooled Dataset
+#+name:Pooled Dataset
+#+begin_src R :session *shell* :tangle no :exports reports :eval no
+  ################################################################
+  # name:Pooled Dataset
+  flist <- dir("NMMAPS-example/data", full.names=T)
+  
+  flist <-    flist[which(basename(flist) %in%
+                          c("Baton Rouge.csv",
+                            "Los Angeles.csv",
+                            "Tucson.csv",
+                            "Denver.csv")
+                          )
+                    ]
+  flist
+  for(f_i in 1:length(flist))
+      {
+          #f_i <- 2
+          fi <- flist[f_i]
+          df <- read.csv(fi)
+          df <- df[,c("city","date", "agecat",
+                      "cvd", "resp", "tmax",
+                      "tmin", "dptp")]
+          # str(df)
+          write.table(df,
+                      "outcome.csv", sep = ",",
+                      row.names = F, append = f_i > 1,
+                      col.names = f_i ==1
+                      )
+      }
+  
+#+end_src
+
 ** Exposure Data
 ** Zones
 *** Map Shapefile Code
@@ -1191,12 +1232,34 @@ That is such a shame, lucky I saved some of the data using the following code:
       )
   text(flist_geo$long, flist_geo$lat, flist_geo$address, pos=3)
   dev.off()
+     
+  # load city names
+  flist2 <- dir("NMMAPS-example/data")
+  flist2
+  city_codes <- matrix(NA, nrow = 0, ncol = 2)
+  for(fi in 1:length(flist2))
+      {
+          # fi <- 1
+          fname <- flist2[fi]
+          print(fi); print(fname);
+          df <- read.csv(
+              file.path("NMMAPS-example/data", fname),
+              stringsAsFactors = F, nrow = 1)
+          city_codes <- rbind(city_codes,
+              c(gsub(".csv","",fname), df$city)
+              )
+      }
+  city_codes <- as.data.frame(city_codes)
+  names(city_codes) <- c("address","city")
+  city_codes 
+  flist_geo2 <- merge(flist_geo, city_codes, by = )
+  flist_geo2
   
   ## make shapefile
   epsg <- make_EPSG()
   prj_code <- epsg[grep("WGS 84$", epsg$note),]
   prj_code
-  shp <- SpatialPointsDataFrame(cbind(flist_geo$long,flist_geo$lat),flist_geo,
+  shp <- SpatialPointsDataFrame(cbind(flist_geo2$long,flist_geo2$lat),flist_geo2,
                                 proj4string = CRS(
                                     epsg$prj4[which(epsg$code ==prj_code$code)]
                                     )
@@ -1208,6 +1271,373 @@ That is such a shame, lucky I saved some of the data using the following code:
 [[file:images/nmmaps-eg-cities.png]]
 
 ** Population Data
+*** Population data 
+**** A Code Skeleton
+The process for getting the population data from the websites is a bit of a pain, with repeated copy and paste operations.  To make sure this is recorded I set up a skeleton to paste into.
+#+name:population-data
+#+begin_src R :session *shell* :tangle no :exports reports :eval no
+  ################################################################
+  # name:population-data
+  
+  # func
+  setwd("~/projects/spatiotemporal-regression-models")
+  require(gisviz)
+  
+  # load
+  ## citycodes
+  shp <- readOGR("cities.shp", "cities")
+  shp@data
+  cityname <- "SELECTED CITY"
+  
+  # do
+  # save url
+  # xxx
+  population_input <- read.table(textConnection(
+  "age: population
+  xxx
+  "), sep = ":", header = TRUE)
+  
+  ## agecats
+  ## 65to74     75p under65  
+  population_input$agecat <- c(rep("under65", 10),
+                               rep("65to74"),
+                               rep("75p",2)
+                               )
+  
+  citycode <- subset(shp@data, address == cityname,
+                     select = city)
+  
+  population_input$city <- rep(
+      as.character(citycode[1,1])        
+      , 13
+      )
+  
+  population_input
+  if(exists("population"))
+      {
+          population <- rbind(population,
+                              population_input
+                              )        
+      } else {
+          population <- population_input
+      }
+  
+#+end_src
+
+
+**** Baton Rouge
+#+begin_src R :session *shell* :tangle no :exports reports :eval yes
+  ################################################################
+  # name:population-data
+  # first city, remove population data.frame
+  rm(population)
+  
+  # func
+  setwd("~/projects/spatiotemporal-regression-models")
+  require(gisviz)
+  
+  # load
+  ## citycodes
+  shp <- readOGR("cities.shp", "cities")
+  shp@data
+  cityname <- "Baton Rouge"
+  
+  # do
+  # save url
+  # http://www.city-data.com/us-cities/The-South/Baton-Rouge-Population-Profile.html
+  population_input <- read.table(textConnection(
+  "age: population
+  Population Under 5 years: 15502
+  Population 5 to 9 years: 15609
+  Population 10 to 14 years: 15248
+  Population 15 to 19 years: 21954
+  Population 20 to 24 years: 27230
+  Population 25 to 34 years: 31719
+  Population 35 to 44 years: 30343
+  Population 45 to 54 years: 27166
+  Population 55 to 59 years: 9495
+  Population 60 to 64 years: 7490
+  Population 65 to 74 years: 13312
+  Population 75 to 84 years: 9611
+  Population 85 years and over: 3139
+  "), sep = ":", header = TRUE)
+  
+  ## agecats
+  ## 65to74     75p under65  
+  population_input$agecat <- c(rep("under65", 10),
+                               rep("65to74"),
+                               rep("75p",2)
+                               )
+  
+  citycode <- subset(shp@data, address == cityname,
+                     select = city)
+  
+  population_input$city <- rep(
+      as.character(citycode[1,1])        
+      , 13
+      )
+  
+  population_input
+  if(exists("population"))
+      {
+          population <- rbind(population,
+                              population_input
+                              )        
+      } else {
+          population <- population_input
+      }
+  
+#+end_src
+
+**** Los Angeles
+#+begin_src R :session *shell* :tangle no :exports reports :eval no
+  ################################################################
+  # name:population-data
+  
+  # func
+  #setwd("~/projects/spatiotemporal-regression-models")
+  #require(gisviz)
+  
+  # load
+  ## citycodes
+  shp <- readOGR("cities.shp", "cities")
+  shp@data
+  cityname <- "Los Angeles"
+  
+  # do
+  # save url
+  # http://www.city-data.com/us-cities/The-West/Los-Angeles-Population-Profile.html
+  population_input <- read.table(textConnection(
+  "age: population
+  Population under 5 years old: 285976
+  Population 5 to 9 years old: 297837
+  Population 10 to 14 years old: 255604
+  Population 15 to 19 years old: 251632
+  Population 20 to 24 years old: 299906
+  Population 25 to 34 years old: 674098
+  Population 35 to 44 years old: 584036
+  Population 45 to 54 years old: 428974
+  Population 55 to 59 years old: 143965
+  Population 60 to 64 years old: 115663
+  Population 65 to 74 years old: 18711
+  Population 75 to 84 years old: 125829
+  Population 85 years and over: 44189
+  "), sep = ":", header = TRUE)
+  
+  ## agecats
+  ## 65to74     75p under65  
+  population_input$agecat <- c(rep("under65", 10),
+                               rep("65to74"),
+                               rep("75p",2)
+                               )
+  
+  citycode <- subset(shp@data, address == cityname,
+                     select = city)
+  
+  population_input$city <- rep(
+      as.character(citycode[1,1])        
+      , 13
+      )
+  
+  population_input
+  if(exists("population"))
+      {
+          population <- rbind(population,
+                              population_input
+                              )        
+      } else {
+          population <- population_input
+      }
+  
+#+end_src
+
+
+**** Tucson
+#+begin_src R :session *shell* :tangle no :exports reports :eval no
+  ################################################################
+  # name:population-data
+  
+  # func
+  #setwd("~/projects/spatiotemporal-regression-models")
+  #require(gisviz)
+  
+  # load
+  ## citycodes
+  shp <- readOGR("cities.shp", "cities")
+  shp@data
+  cityname <- "Tucson"
+  
+  # do
+  # save url
+  # http://www.city-data.com/us-cities/The-West/Tucson-Population-Profile.html
+  population_input <- read.table(textConnection(
+  "age: population
+  Population under 5 years old: 35201
+  Population 5 to 9 years old: 34189
+  Population 10 to 14 years old: 31939
+  Population 15 to 19 years old: 38170
+  Population 20 to 24 years old: 47428
+  Population 25 to 34 years old: 76394
+  Population 35 to 44 years old: 72289
+  Population 45 to 54 years old: 57608
+  Population 55 to 59 years old: 19597
+  Population 60 to 64 years old: 16056
+  Population 65 to 74 years old: 29117
+  Population 75 to 84 years old: 21394
+  Population 85 years and older: 7317
+  "), sep = ":", header = TRUE)
+  
+  ## agecats
+  ## 65to74     75p under65  
+  population_input$agecat <- c(rep("under65", 10),
+                               rep("65to74"),
+                               rep("75p",2)
+                               )
+  
+  citycode <- subset(shp@data, address == cityname,
+                     select = city)
+  
+  population_input$city <- rep(
+      as.character(citycode[1,1])        
+      , 13
+      )
+  
+  population_input
+  if(exists("population"))
+      {
+          population <- rbind(population,
+                              population_input
+                              )        
+      } else {
+          population <- population_input
+      }
+  
+#+end_src
+
+**** Denver
+#+begin_src R :session *shell* :tangle no :exports reports :eval no
+  ################################################################
+  # name:population-data
+  
+  # func
+  #setwd("~/projects/spatiotemporal-regression-models")
+  #require(gisviz)
+  
+  # load
+  ## citycodes
+  shp <- readOGR("cities.shp", "cities")
+  shp@data
+  cityname <- "Denver"
+  
+  # do
+  # save url
+  # http://www.city-data.com/us-cities/The-West/Denver-Population-Profile.html
+  
+  population_input <- read.table(textConnection(
+  "age: population
+  Population under 5 years old: 37769
+  Population 5 to 9 years old: 34473
+  Population 10 to 14 years old: 31315
+  Population 15 to 19 years old: 32259
+  Population 20 to 24 years old: 45534
+  Population 25 to 34 years old: 113676
+  Population 35 to 44 years old: 86420
+  Population 45 to 54 years old: 71000
+  Population 55 to 59 years old: 22573
+  Population 60 to 64 years old: 17191
+  Population 65 to 74 years old: 30643
+  Population 75 to 84 years old: 23369
+  Population 85 years and over: 8414
+  "), sep = ":", header = TRUE)
+  
+  ## agecats
+  ## 65to74     75p under65  
+  population_input$agecat <- c(rep("under65", 10),
+                               rep("65to74"),
+                               rep("75p",2)
+                               )
+  
+  citycode <- subset(shp@data, address == cityname,
+                     select = city)
+  
+  population_input$city <- rep(
+      as.character(citycode[1,1])        
+      , 13
+      )
+  
+  population_input
+  if(exists("population"))
+      {
+          population <- rbind(population,
+                              population_input
+                              )        
+      } else {
+          population <- population_input
+      }
+  
+#+end_src
+**** Save Population Dataset
+#+name:save-population
+#+begin_src R :session *shell* :tangle no :exports reports :eval no
+  ################################################################
+  # name:save-population
+  write.csv(population, "population.csv",
+            row.names = FALSE
+            )
+#+end_src
+
+*** Population Summary 
+#+name:Population Summary
+#+begin_src R :session *shell* :tangle no :exports reports :eval no
+  ################################################################
+  # name:Population Summary
+  # func
+  require(plyr)
+  
+  # load
+  population <- read.csv("population.csv")
+  str(population)
+  population <- population[,c("city", "agecat", "population")]
+  # do
+  population_summary <- ddply(population,
+                             .variables = c("city",
+                                 "agecat"),
+                             .fun = summarise,
+                             sum(population)
+                             )
+  
+  names(population_summary) <- c("city","agecat","pop")
+  
+  write.csv(population_summary,
+            "population_summary.csv",
+            row.names = FALSE
+            )
+#+end_src
+
+** Merge
+
+#+name:merge
+#+begin_src R :session *shell* :tangle no :exports reports :eval no
+  ################################################################
+  # name:merge
+  # func
+  setwd("~/projects/spatiotemporal-regression-models")
+  
+  # load
+  outcome <- read.csv("outcome.csv")
+  str(outcome)
+  outcome$date <- as.Date(outcome$date)
+  
+  population <- read.csv("population_summary.csv")
+  str(population)
+  population
+  
+  # do
+  analyte <- merge(outcome, population)
+  write.csv(analyte, "analyte.csv", row.names = FALSE)
+#+end_src
+
+    
 ** Exploratory Data Analyses
 *** Time-series Plots Code
 #+name:eda-tsplots
@@ -1287,3 +1717,54 @@ That is such a shame, lucky I saved some of the data using the following code:
 
 *** Spatial Neighbours Output
 [[file:images/nmmaps-eg-neighbourhood.png]]
+** Main Analyses
+*** Core Model
+#+name:core
+#+begin_src R :session *shell* :tangle no :exports reports :eval no
+  ################################################################
+  # name:core
+  # func
+  setwd("~/projects/spatiotemporal-regression-models")
+  require(mgcv)
+  require(splines)
+  
+  # load
+  analyte <- read.csv("analyte.csv")
+  
+  # clean
+  analyte$yy <- substr(analyte$date,1,4)
+  numYears<-length(names(table(analyte$yy)))
+  analyte$date <- as.Date(analyte$date)
+  analyte$time <- as.numeric(analyte$date)
+  analyte$agecat <- factor(analyte$agecat,
+                            levels = c("under65",
+                                "65to74", "75p"),
+                            ordered = TRUE
+                            )
+  
+  # do
+  fit <- gam(cvd ~ s(tmax) + s(dptp) +
+             city + agecat +
+             s(time, k= 7*numYears, fx=T) +
+             offset(log(pop)),
+             data = analyte, family = poisson
+             )
+  
+  # plot of response functions
+  png("images/nmmaps-eg-core.png", width = 1000, height = 750, res = 150)
+  par(mfrow=c(2,3))
+  plot(fit, all.terms = TRUE)
+  dev.off()
+  
+  
+#+end_src
+*** Core Model Plots
+[[file:images/nmmaps-eg-core.png]]
+
+** COMMENT SCP files across
+#+name:scp-files
+#+begin_src sh :session *shell* :tangle no :exports none :eval no
+cd images
+scp ivan_hanigan@130.56.102.53:projects/spatiotemporal-regression-models/images/nmmaps-eg-core.png nmmaps-eg-core.png
+cd ..
+#+end_src
