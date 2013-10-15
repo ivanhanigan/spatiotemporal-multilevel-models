@@ -1163,7 +1163,7 @@ That is such a shame, lucky I saved some of the data using the following code:
 #+end_src
 ** Exposure Data
 ** Zones
-*** Map Shapefile
+*** Map Shapefile Code
 #+name:zones
 #+begin_src R :session *shell* :tangle no :exports reports :eval no
   ################################################################
@@ -1204,12 +1204,12 @@ That is such a shame, lucky I saved some of the data using the following code:
   writeOGR(shp, 'cities.shp', 'cities', driver='ESRI Shapefile')
   
 #+end_src
-
+*** Map Shapefile Output
 [[file:images/nmmaps-eg-cities.png]]
 
 ** Population Data
 ** Exploratory Data Analyses
-*** Time-series Plots
+*** Time-series Plots Code
 #+name:eda-tsplots
 #+begin_src R :session *R* :tangle no :exports reports :eval no
   ################################################################
@@ -1244,3 +1244,35 @@ That is such a shame, lucky I saved some of the data using the following code:
   dev.off()
   
 #+end_src
+*** Time-series Plots Output
+[[file:nmmaps-eg-dateranges.png]]
+*** Spatial Neighbours Code
+#+name:spatwat
+#+begin_src R :session *shell* :tangle no :exports reports :eval no
+  ################################################################
+  # name:spatwat
+  # func
+  setwd("~/projects/spatiotemporal-regression-models")
+  require(gisviz)
+  
+  # load
+  dir()
+  shp <- readOGR("cities.shp", "cities")
+  
+  # do
+  shp_knn <- knearneigh(shp, k = 4)
+  nb <- knn2nb(shp_knn)
+  nudge <- 10
+  png("images/nmmaps-eg-neighbourhood.png")
+  plotMyMap(
+      shp@coords, xl = c(min(shp@coords[,1])-nudge, max(shp@coords[,1])+nudge),
+      yl = c(min(shp@coords[,2])-nudge, max(shp@coords[,2])+nudge)
+      )
+  plot(nb, shp@coords, add=TRUE)
+  dev.off()
+  
+  
+#+end_src
+
+*** Spatial Neighbours Output
+[[images/nmmaps-eg-neighbourhood.png]]
