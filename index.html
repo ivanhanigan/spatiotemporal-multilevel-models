@@ -7,7 +7,7 @@
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="title" content="Spatiotemporal Regression Modelling"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2013-10-15T10:44+1100"/>
+<meta name="generated" content="2013-10-15T12:20+1100"/>
 <meta name="author" content="Ivan Hanigan"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -128,7 +128,23 @@ for the JavaScript code in this tag.
 <li><a href="#sec-1">1 README</a></li>
 <li><a href="#sec-2">2 Case Study 1: NMMAPS</a>
 <ul>
-<li><a href="#sec-2-1">2.1 Original Data</a></li>
+<li><a href="#sec-2-1">2.1 Outcome Data</a>
+<ul>
+<li><a href="#sec-2-1-1">2.1.1 Original Data</a></li>
+</ul>
+</li>
+<li><a href="#sec-2-2">2.2 Exposure Data</a></li>
+<li><a href="#sec-2-3">2.3 Zones</a>
+<ul>
+<li><a href="#sec-2-3-1">2.3.1 Map Shapefile</a></li>
+</ul>
+</li>
+<li><a href="#sec-2-4">2.4 Population Data</a></li>
+<li><a href="#sec-2-5">2.5 Exploratory Data Analyses</a>
+<ul>
+<li><a href="#sec-2-5-1">2.5.1 Time-series Plots</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -142,7 +158,7 @@ for the JavaScript code in this tag.
 
 
 
-<pre class="src src-markdown"><span style="color: #268bd2; font-weight: bold;">#</span> <span style="color: #268bd2; font-size: 155%; font-weight: bold;">Spatiotemporal Regression Modelling</span>
+<pre class="src src-markdown"><span style="color: #93E0E3; font-weight: bold;">#</span> <span style="color: #93E0E3; font-size: 155%; font-weight: bold;">Spatiotemporal Regression Modelling</span>
 
 This is an Open Notebook for my work on Spatiotemporal Regression Modelling tips and tricks.
 
@@ -166,8 +182,15 @@ Ivan Hanigan
 </div>
 
 <div id="outline-container-2-1" class="outline-3">
-<h3 id="sec-2-1"><span class="section-number-3">2.1</span> Original Data</h3>
+<h3 id="sec-2-1"><span class="section-number-3">2.1</span> Outcome Data</h3>
 <div class="outline-text-3" id="text-2-1">
+
+
+</div>
+
+<div id="outline-container-2-1-1" class="outline-4">
+<h4 id="sec-2-1-1"><span class="section-number-4">2.1.1</span> Original Data</h4>
+<div class="outline-text-4" id="text-2-1-1">
 
 
 
@@ -189,39 +212,168 @@ That is such a shame, lucky I saved some of the data using the following code:
 
 
 <pre class="src src-R">   
-<span style="color: #586e75;">#### </span><span style="color: #586e75;">Code: get nmmaps data</span>
-<span style="color: #586e75;"># </span><span style="color: #586e75;">func</span>
-<span style="color: #859900; font-weight: bold;">if</span>(!<span style="color: #268bd2; font-weight: bold;">require</span>(NMMAPSlite)) install.packages(<span style="color: #2aa198;">'NMMAPSlite'</span>);<span style="color: #268bd2; font-weight: bold;">require</span>(NMMAPSlite)
-<span style="color: #268bd2; font-weight: bold;">require</span>(mgcv)
-<span style="color: #268bd2; font-weight: bold;">require</span>(splines)
-  
-<span style="color: #586e75;">######################################################</span>
-<span style="color: #586e75;"># </span><span style="color: #586e75;">load  </span>
-setwd(<span style="color: #2aa198;">'data'</span>)
-initDB(<span style="color: #2aa198;">'data/NMMAPS'</span>) <span style="color: #586e75;"># </span><span style="color: #586e75;">this requires that we connect to the web,</span>
-                      <span style="color: #586e75;"># </span><span style="color: #586e75;">so lets get local copies</span>
-setwd(<span style="color: #2aa198;">'..'</span>)
-cities <span style="color: #268bd2; font-weight: bold;">&lt;-</span> getMetaData(<span style="color: #2aa198;">'cities'</span>)
+<span style="color: #5F7F5F;">#### </span><span style="color: #7F9F7F;">Code: get nmmaps data</span>
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">func</span>
+<span style="color: #F0DFAF; font-weight: bold;">if</span>(!<span style="color: #BFEBBF; font-weight: bold;">require</span>(NMMAPSlite)) install.packages(<span style="color: #CC9393;">'NMMAPSlite'</span>);<span style="color: #BFEBBF; font-weight: bold;">require</span>(NMMAPSlite)
+
+<span style="color: #5F7F5F;">######################################################</span>
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">load  </span>
+setwd(<span style="color: #CC9393;">'data'</span>)
+initDB(<span style="color: #CC9393;">'data/NMMAPS'</span>) <span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">this requires that we connect to the web,</span>
+                      <span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">so lets get local copies</span>
+setwd(<span style="color: #CC9393;">'..'</span>)
+cities <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> getMetaData(<span style="color: #CC9393;">'cities'</span>)
 head(cities)
-citieslist <span style="color: #268bd2; font-weight: bold;">&lt;-</span> cities$cityname
-<span style="color: #586e75;"># </span><span style="color: #586e75;">write out a few cities for access later</span>
-<span style="color: #859900; font-weight: bold;">for</span>(city_i <span style="color: #859900; font-weight: bold;">in</span> citieslist[sample(1:nrow(cities), 9)])
+citieslist <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> cities$cityname
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">write out a few cities for access later</span>
+<span style="color: #F0DFAF; font-weight: bold;">for</span>(city_i <span style="color: #F0DFAF; font-weight: bold;">in</span> citieslist[sample(1:nrow(cities), 9)])
 {
- city <span style="color: #268bd2; font-weight: bold;">&lt;-</span> subset(cities, cityname == city_i)$city
- data <span style="color: #268bd2; font-weight: bold;">&lt;-</span> readCity(city)
- write.table(data, file.path(<span style="color: #2aa198;">'data'</span>, paste(city_i, <span style="color: #2aa198;">'.csv'</span>,sep=<span style="color: #2aa198;">''</span>)),
- row.names = F, sep = <span style="color: #2aa198;">','</span>)
+ city <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> subset(cities, cityname == city_i)$city
+ data <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> readCity(city)
+ write.table(data, file.path(<span style="color: #CC9393;">'data'</span>, paste(city_i, <span style="color: #CC9393;">'.csv'</span>,sep=<span style="color: #CC9393;">''</span>)),
+ row.names = F, sep = <span style="color: #CC9393;">','</span>)
 }
-<span style="color: #586e75;"># </span><span style="color: #586e75;">these are all tiny, go some big ones</span>
-<span style="color: #859900; font-weight: bold;">for</span>(city_i <span style="color: #859900; font-weight: bold;">in</span> c(<span style="color: #2aa198;">'New York'</span>, <span style="color: #2aa198;">'Los Angeles'</span>, <span style="color: #2aa198;">'Madison'</span>, <span style="color: #2aa198;">'Boston'</span>))
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">these are all tiny, go some big ones</span>
+<span style="color: #F0DFAF; font-weight: bold;">for</span>(city_i <span style="color: #F0DFAF; font-weight: bold;">in</span> c(<span style="color: #CC9393;">'New York'</span>, <span style="color: #CC9393;">'Los Angeles'</span>, <span style="color: #CC9393;">'Madison'</span>, <span style="color: #CC9393;">'Boston'</span>))
 {
- city <span style="color: #268bd2; font-weight: bold;">&lt;-</span> subset(cities, cityname == city_i)$city
- data <span style="color: #268bd2; font-weight: bold;">&lt;-</span> readCity(city)
- write.table(data, file.path(<span style="color: #2aa198;">'data'</span>, paste(city_i, <span style="color: #2aa198;">'.csv'</span>,sep=<span style="color: #2aa198;">''</span>)),
- row.names = F, sep = <span style="color: #2aa198;">','</span>)
+ city <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> subset(cities, cityname == city_i)$city
+ data <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> readCity(city)
+ write.table(data, file.path(<span style="color: #CC9393;">'data'</span>, paste(city_i, <span style="color: #CC9393;">'.csv'</span>,sep=<span style="color: #CC9393;">''</span>)),
+ row.names = F, sep = <span style="color: #CC9393;">','</span>)
 }
 </pre>
 
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-2-2" class="outline-3">
+<h3 id="sec-2-2"><span class="section-number-3">2.2</span> Exposure Data</h3>
+<div class="outline-text-3" id="text-2-2">
+
+</div>
+
+</div>
+
+<div id="outline-container-2-3" class="outline-3">
+<h3 id="sec-2-3"><span class="section-number-3">2.3</span> Zones</h3>
+<div class="outline-text-3" id="text-2-3">
+
+
+</div>
+
+<div id="outline-container-2-3-1" class="outline-4">
+<h4 id="sec-2-3-1"><span class="section-number-4">2.3.1</span> Map Shapefile</h4>
+<div class="outline-text-4" id="text-2-3-1">
+
+
+
+
+<pre class="src src-R"><span style="color: #5F7F5F;">################################################################</span>
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">name:zones</span>
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">func</span>
+setwd(<span style="color: #CC9393;">"~/projects/spatiotemporal-regression-models"</span>)
+<span style="color: #BFEBBF; font-weight: bold;">require</span>(devtools)
+install_github(<span style="color: #CC9393;">"gisviz"</span>, <span style="color: #CC9393;">"ivanhanigan"</span>)
+<span style="color: #BFEBBF; font-weight: bold;">require</span>(gisviz)
+
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">load</span>
+flist <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> dir(<span style="color: #CC9393;">"NMMAPS-example/data"</span>)
+
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">do    </span>
+<span style="color: #5F7F5F;">## </span><span style="color: #7F9F7F;">geocode</span>
+flist <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> gsub(<span style="color: #CC9393;">".csv"</span>, <span style="color: #CC9393;">""</span>, flist)    
+flist_geo <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> gGeoCode2(flist)
+flist_geo
+
+<span style="color: #5F7F5F;">## </span><span style="color: #7F9F7F;">plot</span>
+png(<span style="color: #CC9393;">"images/nmmaps-eg-cities.png"</span>)
+plotMyMap(
+    flist_geo[,c(<span style="color: #CC9393;">"long"</span>,<span style="color: #CC9393;">"lat"</span>)],
+    xl = c(-130,-60), yl = c(25,50)
+    )
+text(flist_geo$long, flist_geo$lat, flist_geo$address, pos=3)
+dev.off()
+
+<span style="color: #5F7F5F;">## </span><span style="color: #7F9F7F;">make shapefile</span>
+epsg <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> make_EPSG()
+prj_code <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> epsg[grep(<span style="color: #CC9393;">"WGS 84$"</span>, epsg$note),]
+prj_code
+shp <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> SpatialPointsDataFrame(cbind(flist_geo$long,flist_geo$lat),flist_geo,
+                              proj4string = CRS(
+                                  epsg$prj4[which(epsg$code ==prj_code$code)]
+                                  )
+                              )
+writeOGR(shp, <span style="color: #CC9393;">'cities.shp'</span>, <span style="color: #CC9393;">'cities'</span>, driver=<span style="color: #CC9393;">'ESRI Shapefile'</span>)
+
+</pre>
+
+
+<p>
+<img src="images/nmmaps-eg-cities.png"  alt="images/nmmaps-eg-cities.png" />
+</p>
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-2-4" class="outline-3">
+<h3 id="sec-2-4"><span class="section-number-3">2.4</span> Population Data</h3>
+<div class="outline-text-3" id="text-2-4">
+
+</div>
+
+</div>
+
+<div id="outline-container-2-5" class="outline-3">
+<h3 id="sec-2-5"><span class="section-number-3">2.5</span> Exploratory Data Analyses</h3>
+<div class="outline-text-3" id="text-2-5">
+
+
+</div>
+
+<div id="outline-container-2-5-1" class="outline-4">
+<h4 id="sec-2-5-1"><span class="section-number-4">2.5.1</span> Time-series Plots</h4>
+<div class="outline-text-4" id="text-2-5-1">
+
+
+
+
+<pre class="src src-R"><span style="color: #5F7F5F;">################################################################</span>
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">name:eda-tsplots</span>
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">func</span>
+setwd(<span style="color: #CC9393;">"~/projects/spatiotemporal-regression-models"</span>)
+  
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">load</span>
+flist
+fname <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> flist[7]; print(fname)
+df <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> read.csv(file.path(<span style="color: #CC9393;">"NMMAPS-example/data"</span>, fname))
+
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">clean</span>
+str(df)
+summary(df$tmax); summary(df$dptp)
+
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">do</span>
+<span style="color: #5F7F5F;">## </span><span style="color: #7F9F7F;">we will only consider cities with long periods temp and humidity observed</span>
+png(<span style="color: #CC9393;">"images/nmmaps-eg-dateranges.png"</span>, width = 1000, height=500, res = 150)
+par(mfrow=c(6,5), mar=c(0,3,3,0), cex=.25)
+<span style="color: #F0DFAF; font-weight: bold;">for</span>(fi <span style="color: #F0DFAF; font-weight: bold;">in</span> 1:length(flist))
+    {
+        <span style="color: #5F7F5F;">#</span><span style="color: #7F9F7F;">fi &lt;- 4</span>
+        fname <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> flist[fi]
+        df <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> read.csv(file.path(<span style="color: #CC9393;">"NMMAPS-example/data"</span>, fname))
+        print(fi); print(fname);
+        with(df, plot(as.Date(date), tmax, type = <span style="color: #CC9393;">"l"</span>))
+        title(paste(fname, <span style="color: #CC9393;">"tmax"</span>))
+        with(df, plot(as.Date(date), dptp, type = <span style="color: #CC9393;">"l"</span>))
+        title(paste(fname, <span style="color: #CC9393;">"dptp"</span>))
+    }
+dev.off()
+
+</pre>
+
+</div>
 </div>
 </div>
 </div>
