@@ -7,7 +7,7 @@
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="title" content="Spatiotemporal Regression Modelling"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2013-10-15T12:20+1100"/>
+<meta name="generated" content="2013-10-15T12:50+1100"/>
 <meta name="author" content="Ivan Hanigan"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -136,13 +136,17 @@ for the JavaScript code in this tag.
 <li><a href="#sec-2-2">2.2 Exposure Data</a></li>
 <li><a href="#sec-2-3">2.3 Zones</a>
 <ul>
-<li><a href="#sec-2-3-1">2.3.1 Map Shapefile</a></li>
+<li><a href="#sec-2-3-1">2.3.1 Map Shapefile Code</a></li>
+<li><a href="#sec-2-3-2">2.3.2 Map Shapefile Output</a></li>
 </ul>
 </li>
 <li><a href="#sec-2-4">2.4 Population Data</a></li>
 <li><a href="#sec-2-5">2.5 Exploratory Data Analyses</a>
 <ul>
-<li><a href="#sec-2-5-1">2.5.1 Time-series Plots</a></li>
+<li><a href="#sec-2-5-1">2.5.1 Time-series Plots Code</a></li>
+<li><a href="#sec-2-5-2">2.5.2 Time-series Plots Output</a></li>
+<li><a href="#sec-2-5-3">2.5.3 Spatial Neighbours Code</a></li>
+<li><a href="#sec-2-5-4">2.5.4 Spatial Neighbours Output</a></li>
 </ul>
 </li>
 </ul>
@@ -264,7 +268,7 @@ citieslist <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> cities$
 </div>
 
 <div id="outline-container-2-3-1" class="outline-4">
-<h4 id="sec-2-3-1"><span class="section-number-4">2.3.1</span> Map Shapefile</h4>
+<h4 id="sec-2-3-1"><span class="section-number-4">2.3.1</span> Map Shapefile Code</h4>
 <div class="outline-text-4" id="text-2-3-1">
 
 
@@ -309,9 +313,15 @@ writeOGR(shp, <span style="color: #CC9393;">'cities.shp'</span>, <span style="co
 
 </pre>
 
+</div>
 
-<p>
-<img src="images/nmmaps-eg-cities.png"  alt="images/nmmaps-eg-cities.png" />
+</div>
+
+<div id="outline-container-2-3-2" class="outline-4">
+<h4 id="sec-2-3-2"><span class="section-number-4">2.3.2</span> Map Shapefile Output</h4>
+<div class="outline-text-4" id="text-2-3-2">
+
+<p><img src="images/nmmaps-eg-cities.png"  alt="images/nmmaps-eg-cities.png" />
 </p>
 </div>
 </div>
@@ -334,7 +344,7 @@ writeOGR(shp, <span style="color: #CC9393;">'cities.shp'</span>, <span style="co
 </div>
 
 <div id="outline-container-2-5-1" class="outline-4">
-<h4 id="sec-2-5-1"><span class="section-number-4">2.5.1</span> Time-series Plots</h4>
+<h4 id="sec-2-5-1"><span class="section-number-4">2.5.1</span> Time-series Plots Code</h4>
 <div class="outline-text-4" id="text-2-5-1">
 
 
@@ -374,6 +384,61 @@ dev.off()
 </pre>
 
 </div>
+
+</div>
+
+<div id="outline-container-2-5-2" class="outline-4">
+<h4 id="sec-2-5-2"><span class="section-number-4">2.5.2</span> Time-series Plots Output</h4>
+<div class="outline-text-4" id="text-2-5-2">
+
+<p><img src="images/nmmaps-eg-dateranges.png"  alt="images/nmmaps-eg-dateranges.png" />
+</p></div>
+
+</div>
+
+<div id="outline-container-2-5-3" class="outline-4">
+<h4 id="sec-2-5-3"><span class="section-number-4">2.5.3</span> Spatial Neighbours Code</h4>
+<div class="outline-text-4" id="text-2-5-3">
+
+
+
+
+<pre class="src src-R"><span style="color: #5F7F5F;">################################################################</span>
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">name:spatwat</span>
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">func</span>
+setwd(<span style="color: #CC9393;">"~/projects/spatiotemporal-regression-models"</span>)
+<span style="color: #BFEBBF; font-weight: bold;">require</span>(gisviz)
+
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">load</span>
+dir()
+shp <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> readOGR(<span style="color: #CC9393;">"cities.shp"</span>, <span style="color: #CC9393;">"cities"</span>)
+
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">do</span>
+shp_knn <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> knearneigh(shp, k = 4)
+nb <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> knn2nb(shp_knn)
+nudge <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> 10
+png(<span style="color: #CC9393;">"images/nmmaps-eg-neighbourhood.png"</span>)
+plotMyMap(
+    shp@coords, xl = c(min(shp@coords[,1])-nudge, max(shp@coords[,1])+nudge),
+    yl = c(min(shp@coords[,2])-nudge, max(shp@coords[,2])+nudge)
+    )
+plot(nb, shp@coords, add=<span style="color: #7CB8BB;">TRUE</span>)
+dev.off()
+
+
+</pre>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-2-5-4" class="outline-4">
+<h4 id="sec-2-5-4"><span class="section-number-4">2.5.4</span> Spatial Neighbours Output</h4>
+<div class="outline-text-4" id="text-2-5-4">
+
+<p><img src="images/nmmaps-eg-neighbourhood.png"  alt="images/nmmaps-eg-neighbourhood.png" />
+</p></div>
 </div>
 </div>
 </div>
