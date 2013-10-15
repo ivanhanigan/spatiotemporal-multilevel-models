@@ -1,13 +1,13 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 <title>Spatiotemporal Regression Modelling</title>
-<meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1"/>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="title" content="Spatiotemporal Regression Modelling"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2013-10-15T10:26+1100"/>
+<meta name="generated" content="2013-10-15T10:44+1100"/>
 <meta name="author" content="Ivan Hanigan"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -126,6 +126,11 @@ for the JavaScript code in this tag.
 <div id="text-table-of-contents">
 <ul>
 <li><a href="#sec-1">1 README</a></li>
+<li><a href="#sec-2">2 Case Study 1: NMMAPS</a>
+<ul>
+<li><a href="#sec-2-1">2.1 Original Data</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
@@ -148,6 +153,76 @@ Ivan Hanigan
 
 
 
+</div>
+
+</div>
+
+<div id="outline-container-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> Case Study 1: NMMAPS</h2>
+<div class="outline-text-2" id="text-2">
+
+<p>I will use the NMMAPSlite datasets for a simple example of what I am trying to do.
+</p>
+</div>
+
+<div id="outline-container-2-1" class="outline-3">
+<h3 id="sec-2-1"><span class="section-number-3">2.1</span> Original Data</h3>
+<div class="outline-text-3" id="text-2-1">
+
+
+
+
+<pre class="src src-R">http://cran.r-project.org/web/packages/NMMAPSlite/index.html
+Package &#8216;NMMAPSlite&#8217; was removed from the CRAN repository.
+Formerly available versions can be obtained from the archive.
+Archived on 2013-05-11 at the request of the maintainer.
+
+The Archived versions do not seem to work either.
+</pre>
+
+
+
+<p>
+That is such a shame, lucky I saved some of the data using the following code:
+</p>
+
+
+
+<pre class="src src-R">   
+<span style="color: #586e75;">#### </span><span style="color: #586e75;">Code: get nmmaps data</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">func</span>
+<span style="color: #859900; font-weight: bold;">if</span>(!<span style="color: #268bd2; font-weight: bold;">require</span>(NMMAPSlite)) install.packages(<span style="color: #2aa198;">'NMMAPSlite'</span>);<span style="color: #268bd2; font-weight: bold;">require</span>(NMMAPSlite)
+<span style="color: #268bd2; font-weight: bold;">require</span>(mgcv)
+<span style="color: #268bd2; font-weight: bold;">require</span>(splines)
+  
+<span style="color: #586e75;">######################################################</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">load  </span>
+setwd(<span style="color: #2aa198;">'data'</span>)
+initDB(<span style="color: #2aa198;">'data/NMMAPS'</span>) <span style="color: #586e75;"># </span><span style="color: #586e75;">this requires that we connect to the web,</span>
+                      <span style="color: #586e75;"># </span><span style="color: #586e75;">so lets get local copies</span>
+setwd(<span style="color: #2aa198;">'..'</span>)
+cities <span style="color: #268bd2; font-weight: bold;">&lt;-</span> getMetaData(<span style="color: #2aa198;">'cities'</span>)
+head(cities)
+citieslist <span style="color: #268bd2; font-weight: bold;">&lt;-</span> cities$cityname
+<span style="color: #586e75;"># </span><span style="color: #586e75;">write out a few cities for access later</span>
+<span style="color: #859900; font-weight: bold;">for</span>(city_i <span style="color: #859900; font-weight: bold;">in</span> citieslist[sample(1:nrow(cities), 9)])
+{
+ city <span style="color: #268bd2; font-weight: bold;">&lt;-</span> subset(cities, cityname == city_i)$city
+ data <span style="color: #268bd2; font-weight: bold;">&lt;-</span> readCity(city)
+ write.table(data, file.path(<span style="color: #2aa198;">'data'</span>, paste(city_i, <span style="color: #2aa198;">'.csv'</span>,sep=<span style="color: #2aa198;">''</span>)),
+ row.names = F, sep = <span style="color: #2aa198;">','</span>)
+}
+<span style="color: #586e75;"># </span><span style="color: #586e75;">these are all tiny, go some big ones</span>
+<span style="color: #859900; font-weight: bold;">for</span>(city_i <span style="color: #859900; font-weight: bold;">in</span> c(<span style="color: #2aa198;">'New York'</span>, <span style="color: #2aa198;">'Los Angeles'</span>, <span style="color: #2aa198;">'Madison'</span>, <span style="color: #2aa198;">'Boston'</span>))
+{
+ city <span style="color: #268bd2; font-weight: bold;">&lt;-</span> subset(cities, cityname == city_i)$city
+ data <span style="color: #268bd2; font-weight: bold;">&lt;-</span> readCity(city)
+ write.table(data, file.path(<span style="color: #2aa198;">'data'</span>, paste(city_i, <span style="color: #2aa198;">'.csv'</span>,sep=<span style="color: #2aa198;">''</span>)),
+ row.names = F, sep = <span style="color: #2aa198;">','</span>)
+}
+</pre>
+
+</div>
 </div>
 </div>
 </div>

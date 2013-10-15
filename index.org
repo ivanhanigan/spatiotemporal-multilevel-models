@@ -1111,3 +1111,136 @@ Where:<br/>
       # summary(fit)
   
 #+end_src
+* Case Study 1: NMMAPS
+I will use the NMMAPSlite datasets for a simple example of what I am trying to do.
+** Outcome Data
+*** Original Data
+# NB The original data are not available anymore
+#+name:md
+#+begin_src R :tangle no :exports reports :eval no
+http://cran.r-project.org/web/packages/NMMAPSlite/index.html
+Package ‘NMMAPSlite’ was removed from the CRAN repository.
+Formerly available versions can be obtained from the archive.
+Archived on 2013-05-11 at the request of the maintainer.
+
+The Archived versions do not seem to work either.
+#+end_src
+
+
+That is such a shame, lucky I saved some of the data using the following code:
+
+#+begin_src R :session *R* :tangle NMMAPS-example/NMMAPS-example-code.r :exports reports :eval no
+   
+      #### Code: get nmmaps data
+      # func
+      if(!require(NMMAPSlite)) install.packages('NMMAPSlite');require(NMMAPSlite)
+
+      ######################################################
+      # load  
+      setwd('data')
+      initDB('data/NMMAPS') # this requires that we connect to the web,
+                            # so lets get local copies
+      setwd('..')
+      cities <- getMetaData('cities')
+      head(cities)
+      citieslist <- cities$cityname
+      # write out a few cities for access later
+      for(city_i in citieslist[sample(1:nrow(cities), 9)])
+      {
+       city <- subset(cities, cityname == city_i)$city
+       data <- readCity(city)
+       write.table(data, file.path('data', paste(city_i, '.csv',sep='')),
+       row.names = F, sep = ',')
+      }
+      # these are all tiny, go some big ones
+      for(city_i in c('New York', 'Los Angeles', 'Madison', 'Boston'))
+      {
+       city <- subset(cities, cityname == city_i)$city
+       data <- readCity(city)
+       write.table(data, file.path('data', paste(city_i, '.csv',sep='')),
+       row.names = F, sep = ',')
+      }
+#+end_src
+** Exposure Data
+** Zones
+*** Map Shapefile
+#+name:zones
+#+begin_src R :session *shell* :tangle no :exports reports :eval no
+  ################################################################
+  # name:zones
+  # func
+  setwd("~/projects/spatiotemporal-regression-models")
+  require(devtools)
+  install_github("gisviz", "ivanhanigan")
+  require(gisviz)
+  
+  # load
+  flist <- dir("NMMAPS-example/data")
+  
+  # do    
+  ## geocode
+  flist <- gsub(".csv", "", flist)    
+  flist_geo <- gGeoCode2(flist)
+  flist_geo
+  
+  ## plot
+  png("images/nmmaps-eg-cities.png")
+  plotMyMap(
+      flist_geo[,c("long","lat")],
+      xl = c(-130,-60), yl = c(25,50)
+      )
+  text(flist_geo$long, flist_geo$lat, flist_geo$address, pos=3)
+  dev.off()
+  
+  ## make shapefile
+  epsg <- make_EPSG()
+  prj_code <- epsg[grep("WGS 84$", epsg$note),]
+  prj_code
+  shp <- SpatialPointsDataFrame(cbind(flist_geo$long,flist_geo$lat),flist_geo,
+                                proj4string = CRS(
+                                    epsg$prj4[which(epsg$code ==prj_code$code)]
+                                    )
+                                )
+  writeOGR(shp, 'cities.shp', 'cities', driver='ESRI Shapefile')
+  
+#+end_src
+
+[[file:images/nmmaps-eg-cities.png]]
+
+** Population Data
+** Exploratory Data Analyses
+*** Time-series Plots
+#+name:eda-tsplots
+#+begin_src R :session *R* :tangle no :exports reports :eval no
+  ################################################################
+  # name:eda-tsplots
+  # func
+  setwd("~/projects/spatiotemporal-regression-models")
+    
+  # load
+  flist
+  fname <- flist[7]; print(fname)
+  df <- read.csv(file.path("NMMAPS-example/data", fname))
+  
+  # clean
+  str(df)
+  summary(df$tmax); summary(df$dptp)
+  
+  # do
+  ## we will only consider cities with long periods temp and humidity observed
+  png("images/nmmaps-eg-dateranges.png", width = 1000, height=500, res = 150)
+  par(mfrow=c(6,5), mar=c(0,3,3,0), cex=.25)
+  for(fi in 1:length(flist))
+      {
+          #fi <- 4
+          fname <- flist[fi]
+          df <- read.csv(file.path("NMMAPS-example/data", fname))
+          print(fi); print(fname);
+          with(df, plot(as.Date(date), tmax, type = "l"))
+          title(paste(fname, "tmax"))
+          with(df, plot(as.Date(date), dptp, type = "l"))
+          title(paste(fname, "dptp"))
+      }
+  dev.off()
+  
+#+end_src
