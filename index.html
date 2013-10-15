@@ -7,7 +7,7 @@
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="title" content="Spatiotemporal Regression Modelling"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2013-10-15T21:50+1100"/>
+<meta name="generated" content="2013-10-15T23:35+1100"/>
 <meta name="author" content="Ivan Hanigan"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -126,11 +126,12 @@ for the JavaScript code in this tag.
 <div id="text-table-of-contents">
 <ul>
 <li><a href="#sec-1">1 README</a></li>
-<li><a href="#sec-2">2 Case Study 1: NMMAPS</a>
+<li><a href="#sec-2">2 Case Study 1: Spatially Structured Timeseries with NMMAPS</a>
 <ul>
 <li><a href="#sec-2-1">2.1 Outcome Data</a>
 <ul>
 <li><a href="#sec-2-1-1">2.1.1 Original Data</a></li>
+<li><a href="#sec-2-1-2">2.1.2 Pooled Dataset</a></li>
 </ul>
 </li>
 <li><a href="#sec-2-2">2.2 Exposure Data</a></li>
@@ -142,15 +143,23 @@ for the JavaScript code in this tag.
 </li>
 <li><a href="#sec-2-4">2.4 Population Data</a>
 <ul>
-<li><a href="#sec-2-4-1">2.4.1 Population data code</a></li>
+<li><a href="#sec-2-4-1">2.4.1 Population data</a></li>
+<li><a href="#sec-2-4-2">2.4.2 Population Summary</a></li>
 </ul>
 </li>
-<li><a href="#sec-2-5">2.5 Exploratory Data Analyses</a>
+<li><a href="#sec-2-5">2.5 Merge</a></li>
+<li><a href="#sec-2-6">2.6 Exploratory Data Analyses</a>
 <ul>
-<li><a href="#sec-2-5-1">2.5.1 Time-series Plots Code</a></li>
-<li><a href="#sec-2-5-2">2.5.2 Time-series Plots Output</a></li>
-<li><a href="#sec-2-5-3">2.5.3 Spatial Neighbours Code</a></li>
-<li><a href="#sec-2-5-4">2.5.4 Spatial Neighbours Output</a></li>
+<li><a href="#sec-2-6-1">2.6.1 Time-series Plots Code</a></li>
+<li><a href="#sec-2-6-2">2.6.2 Time-series Plots Output</a></li>
+<li><a href="#sec-2-6-3">2.6.3 Spatial Neighbours Code</a></li>
+<li><a href="#sec-2-6-4">2.6.4 Spatial Neighbours Output</a></li>
+</ul>
+</li>
+<li><a href="#sec-2-7">2.7 Main Analyses</a>
+<ul>
+<li><a href="#sec-2-7-1">2.7.1 Core Model</a></li>
+<li><a href="#sec-2-7-2">2.7.2 Core Model Plots</a></li>
 </ul>
 </li>
 </ul>
@@ -195,7 +204,7 @@ Ivan Hanigan
 </div>
 
 <div id="outline-container-2" class="outline-2">
-<h2 id="sec-2"><span class="section-number-2">2</span> Case Study 1: NMMAPS</h2>
+<h2 id="sec-2"><span class="section-number-2">2</span> Case Study 1: Spatially Structured Timeseries with NMMAPS</h2>
 <div class="outline-text-2" id="text-2">
 
 <p>I will use the NMMAPSlite datasets for a simple example of what I am trying to do.
@@ -263,6 +272,48 @@ citieslist <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> cities$
  row.names = F, sep = <span style="color: #CC9393;">','</span>)
 }
 </pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-2-1-2" class="outline-4">
+<h4 id="sec-2-1-2"><span class="section-number-4">2.1.2</span> Pooled Dataset</h4>
+<div class="outline-text-4" id="text-2-1-2">
+
+
+
+
+<pre class="src src-R"><span style="color: #5F7F5F;">################################################################</span>
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">name:Pooled Dataset</span>
+flist <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> dir(<span style="color: #CC9393;">"NMMAPS-example/data"</span>, full.names=T)
+
+flist <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span>    flist[which(basename(flist) %<span style="color: #F0DFAF; font-weight: bold;">in</span>%
+                        c(<span style="color: #CC9393;">"Baton Rouge.csv"</span>,
+                          <span style="color: #CC9393;">"Los Angeles.csv"</span>,
+                          <span style="color: #CC9393;">"Tucson.csv"</span>,
+                          <span style="color: #CC9393;">"Denver.csv"</span>)
+                        )
+                  ]
+flist
+<span style="color: #F0DFAF; font-weight: bold;">for</span>(f_i <span style="color: #F0DFAF; font-weight: bold;">in</span> 1:length(flist))
+    {
+        <span style="color: #5F7F5F;">#</span><span style="color: #7F9F7F;">f_i &lt;- 2</span>
+        fi <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> flist[f_i]
+        df <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> read.csv(fi)
+        df <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> df[,c(<span style="color: #CC9393;">"city"</span>,<span style="color: #CC9393;">"date"</span>, <span style="color: #CC9393;">"agecat"</span>,
+                    <span style="color: #CC9393;">"cvd"</span>, <span style="color: #CC9393;">"resp"</span>, <span style="color: #CC9393;">"tmax"</span>,
+                    <span style="color: #CC9393;">"tmin"</span>, <span style="color: #CC9393;">"dptp"</span>)]
+        <span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">str(df)</span>
+        write.table(df,
+                    <span style="color: #CC9393;">"outcome.csv"</span>, sep = <span style="color: #CC9393;">","</span>,
+                    row.names = F, append = f_i &gt; 1,
+                    col.names = f_i ==1
+                    )
+    }
+
+</pre>
+
 
 </div>
 </div>
@@ -375,7 +426,7 @@ writeOGR(shp, <span style="color: #CC9393;">'cities.shp'</span>, <span style="co
 </div>
 
 <div id="outline-container-2-4-1" class="outline-4">
-<h4 id="sec-2-4-1"><span class="section-number-4">2.4.1</span> Population data code</h4>
+<h4 id="sec-2-4-1"><span class="section-number-4">2.4.1</span> Population data</h4>
 <div class="outline-text-4" id="text-2-4-1">
 
 <ul>
@@ -724,24 +775,93 @@ write.csv(population, <span style="color: #CC9393;">"population.csv"</span>,
 </pre>
 
 
-
 </li>
 </ul>
+</div>
+
+</div>
+
+<div id="outline-container-2-4-2" class="outline-4">
+<h4 id="sec-2-4-2"><span class="section-number-4">2.4.2</span> Population Summary</h4>
+<div class="outline-text-4" id="text-2-4-2">
+
+
+
+
+<pre class="src src-R"><span style="color: #5F7F5F;">################################################################</span>
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">name:Population Summary</span>
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">func</span>
+<span style="color: #BFEBBF; font-weight: bold;">require</span>(plyr)
+
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">load</span>
+population <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> read.csv(<span style="color: #CC9393;">"population.csv"</span>)
+str(population)
+population <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> population[,c(<span style="color: #CC9393;">"city"</span>, <span style="color: #CC9393;">"agecat"</span>, <span style="color: #CC9393;">"population"</span>)]
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">do</span>
+population_summary <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> ddply(population,
+                           .variables = c(<span style="color: #CC9393;">"city"</span>,
+                               <span style="color: #CC9393;">"agecat"</span>),
+                           .fun = summarise,
+                           sum(population)
+                           )
+
+names(population_summary) <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> c(<span style="color: #CC9393;">"city"</span>,<span style="color: #CC9393;">"agecat"</span>,<span style="color: #CC9393;">"pop"</span>)
+
+write.csv(population_summary,
+          <span style="color: #CC9393;">"population_summary.csv"</span>,
+          row.names = <span style="color: #7CB8BB;">FALSE</span>
+          )
+</pre>
+
+
 </div>
 </div>
 
 </div>
 
 <div id="outline-container-2-5" class="outline-3">
-<h3 id="sec-2-5"><span class="section-number-3">2.5</span> Exploratory Data Analyses</h3>
+<h3 id="sec-2-5"><span class="section-number-3">2.5</span> Merge</h3>
 <div class="outline-text-3" id="text-2-5">
+
+
+
+
+
+<pre class="src src-R"><span style="color: #5F7F5F;">################################################################</span>
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">name:merge</span>
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">func</span>
+setwd(<span style="color: #CC9393;">"~/projects/spatiotemporal-regression-models"</span>)
+
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">load</span>
+outcome <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> read.csv(<span style="color: #CC9393;">"outcome.csv"</span>)
+str(outcome)
+outcome$date <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> as.Date(outcome$date)
+
+population <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> read.csv(<span style="color: #CC9393;">"population_summary.csv"</span>)
+str(population)
+population
+
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">do</span>
+analyte <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> merge(outcome, population)
+write.csv(analyte, <span style="color: #CC9393;">"analyte.csv"</span>, row.names = <span style="color: #7CB8BB;">FALSE</span>)
+</pre>
+
 
 
 </div>
 
-<div id="outline-container-2-5-1" class="outline-4">
-<h4 id="sec-2-5-1"><span class="section-number-4">2.5.1</span> Time-series Plots Code</h4>
-<div class="outline-text-4" id="text-2-5-1">
+</div>
+
+<div id="outline-container-2-6" class="outline-3">
+<h3 id="sec-2-6"><span class="section-number-3">2.6</span> Exploratory Data Analyses</h3>
+<div class="outline-text-3" id="text-2-6">
+
+
+</div>
+
+<div id="outline-container-2-6-1" class="outline-4">
+<h4 id="sec-2-6-1"><span class="section-number-4">2.6.1</span> Time-series Plots Code</h4>
+<div class="outline-text-4" id="text-2-6-1">
 
 
 
@@ -783,18 +903,18 @@ dev.off()
 
 </div>
 
-<div id="outline-container-2-5-2" class="outline-4">
-<h4 id="sec-2-5-2"><span class="section-number-4">2.5.2</span> Time-series Plots Output</h4>
-<div class="outline-text-4" id="text-2-5-2">
+<div id="outline-container-2-6-2" class="outline-4">
+<h4 id="sec-2-6-2"><span class="section-number-4">2.6.2</span> Time-series Plots Output</h4>
+<div class="outline-text-4" id="text-2-6-2">
 
 <p><img src="images/nmmaps-eg-dateranges.png"  alt="images/nmmaps-eg-dateranges.png" />
 </p></div>
 
 </div>
 
-<div id="outline-container-2-5-3" class="outline-4">
-<h4 id="sec-2-5-3"><span class="section-number-4">2.5.3</span> Spatial Neighbours Code</h4>
-<div class="outline-text-4" id="text-2-5-3">
+<div id="outline-container-2-6-3" class="outline-4">
+<h4 id="sec-2-6-3"><span class="section-number-4">2.6.3</span> Spatial Neighbours Code</h4>
+<div class="outline-text-4" id="text-2-6-3">
 
 
 
@@ -840,12 +960,80 @@ dev.off()
 
 </div>
 
-<div id="outline-container-2-5-4" class="outline-4">
-<h4 id="sec-2-5-4"><span class="section-number-4">2.5.4</span> Spatial Neighbours Output</h4>
-<div class="outline-text-4" id="text-2-5-4">
+<div id="outline-container-2-6-4" class="outline-4">
+<h4 id="sec-2-6-4"><span class="section-number-4">2.6.4</span> Spatial Neighbours Output</h4>
+<div class="outline-text-4" id="text-2-6-4">
 
 <p><img src="images/nmmaps-eg-neighbourhood.png"  alt="images/nmmaps-eg-neighbourhood.png" />
 </p></div>
+</div>
+
+</div>
+
+<div id="outline-container-2-7" class="outline-3">
+<h3 id="sec-2-7"><span class="section-number-3">2.7</span> Main Analyses</h3>
+<div class="outline-text-3" id="text-2-7">
+
+
+</div>
+
+<div id="outline-container-2-7-1" class="outline-4">
+<h4 id="sec-2-7-1"><span class="section-number-4">2.7.1</span> Core Model</h4>
+<div class="outline-text-4" id="text-2-7-1">
+
+
+
+
+<pre class="src src-R"><span style="color: #5F7F5F;">################################################################</span>
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">name:core</span>
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">func</span>
+setwd(<span style="color: #CC9393;">"~/projects/spatiotemporal-regression-models"</span>)
+<span style="color: #BFEBBF; font-weight: bold;">require</span>(mgcv)
+<span style="color: #BFEBBF; font-weight: bold;">require</span>(splines)
+
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">load</span>
+analyte <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> read.csv(<span style="color: #CC9393;">"analyte.csv"</span>)
+
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">clean</span>
+analyte$yy <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> substr(analyte$date,1,4)
+numYears<span style="color: #BFEBBF; font-weight: bold;">&lt;-</span>length(names(table(analyte$yy)))
+analyte$date <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> as.Date(analyte$date)
+analyte$time <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> as.numeric(analyte$date)
+analyte$agecat <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> factor(analyte$agecat,
+                          levels = c(<span style="color: #CC9393;">"under65"</span>,
+                              <span style="color: #CC9393;">"65to74"</span>, <span style="color: #CC9393;">"75p"</span>),
+                          ordered = <span style="color: #7CB8BB;">TRUE</span>
+                          )
+
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">do</span>
+fit <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> gam(cvd ~ s(tmax) + s(dptp) +
+           city + agecat +
+           s(time, k= 7*numYears, fx=T) +
+           offset(log(pop)),
+           data = analyte, family = poisson
+           )
+
+<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">plot of response functions</span>
+png(<span style="color: #CC9393;">"images/nmmaps-eg-core.png"</span>, width = 1000, height = 750, res = 150)
+par(mfrow=c(2,3))
+plot(fit, all.terms = <span style="color: #7CB8BB;">TRUE</span>)
+dev.off()
+
+
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-2-7-2" class="outline-4">
+<h4 id="sec-2-7-2"><span class="section-number-4">2.7.2</span> Core Model Plots</h4>
+<div class="outline-text-4" id="text-2-7-2">
+
+<p><img src="images/nmmaps-eg-core.png"  alt="images/nmmaps-eg-core.png" />
+</p>
+
+</div>
 </div>
 </div>
 </div>

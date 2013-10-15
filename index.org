@@ -1119,7 +1119,7 @@ Where:<br/>
       # summary(fit)
   
 #+end_src
-* Case Study 1: NMMAPS
+* Case Study 1: Spatially Structured Timeseries with NMMAPS
 I will use the NMMAPSlite datasets for a simple example of what I am trying to do.
 ** Outcome Data
 *** Original Data
@@ -1169,6 +1169,39 @@ That is such a shame, lucky I saved some of the data using the following code:
        row.names = F, sep = ',')
       }
 #+end_src
+*** Pooled Dataset
+#+name:Pooled Dataset
+#+begin_src R :session *shell* :tangle no :exports reports :eval no
+  ################################################################
+  # name:Pooled Dataset
+  flist <- dir("NMMAPS-example/data", full.names=T)
+  
+  flist <-    flist[which(basename(flist) %in%
+                          c("Baton Rouge.csv",
+                            "Los Angeles.csv",
+                            "Tucson.csv",
+                            "Denver.csv")
+                          )
+                    ]
+  flist
+  for(f_i in 1:length(flist))
+      {
+          #f_i <- 2
+          fi <- flist[f_i]
+          df <- read.csv(fi)
+          df <- df[,c("city","date", "agecat",
+                      "cvd", "resp", "tmax",
+                      "tmin", "dptp")]
+          # str(df)
+          write.table(df,
+                      "outcome.csv", sep = ",",
+                      row.names = F, append = f_i > 1,
+                      col.names = f_i ==1
+                      )
+      }
+  
+#+end_src
+
 ** Exposure Data
 ** Zones
 *** Map Shapefile Code
@@ -1238,7 +1271,7 @@ That is such a shame, lucky I saved some of the data using the following code:
 [[file:images/nmmaps-eg-cities.png]]
 
 ** Population Data
-*** Population data code
+*** Population data 
 **** A Code Skeleton
 The process for getting the population data from the websites is a bit of a pain, with repeated copy and paste operations.  To make sure this is recorded I set up a skeleton to paste into.
 #+name:population-data
@@ -1553,6 +1586,57 @@ The process for getting the population data from the websites is a bit of a pain
             )
 #+end_src
 
+*** Population Summary 
+#+name:Population Summary
+#+begin_src R :session *shell* :tangle no :exports reports :eval no
+  ################################################################
+  # name:Population Summary
+  # func
+  require(plyr)
+  
+  # load
+  population <- read.csv("population.csv")
+  str(population)
+  population <- population[,c("city", "agecat", "population")]
+  # do
+  population_summary <- ddply(population,
+                             .variables = c("city",
+                                 "agecat"),
+                             .fun = summarise,
+                             sum(population)
+                             )
+  
+  names(population_summary) <- c("city","agecat","pop")
+  
+  write.csv(population_summary,
+            "population_summary.csv",
+            row.names = FALSE
+            )
+#+end_src
+
+** Merge
+
+#+name:merge
+#+begin_src R :session *shell* :tangle no :exports reports :eval no
+  ################################################################
+  # name:merge
+  # func
+  setwd("~/projects/spatiotemporal-regression-models")
+  
+  # load
+  outcome <- read.csv("outcome.csv")
+  str(outcome)
+  outcome$date <- as.Date(outcome$date)
+  
+  population <- read.csv("population_summary.csv")
+  str(population)
+  population
+  
+  # do
+  analyte <- merge(outcome, population)
+  write.csv(analyte, "analyte.csv", row.names = FALSE)
+#+end_src
+
     
 ** Exploratory Data Analyses
 *** Time-series Plots Code
@@ -1633,3 +1717,54 @@ The process for getting the population data from the websites is a bit of a pain
 
 *** Spatial Neighbours Output
 [[file:images/nmmaps-eg-neighbourhood.png]]
+** Main Analyses
+*** Core Model
+#+name:core
+#+begin_src R :session *shell* :tangle no :exports reports :eval no
+  ################################################################
+  # name:core
+  # func
+  setwd("~/projects/spatiotemporal-regression-models")
+  require(mgcv)
+  require(splines)
+  
+  # load
+  analyte <- read.csv("analyte.csv")
+  
+  # clean
+  analyte$yy <- substr(analyte$date,1,4)
+  numYears<-length(names(table(analyte$yy)))
+  analyte$date <- as.Date(analyte$date)
+  analyte$time <- as.numeric(analyte$date)
+  analyte$agecat <- factor(analyte$agecat,
+                            levels = c("under65",
+                                "65to74", "75p"),
+                            ordered = TRUE
+                            )
+  
+  # do
+  fit <- gam(cvd ~ s(tmax) + s(dptp) +
+             city + agecat +
+             s(time, k= 7*numYears, fx=T) +
+             offset(log(pop)),
+             data = analyte, family = poisson
+             )
+  
+  # plot of response functions
+  png("images/nmmaps-eg-core.png", width = 1000, height = 750, res = 150)
+  par(mfrow=c(2,3))
+  plot(fit, all.terms = TRUE)
+  dev.off()
+  
+  
+#+end_src
+*** Core Model Plots
+[[file:images/nmmaps-eg-core.png]]
+
+** COMMENT SCP files across
+#+name:scp-files
+#+begin_src sh :session *shell* :tangle no :exports none :eval no
+cd images
+scp ivan_hanigan@130.56.102.53:projects/spatiotemporal-regression-models/images/nmmaps-eg-core.png nmmaps-eg-core.png
+cd ..
+#+end_src
