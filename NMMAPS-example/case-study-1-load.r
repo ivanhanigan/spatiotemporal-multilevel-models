@@ -9,7 +9,8 @@ flist <-    flist[which(basename(flist) %in%
                         c("Baton Rouge.csv",
                           "Los Angeles.csv",
                           "Tucson.csv",
-                          "Denver.csv")
+                          "Denver.csv",
+                          "Louisville.csv")
                         )
                   ]
 flist
@@ -74,7 +75,7 @@ for(fi in 1:length(flist2))
 city_codes <- as.data.frame(city_codes)
 names(city_codes) <- c("address","city")
 city_codes 
-flist_geo2 <- merge(flist_geo, city_codes, by = )
+flist_geo2 <- merge(flist_geo, city_codes, by = "address")
 flist_geo2
 
 ## make shapefile
@@ -429,7 +430,12 @@ str(population)
 population
 
 # do
-analyte <- merge(outcome, population)
+analyte <- merge(outcome, population, by = c("city", "agecat"))
+
+# check
+subset(analyte, date == as.Date("1990-01-01"))
+
+# save
 write.csv(analyte, "analyte.csv", row.names = FALSE)
 
 ################################################################
@@ -438,7 +444,7 @@ write.csv(analyte, "analyte.csv", row.names = FALSE)
 setwd("~/projects/spatiotemporal-regression-models/NMMAPS-example")
   
 # load
-flist
+flist <- dir("data")
 fname <- flist[7]; print(fname)
 df <- read.csv(file.path("data", fname))
 
