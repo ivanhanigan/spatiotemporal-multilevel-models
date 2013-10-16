@@ -1324,7 +1324,7 @@ Where:<br/>
   <h4 id="sec-2"><span class="section-number-4">2</span> Core Model Plots</h4>
   <div class="outline-text-4" id="text-2">
   
-  <p><img src="images/nmmaps-eg-core.png"  alt="images/nmmaps-eg-core.png" />
+  <p><img src="/images/nmmaps-eg-core.png"  alt="/images/nmmaps-eg-core.png" />
   </p></div>
   </div>
   </div>
@@ -1334,7 +1334,7 @@ Where:<br/>
   
   
 #+end_src
-
+# ![nmmaps-eg-core.png](/images/nmmaps-eg-core.png)
 * Case Study 1: Spatially Structured Timeseries with NMMAPS
 I will use the NMMAPSlite datasets for a simple example of what I describe as "Spatially Structured Timeseries" as opposed to "Spatio-Temporal" which I think more explicitly includes spatial structure in the model.
 ** Outcome Data
