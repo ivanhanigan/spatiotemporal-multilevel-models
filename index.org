@@ -15,14 +15,17 @@ This is an Open Notebook for my work on Spatiotemporal Regression Modelling tips
 
 Ivan Hanigan
 #+end_src
-
+** Version Statement
 #+begin_src R :session *R* :exports none
-rbind("Date", as.character(Sys.Date()))
+  commit_msg <- "written R codes to scripts"
+  commit_msg <- as.data.frame(c(as.character(Sys.Date()), commit_msg))
+  commit_msg
 #+end_src
 
 
-|       Date |
-| 2013-10-15 |
+|                 2013-10-16 |
+| written R codes to scripts |
+
 
 
 
@@ -1120,24 +1123,28 @@ Where:<br/>
   
 #+end_src
 * Case Study 1: Spatially Structured Timeseries with NMMAPS
-I will use the NMMAPSlite datasets for a simple example of what I am trying to do.
+I will use the NMMAPSlite datasets for a simple example of what I describe as "Spatially Structured Timeseries" as opposed to "Spatio-Temporal" which I think more explicitly includes spatial structure in the model.
 ** Outcome Data
 *** Original Data
 # NB The original data are not available anymore
 #+name:md
-#+begin_src R :tangle no :exports reports :eval no
+#+begin_src R :tangle no :exports reports :eval no :tangle NMMAPS-example/NMMAPS-original-data.r 
+"
 http://cran.r-project.org/web/packages/NMMAPSlite/index.html
 Package ‘NMMAPSlite’ was removed from the CRAN repository.
 Formerly available versions can be obtained from the archive.
 Archived on 2013-05-11 at the request of the maintainer.
 
 The Archived versions do not seem to work either.
+
+That is such a shame, lucky I saved some of the data using the following code:
+"
 #+end_src
 
 
-That is such a shame, lucky I saved some of the data using the following code:
 
-#+begin_src R :session *R* :tangle NMMAPS-example/NMMAPS-example-code.r :exports reports :eval no
+
+#+begin_src R :session *R* :tangle NMMAPS-example/NMMAPS-original-data.r :exports reports :eval no
    
       #### Code: get nmmaps data
       # func
@@ -1171,10 +1178,12 @@ That is such a shame, lucky I saved some of the data using the following code:
 #+end_src
 *** Pooled Dataset
 #+name:Pooled Dataset
-#+begin_src R :session *shell* :tangle no :exports reports :eval no
+#+begin_src R :session *shell* :tangle NMMAPS-example/case-study-1-load.r :exports reports :eval no
   ################################################################
   # name:Pooled Dataset
-  flist <- dir("NMMAPS-example/data", full.names=T)
+  setwd("~/projects/spatiotemporal-regression-models/NMMAPS-example")
+
+  flist <- dir("data", full.names=T)
   
   flist <-    flist[which(basename(flist) %in%
                           c("Baton Rouge.csv",
@@ -1206,17 +1215,17 @@ That is such a shame, lucky I saved some of the data using the following code:
 ** Zones
 *** Map Shapefile Code
 #+name:zones
-#+begin_src R :session *shell* :tangle no :exports reports :eval no
+#+begin_src R :session *shell* :tangle NMMAPS-example/case-study-1-load.r :exports reports :eval no
   ################################################################
   # name:zones
   # func
-  setwd("~/projects/spatiotemporal-regression-models")
+  setwd("~/projects/spatiotemporal-regression-models/NMMAPS-example")
   #require(devtools)
   #install_github("gisviz", "ivanhanigan")
   require(gisviz)
   
   # load
-  flist <- dir("NMMAPS-example/data")
+  flist <- dir("data")
   
   # do    
   ## geocode
@@ -1234,7 +1243,7 @@ That is such a shame, lucky I saved some of the data using the following code:
   dev.off()
      
   # load city names
-  flist2 <- dir("NMMAPS-example/data")
+  flist2 <- dir("data")
   flist2
   city_codes <- matrix(NA, nrow = 0, ncol = 2)
   for(fi in 1:length(flist2))
@@ -1243,7 +1252,7 @@ That is such a shame, lucky I saved some of the data using the following code:
           fname <- flist2[fi]
           print(fi); print(fname);
           df <- read.csv(
-              file.path("NMMAPS-example/data", fname),
+              file.path("data", fname),
               stringsAsFactors = F, nrow = 1)
           city_codes <- rbind(city_codes,
               c(gsub(".csv","",fname), df$city)
@@ -1265,15 +1274,16 @@ That is such a shame, lucky I saved some of the data using the following code:
                                     )
                                 )
   writeOGR(shp, 'cities.shp', 'cities', driver='ESRI Shapefile')
-  
+
 #+end_src
 *** Map Shapefile Output
-[[file:images/nmmaps-eg-cities.png]]
+[[file:NMMAPS-example/images/nmmaps-eg-cities.png]]
 
 ** Population Data
 *** Population data 
 **** A Code Skeleton
 The process for getting the population data from the websites is a bit of a pain, with repeated copy and paste operations.  To make sure this is recorded I set up a skeleton to paste into.
+**** TODO better to use gsub() to remove the ","
 #+name:population-data
 #+begin_src R :session *shell* :tangle no :exports reports :eval no
   ################################################################
@@ -1326,7 +1336,7 @@ The process for getting the population data from the websites is a bit of a pain
 
 
 **** Baton Rouge
-#+begin_src R :session *shell* :tangle no :exports reports :eval yes
+#+begin_src R :session *shell* :tangle NMMAPS-example/case-study-1-load.r :exports reports :eval yes
   ################################################################
   # name:population-data
   # first city, remove population data.frame
@@ -1390,7 +1400,7 @@ The process for getting the population data from the websites is a bit of a pain
 #+end_src
 
 **** Los Angeles
-#+begin_src R :session *shell* :tangle no :exports reports :eval no
+#+begin_src R :session *shell* :tangle NMMAPS-example/case-study-1-load.r :exports reports :eval no
   ################################################################
   # name:population-data
   
@@ -1453,7 +1463,7 @@ The process for getting the population data from the websites is a bit of a pain
 
 
 **** Tucson
-#+begin_src R :session *shell* :tangle no :exports reports :eval no
+#+begin_src R :session *shell* :tangle NMMAPS-example/case-study-1-load.r :exports reports :eval no
   ################################################################
   # name:population-data
   
@@ -1515,7 +1525,7 @@ The process for getting the population data from the websites is a bit of a pain
 #+end_src
 
 **** Denver
-#+begin_src R :session *shell* :tangle no :exports reports :eval no
+#+begin_src R :session *shell* :tangle NMMAPS-example/case-study-1-load.r :exports reports :eval no
   ################################################################
   # name:population-data
   
@@ -1576,9 +1586,75 @@ The process for getting the population data from the websites is a bit of a pain
       }
   
 #+end_src
+**** Louisville
+#+begin_src R :session *shell* :tangle NMMAPS-example/case-study-1-load.r :exports reports :eval no
+  ################################################################
+  # name:population-data
+  
+  # func
+  setwd("~/projects/spatiotemporal-regression-models")
+  require(gisviz)
+  
+  # load
+  ## citycodes
+  shp <- readOGR("cities.shp", "cities")
+  shp@data
+  
+  cityname <- "Louisville"
+  
+  # do
+  # save url
+  #http://www.city-data.com/us-cities/The-South/Louisville-Population-Profile.html
+  
+  ## NB error in table, 75-84 was missing.  used same from baton rouge
+  population_input <- read.table(textConnection(
+    "age: population
+    Population under 5 years old: 16926
+    Population 5 to 9 years old: 17359
+    Population 10 to 14 years old: 16627
+    Population 15 to 19 years old: 17362
+    Population 20 to 24 years old: 18923
+    Population 25 to 34 years old: 37541
+    Population 35 to 44 years old: 40354
+    Population 45 to 54 years old: 33755
+    Population 55 to 59 years old: 10716
+    Population 60 to 64 years old: 9211
+    Population 65 to 74 years old: 18577
+    Population 75 to 84 years: 9611
+    Population 85 years and older: 5075
+    "), sep = ":", header = TRUE)
+  
+  ## agecats
+  ## 65to74     75p under65  
+  population_input$agecat <- c(rep("under65", 10),
+                               rep("65to74"),
+                               rep("75p",2)
+                               )
+  
+  citycode <- subset(shp@data, address == cityname,
+                     select = city)
+  
+  population_input$city <- rep(
+      as.character(citycode[1,1])        
+      , 13
+      )
+  
+  population_input
+  if(exists("population"))
+      {
+          population <- rbind(population,
+                              population_input
+                              )        
+      } else {
+          population <- population_input
+      }
+  
+#+end_src
+
+
 **** Save Population Dataset
 #+name:save-population
-#+begin_src R :session *shell* :tangle no :exports reports :eval no
+#+begin_src R :session *shell* :tangle NMMAPS-example/case-study-1-load.r :exports reports :eval no
   ################################################################
   # name:save-population
   write.csv(population, "population.csv",
@@ -1588,7 +1664,7 @@ The process for getting the population data from the websites is a bit of a pain
 
 *** Population Summary 
 #+name:Population Summary
-#+begin_src R :session *shell* :tangle no :exports reports :eval no
+#+begin_src R :session *shell* :tangle NMMAPS-example/case-study-1-load.r :exports reports :eval no
   ################################################################
   # name:Population Summary
   # func
@@ -1617,11 +1693,11 @@ The process for getting the population data from the websites is a bit of a pain
 ** Merge
 
 #+name:merge
-#+begin_src R :session *shell* :tangle no :exports reports :eval no
+#+begin_src R :session *shell* :tangle NMMAPS-example/case-study-1-load.r :exports reports :eval no
   ################################################################
   # name:merge
   # func
-  setwd("~/projects/spatiotemporal-regression-models")
+  setwd("~/projects/spatiotemporal-regression-models/NMMAPS-example")
   
   # load
   outcome <- read.csv("outcome.csv")
@@ -1641,16 +1717,16 @@ The process for getting the population data from the websites is a bit of a pain
 ** Exploratory Data Analyses
 *** Time-series Plots Code
 #+name:eda-tsplots
-#+begin_src R :session *R* :tangle no :exports reports :eval no
+#+begin_src R :session *R* :tangle NMMAPS-example/case-study-1-load.r :exports reports :eval no
   ################################################################
   # name:eda-tsplots
   # func
-  setwd("~/projects/spatiotemporal-regression-models")
+  setwd("~/projects/spatiotemporal-regression-models/NMMAPS-example")
     
   # load
   flist
   fname <- flist[7]; print(fname)
-  df <- read.csv(file.path("NMMAPS-example/data", fname))
+  df <- read.csv(file.path("data", fname))
   
   # clean
   str(df)
@@ -1664,7 +1740,7 @@ The process for getting the population data from the websites is a bit of a pain
       {
           #fi <- 4
           fname <- flist[fi]
-          df <- read.csv(file.path("NMMAPS-example/data", fname))
+          df <- read.csv(file.path("data", fname))
           print(fi); print(fname);
           with(df, plot(as.Date(date), tmax, type = "l"))
           title(paste(fname, "tmax"))
@@ -1675,56 +1751,16 @@ The process for getting the population data from the websites is a bit of a pain
   
 #+end_src
 *** Time-series Plots Output
-[[file:images/nmmaps-eg-dateranges.png]]
-*** Spatial Neighbours Code
-#+name:spatwat
-#+begin_src R :session *shell* :tangle no :exports reports :eval no
-  ################################################################
-  # name:spatwat
-  # func
-  setwd("~/projects/spatiotemporal-regression-models")
-  require(gisviz)
-  
-  # load
-  dir()
-  shp <- readOGR("cities.shp", "cities")
-  
-  # clean
-  head(shp@data)
-  
-  # do
-  ## I will use nearest neighbour within a distance threshold, but
-  ## usually polygon datasets would use poly2nb
-  nb <- dnearneigh(shp, d1 = 1, d2 = 1000)                      
-  head(nb)
-  shp[[1]][1]
-  shp[[1]][nb[[1]]]
-  # map
-  nudge <- 10
-  png("images/nmmaps-eg-neighbourhood.png")
-  plotMyMap(
-      shp@coords, xl = c(min(shp@coords[,1])-nudge, max(shp@coords[,1])+nudge),
-      yl = c(min(shp@coords[,2])-nudge, max(shp@coords[,2])+nudge)
-      )
-  plot(nb, shp@coords, add=TRUE)
-  text(shp@data$long, shp@data$lat, shp@data$address, pos=3)
-  points(shp@coords[nb[[1]],], col = 'green', pch = 16)
-  points(shp@data[1,c("long","lat")],col = 'blue', pch = 16)
-  dev.off()
-  
-  
-#+end_src
+[[file:NMMAPS-example/images/nmmaps-eg-dateranges.png]]
 
-*** Spatial Neighbours Output
-[[file:images/nmmaps-eg-neighbourhood.png]]
 ** Main Analyses
 *** Core Model
 #+name:core
-#+begin_src R :session *shell* :tangle no :exports reports :eval no
+#+begin_src R :session *shell* :tangle NMMAPS-example/case-study-1-do.r :exports reports :eval no
   ################################################################
   # name:core
   # func
-  setwd("~/projects/spatiotemporal-regression-models")
+  setwd("~/projects/spatiotemporal-regression-models/NMMAPS-example")
   require(mgcv)
   require(splines)
   
@@ -1759,12 +1795,60 @@ The process for getting the population data from the websites is a bit of a pain
   
 #+end_src
 *** Core Model Plots
-[[file:images/nmmaps-eg-core.png]]
+[[file:NMMAPS-example/images/nmmaps-eg-core.png]]
 
 ** COMMENT SCP files across
 #+name:scp-files
 #+begin_src sh :session *shell* :tangle no :exports none :eval no
 cd images
-scp ivan_hanigan@130.56.102.53:projects/spatiotemporal-regression-models/images/nmmaps-eg-core.png nmmaps-eg-core.png
+scp ivan_hanigan@130.56.102.53:projects/spatiotemporal-regression-models/NMMAPS-example/images/nmmaps-eg-core.png nmmaps-eg-core.png
+cd ..
+cd NMMAPS-example
+scp ivan_hanigan@130.56.102.53:projects/spatiotemporal-regression-models/NMMAPS-example/analyte.csv analyte.csv
 cd ..
 #+end_src
+* Case Study 2: Spatial Lag and Timeseries with NMMAPS
+I will use the same NMMAPSlite to show how I'd approach a simple "Spatio-Temporal" model.
+**** TODO The following is a stub of an idea.  For further development
+** Zones
+*** Spatial Neighbours Code
+#+name:spatwat
+#+begin_src R :session *shell* :tangle NMMAPS-example/case-study-2-load.r :exports reports :eval no
+  ################################################################
+  # name:spatwat
+  # func
+  setwd("~/projects/spatiotemporal-regression-models/NMMAPS-example")
+  require(gisviz)
+  
+  # load
+  dir()
+  shp <- readOGR("cities.shp", "cities")
+  
+  # clean
+  head(shp@data)
+  
+  # do
+  ## I will use nearest neighbour within a distance threshold, but
+  ## usually polygon datasets would use poly2nb
+  nb <- dnearneigh(shp, d1 = 1, d2 = 1000)                      
+  head(nb)
+  shp[[1]][1]
+  shp[[1]][nb[[1]]]
+  # map
+  nudge <- 10
+  png("images/nmmaps-eg-neighbourhood.png")
+  plotMyMap(
+      shp@coords, xl = c(min(shp@coords[,1])-nudge, max(shp@coords[,1])+nudge),
+      yl = c(min(shp@coords[,2])-nudge, max(shp@coords[,2])+nudge)
+      )
+  plot(nb, shp@coords, add=TRUE)
+  text(shp@data$long, shp@data$lat, shp@data$address, pos=3)
+  points(shp@coords[nb[[1]],], col = 'green', pch = 16)
+  points(shp@data[1,c("long","lat")],col = 'blue', pch = 16)
+  dev.off()
+  
+  
+#+end_src
+
+*** Spatial Neighbours Output
+[[file:NMMAPS-example/images/nmmaps-eg-neighbourhood.png]]

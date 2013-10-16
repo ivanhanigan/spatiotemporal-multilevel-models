@@ -7,7 +7,7 @@
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="title" content="Spatiotemporal Regression Modelling"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2013-10-15T23:35+1100"/>
+<meta name="generated" content="2013-10-16T13:37+1100"/>
 <meta name="author" content="Ivan Hanigan"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -125,7 +125,11 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#sec-1">1 README</a></li>
+<li><a href="#sec-1">1 README</a>
+<ul>
+<li><a href="#sec-1-1">1.1 Version Statement</a></li>
+</ul>
+</li>
 <li><a href="#sec-2">2 Case Study 1: Spatially Structured Timeseries with NMMAPS</a>
 <ul>
 <li><a href="#sec-2-1">2.1 Outcome Data</a>
@@ -152,14 +156,21 @@ for the JavaScript code in this tag.
 <ul>
 <li><a href="#sec-2-6-1">2.6.1 Time-series Plots Code</a></li>
 <li><a href="#sec-2-6-2">2.6.2 Time-series Plots Output</a></li>
-<li><a href="#sec-2-6-3">2.6.3 Spatial Neighbours Code</a></li>
-<li><a href="#sec-2-6-4">2.6.4 Spatial Neighbours Output</a></li>
 </ul>
 </li>
 <li><a href="#sec-2-7">2.7 Main Analyses</a>
 <ul>
 <li><a href="#sec-2-7-1">2.7.1 Core Model</a></li>
 <li><a href="#sec-2-7-2">2.7.2 Core Model Plots</a></li>
+</ul></li>
+</ul>
+</li>
+<li><a href="#sec-3">3 Case Study 2: Spatial Lag and Timeseries with NMMAPS</a>
+<ul>
+<li><a href="#sec-3-1">3.1 Zones</a>
+<ul>
+<li><a href="#sec-3-1-1">3.1.1 Spatial Neighbours Code</a></li>
+<li><a href="#sec-3-1-2">3.1.2 Spatial Neighbours Output</a></li>
 </ul>
 </li>
 </ul>
@@ -175,13 +186,19 @@ for the JavaScript code in this tag.
 
 
 
-<pre class="src src-markdown"><span style="color: #93E0E3; font-weight: bold;">#</span> <span style="color: #93E0E3; font-size: 155%; font-weight: bold;">Spatiotemporal Regression Modelling</span>
+<pre class="src src-markdown"><span style="color: #268bd2; font-weight: bold;">#</span> <span style="color: #268bd2; font-size: 155%; font-weight: bold;">Spatiotemporal Regression Modelling</span>
 
 This is an Open Notebook for my work on Spatiotemporal Regression Modelling tips and tricks.
 
 Ivan Hanigan
 </pre>
 
+
+</div>
+
+<div id="outline-container-1-1" class="outline-3">
+<h3 id="sec-1-1"><span class="section-number-3">1.1</span> Version Statement</h3>
+<div class="outline-text-3" id="text-1-1">
 
 
 
@@ -190,8 +207,8 @@ Ivan Hanigan
 <colgroup><col class="left" />
 </colgroup>
 <tbody>
-<tr><td class="left">Date</td></tr>
-<tr><td class="left">2013-10-15</td></tr>
+<tr><td class="left">2013-10-16</td></tr>
+<tr><td class="left">written R codes to scripts</td></tr>
 </tbody>
 </table>
 
@@ -199,6 +216,8 @@ Ivan Hanigan
 
 
 
+
+</div>
 </div>
 
 </div>
@@ -207,7 +226,7 @@ Ivan Hanigan
 <h2 id="sec-2"><span class="section-number-2">2</span> Case Study 1: Spatially Structured Timeseries with NMMAPS</h2>
 <div class="outline-text-2" id="text-2">
 
-<p>I will use the NMMAPSlite datasets for a simple example of what I am trying to do.
+<p>I will use the NMMAPSlite datasets for a simple example of what I describe as "Spatially Structured Timeseries" as opposed to "Spatio-Temporal" which I think more explicitly includes spatial structure in the model.
 </p>
 </div>
 
@@ -225,51 +244,52 @@ Ivan Hanigan
 
 
 
-<pre class="src src-R">http://cran.r-project.org/web/packages/NMMAPSlite/index.html
-Package &#8216;NMMAPSlite&#8217; was removed from the CRAN repository.
-Formerly available versions can be obtained from the archive.
-Archived on 2013-05-11 at the request of the maintainer.
+<pre class="src src-R"><span style="color: #2aa198;">"</span>
+<span style="color: #2aa198;">http://cran.r-project.org/web/packages/NMMAPSlite/index.html</span>
+<span style="color: #2aa198;">Package &#8216;NMMAPSlite&#8217; was removed from the CRAN repository.</span>
+<span style="color: #2aa198;">Formerly available versions can be obtained from the archive.</span>
+<span style="color: #2aa198;">Archived on 2013-05-11 at the request of the maintainer.</span>
 
-The Archived versions do not seem to work either.
+<span style="color: #2aa198;">The Archived versions do not seem to work either.</span>
+
+<span style="color: #2aa198;">That is such a shame, lucky I saved some of the data using the following code:</span>
+<span style="color: #2aa198;">"</span>
 </pre>
 
 
 
-<p>
-That is such a shame, lucky I saved some of the data using the following code:
-</p>
 
 
 
 <pre class="src src-R">   
-<span style="color: #5F7F5F;">#### </span><span style="color: #7F9F7F;">Code: get nmmaps data</span>
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">func</span>
-<span style="color: #F0DFAF; font-weight: bold;">if</span>(!<span style="color: #BFEBBF; font-weight: bold;">require</span>(NMMAPSlite)) install.packages(<span style="color: #CC9393;">'NMMAPSlite'</span>);<span style="color: #BFEBBF; font-weight: bold;">require</span>(NMMAPSlite)
+<span style="color: #586e75;">#### </span><span style="color: #586e75;">Code: get nmmaps data</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">func</span>
+<span style="color: #859900; font-weight: bold;">if</span>(!<span style="color: #268bd2; font-weight: bold;">require</span>(NMMAPSlite)) install.packages(<span style="color: #2aa198;">'NMMAPSlite'</span>);<span style="color: #268bd2; font-weight: bold;">require</span>(NMMAPSlite)
 
-<span style="color: #5F7F5F;">######################################################</span>
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">load  </span>
-setwd(<span style="color: #CC9393;">'data'</span>)
-initDB(<span style="color: #CC9393;">'data/NMMAPS'</span>) <span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">this requires that we connect to the web,</span>
-                      <span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">so lets get local copies</span>
-setwd(<span style="color: #CC9393;">'..'</span>)
-cities <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> getMetaData(<span style="color: #CC9393;">'cities'</span>)
+<span style="color: #586e75;">######################################################</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">load  </span>
+setwd(<span style="color: #2aa198;">'data'</span>)
+initDB(<span style="color: #2aa198;">'data/NMMAPS'</span>) <span style="color: #586e75;"># </span><span style="color: #586e75;">this requires that we connect to the web,</span>
+                      <span style="color: #586e75;"># </span><span style="color: #586e75;">so lets get local copies</span>
+setwd(<span style="color: #2aa198;">'..'</span>)
+cities <span style="color: #268bd2; font-weight: bold;">&lt;-</span> getMetaData(<span style="color: #2aa198;">'cities'</span>)
 head(cities)
-citieslist <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> cities$cityname
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">write out a few cities for access later</span>
-<span style="color: #F0DFAF; font-weight: bold;">for</span>(city_i <span style="color: #F0DFAF; font-weight: bold;">in</span> citieslist[sample(1:nrow(cities), 9)])
+citieslist <span style="color: #268bd2; font-weight: bold;">&lt;-</span> cities$cityname
+<span style="color: #586e75;"># </span><span style="color: #586e75;">write out a few cities for access later</span>
+<span style="color: #859900; font-weight: bold;">for</span>(city_i <span style="color: #859900; font-weight: bold;">in</span> citieslist[sample(1:nrow(cities), 9)])
 {
- city <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> subset(cities, cityname == city_i)$city
- data <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> readCity(city)
- write.table(data, file.path(<span style="color: #CC9393;">'data'</span>, paste(city_i, <span style="color: #CC9393;">'.csv'</span>,sep=<span style="color: #CC9393;">''</span>)),
- row.names = F, sep = <span style="color: #CC9393;">','</span>)
+ city <span style="color: #268bd2; font-weight: bold;">&lt;-</span> subset(cities, cityname == city_i)$city
+ data <span style="color: #268bd2; font-weight: bold;">&lt;-</span> readCity(city)
+ write.table(data, file.path(<span style="color: #2aa198;">'data'</span>, paste(city_i, <span style="color: #2aa198;">'.csv'</span>,sep=<span style="color: #2aa198;">''</span>)),
+ row.names = F, sep = <span style="color: #2aa198;">','</span>)
 }
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">these are all tiny, go some big ones</span>
-<span style="color: #F0DFAF; font-weight: bold;">for</span>(city_i <span style="color: #F0DFAF; font-weight: bold;">in</span> c(<span style="color: #CC9393;">'New York'</span>, <span style="color: #CC9393;">'Los Angeles'</span>, <span style="color: #CC9393;">'Madison'</span>, <span style="color: #CC9393;">'Boston'</span>))
+<span style="color: #586e75;"># </span><span style="color: #586e75;">these are all tiny, go some big ones</span>
+<span style="color: #859900; font-weight: bold;">for</span>(city_i <span style="color: #859900; font-weight: bold;">in</span> c(<span style="color: #2aa198;">'New York'</span>, <span style="color: #2aa198;">'Los Angeles'</span>, <span style="color: #2aa198;">'Madison'</span>, <span style="color: #2aa198;">'Boston'</span>))
 {
- city <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> subset(cities, cityname == city_i)$city
- data <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> readCity(city)
- write.table(data, file.path(<span style="color: #CC9393;">'data'</span>, paste(city_i, <span style="color: #CC9393;">'.csv'</span>,sep=<span style="color: #CC9393;">''</span>)),
- row.names = F, sep = <span style="color: #CC9393;">','</span>)
+ city <span style="color: #268bd2; font-weight: bold;">&lt;-</span> subset(cities, cityname == city_i)$city
+ data <span style="color: #268bd2; font-weight: bold;">&lt;-</span> readCity(city)
+ write.table(data, file.path(<span style="color: #2aa198;">'data'</span>, paste(city_i, <span style="color: #2aa198;">'.csv'</span>,sep=<span style="color: #2aa198;">''</span>)),
+ row.names = F, sep = <span style="color: #2aa198;">','</span>)
 }
 </pre>
 
@@ -284,29 +304,31 @@ citieslist <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> cities$
 
 
 
-<pre class="src src-R"><span style="color: #5F7F5F;">################################################################</span>
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">name:Pooled Dataset</span>
-flist <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> dir(<span style="color: #CC9393;">"NMMAPS-example/data"</span>, full.names=T)
+<pre class="src src-R"><span style="color: #586e75;">################################################################</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">name:Pooled Dataset</span>
+setwd(<span style="color: #2aa198;">"~/projects/spatiotemporal-regression-models/NMMAPS-example"</span>)
 
-flist <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span>    flist[which(basename(flist) %<span style="color: #F0DFAF; font-weight: bold;">in</span>%
-                        c(<span style="color: #CC9393;">"Baton Rouge.csv"</span>,
-                          <span style="color: #CC9393;">"Los Angeles.csv"</span>,
-                          <span style="color: #CC9393;">"Tucson.csv"</span>,
-                          <span style="color: #CC9393;">"Denver.csv"</span>)
+flist <span style="color: #268bd2; font-weight: bold;">&lt;-</span> dir(<span style="color: #2aa198;">"data"</span>, full.names=T)
+
+flist <span style="color: #268bd2; font-weight: bold;">&lt;-</span>    flist[which(basename(flist) %<span style="color: #859900; font-weight: bold;">in</span>%
+                        c(<span style="color: #2aa198;">"Baton Rouge.csv"</span>,
+                          <span style="color: #2aa198;">"Los Angeles.csv"</span>,
+                          <span style="color: #2aa198;">"Tucson.csv"</span>,
+                          <span style="color: #2aa198;">"Denver.csv"</span>)
                         )
                   ]
 flist
-<span style="color: #F0DFAF; font-weight: bold;">for</span>(f_i <span style="color: #F0DFAF; font-weight: bold;">in</span> 1:length(flist))
+<span style="color: #859900; font-weight: bold;">for</span>(f_i <span style="color: #859900; font-weight: bold;">in</span> 1:length(flist))
     {
-        <span style="color: #5F7F5F;">#</span><span style="color: #7F9F7F;">f_i &lt;- 2</span>
-        fi <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> flist[f_i]
-        df <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> read.csv(fi)
-        df <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> df[,c(<span style="color: #CC9393;">"city"</span>,<span style="color: #CC9393;">"date"</span>, <span style="color: #CC9393;">"agecat"</span>,
-                    <span style="color: #CC9393;">"cvd"</span>, <span style="color: #CC9393;">"resp"</span>, <span style="color: #CC9393;">"tmax"</span>,
-                    <span style="color: #CC9393;">"tmin"</span>, <span style="color: #CC9393;">"dptp"</span>)]
-        <span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">str(df)</span>
+        <span style="color: #586e75;">#</span><span style="color: #586e75;">f_i &lt;- 2</span>
+        fi <span style="color: #268bd2; font-weight: bold;">&lt;-</span> flist[f_i]
+        df <span style="color: #268bd2; font-weight: bold;">&lt;-</span> read.csv(fi)
+        df <span style="color: #268bd2; font-weight: bold;">&lt;-</span> df[,c(<span style="color: #2aa198;">"city"</span>,<span style="color: #2aa198;">"date"</span>, <span style="color: #2aa198;">"agecat"</span>,
+                    <span style="color: #2aa198;">"cvd"</span>, <span style="color: #2aa198;">"resp"</span>, <span style="color: #2aa198;">"tmax"</span>,
+                    <span style="color: #2aa198;">"tmin"</span>, <span style="color: #2aa198;">"dptp"</span>)]
+        <span style="color: #586e75;"># </span><span style="color: #586e75;">str(df)</span>
         write.table(df,
-                    <span style="color: #CC9393;">"outcome.csv"</span>, sep = <span style="color: #CC9393;">","</span>,
+                    <span style="color: #2aa198;">"outcome.csv"</span>, sep = <span style="color: #2aa198;">","</span>,
                     row.names = F, append = f_i &gt; 1,
                     col.names = f_i ==1
                     )
@@ -342,64 +364,64 @@ flist
 
 
 
-<pre class="src src-R"><span style="color: #5F7F5F;">################################################################</span>
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">name:zones</span>
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">func</span>
-setwd(<span style="color: #CC9393;">"~/projects/spatiotemporal-regression-models"</span>)
-<span style="color: #5F7F5F;">#</span><span style="color: #7F9F7F;">require(devtools)</span>
-<span style="color: #5F7F5F;">#</span><span style="color: #7F9F7F;">install_github("gisviz", "ivanhanigan")</span>
-<span style="color: #BFEBBF; font-weight: bold;">require</span>(gisviz)
+<pre class="src src-R"><span style="color: #586e75;">################################################################</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">name:zones</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">func</span>
+setwd(<span style="color: #2aa198;">"~/projects/spatiotemporal-regression-models/NMMAPS-example"</span>)
+<span style="color: #586e75;">#</span><span style="color: #586e75;">require(devtools)</span>
+<span style="color: #586e75;">#</span><span style="color: #586e75;">install_github("gisviz", "ivanhanigan")</span>
+<span style="color: #268bd2; font-weight: bold;">require</span>(gisviz)
 
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">load</span>
-flist <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> dir(<span style="color: #CC9393;">"NMMAPS-example/data"</span>)
+<span style="color: #586e75;"># </span><span style="color: #586e75;">load</span>
+flist <span style="color: #268bd2; font-weight: bold;">&lt;-</span> dir(<span style="color: #2aa198;">"data"</span>)
 
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">do    </span>
-<span style="color: #5F7F5F;">## </span><span style="color: #7F9F7F;">geocode</span>
-flist <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> gsub(<span style="color: #CC9393;">".csv"</span>, <span style="color: #CC9393;">""</span>, flist)    
-flist_geo <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> gGeoCode2(flist)
+<span style="color: #586e75;"># </span><span style="color: #586e75;">do    </span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">geocode</span>
+flist <span style="color: #268bd2; font-weight: bold;">&lt;-</span> gsub(<span style="color: #2aa198;">".csv"</span>, <span style="color: #2aa198;">""</span>, flist)    
+flist_geo <span style="color: #268bd2; font-weight: bold;">&lt;-</span> gGeoCode2(flist)
 flist_geo
 
-<span style="color: #5F7F5F;">## </span><span style="color: #7F9F7F;">plot</span>
-png(<span style="color: #CC9393;">"images/nmmaps-eg-cities.png"</span>)
+<span style="color: #586e75;">## </span><span style="color: #586e75;">plot</span>
+png(<span style="color: #2aa198;">"images/nmmaps-eg-cities.png"</span>)
 plotMyMap(
-    flist_geo[,c(<span style="color: #CC9393;">"long"</span>,<span style="color: #CC9393;">"lat"</span>)],
+    flist_geo[,c(<span style="color: #2aa198;">"long"</span>,<span style="color: #2aa198;">"lat"</span>)],
     xl = c(-130,-60), yl = c(25,50)
     )
 text(flist_geo$long, flist_geo$lat, flist_geo$address, pos=3)
 dev.off()
    
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">load city names</span>
-flist2 <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> dir(<span style="color: #CC9393;">"NMMAPS-example/data"</span>)
+<span style="color: #586e75;"># </span><span style="color: #586e75;">load city names</span>
+flist2 <span style="color: #268bd2; font-weight: bold;">&lt;-</span> dir(<span style="color: #2aa198;">"data"</span>)
 flist2
-city_codes <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> matrix(<span style="color: #7CB8BB;">NA</span>, nrow = 0, ncol = 2)
-<span style="color: #F0DFAF; font-weight: bold;">for</span>(fi <span style="color: #F0DFAF; font-weight: bold;">in</span> 1:length(flist2))
+city_codes <span style="color: #268bd2; font-weight: bold;">&lt;-</span> matrix(<span style="color: #b58900;">NA</span>, nrow = 0, ncol = 2)
+<span style="color: #859900; font-weight: bold;">for</span>(fi <span style="color: #859900; font-weight: bold;">in</span> 1:length(flist2))
     {
-        <span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">fi &lt;- 1</span>
-        fname <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> flist2[fi]
+        <span style="color: #586e75;"># </span><span style="color: #586e75;">fi &lt;- 1</span>
+        fname <span style="color: #268bd2; font-weight: bold;">&lt;-</span> flist2[fi]
         print(fi); print(fname);
-        df <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> read.csv(
-            file.path(<span style="color: #CC9393;">"NMMAPS-example/data"</span>, fname),
+        df <span style="color: #268bd2; font-weight: bold;">&lt;-</span> read.csv(
+            file.path(<span style="color: #2aa198;">"data"</span>, fname),
             stringsAsFactors = F, nrow = 1)
-        city_codes <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> rbind(city_codes,
-            c(gsub(<span style="color: #CC9393;">".csv"</span>,<span style="color: #CC9393;">""</span>,fname), df$city)
+        city_codes <span style="color: #268bd2; font-weight: bold;">&lt;-</span> rbind(city_codes,
+            c(gsub(<span style="color: #2aa198;">".csv"</span>,<span style="color: #2aa198;">""</span>,fname), df$city)
             )
     }
-city_codes <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> as.data.frame(city_codes)
-names(city_codes) <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> c(<span style="color: #CC9393;">"address"</span>,<span style="color: #CC9393;">"city"</span>)
+city_codes <span style="color: #268bd2; font-weight: bold;">&lt;-</span> as.data.frame(city_codes)
+names(city_codes) <span style="color: #268bd2; font-weight: bold;">&lt;-</span> c(<span style="color: #2aa198;">"address"</span>,<span style="color: #2aa198;">"city"</span>)
 city_codes 
-flist_geo2 <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> merge(flist_geo, city_codes, by = )
+flist_geo2 <span style="color: #268bd2; font-weight: bold;">&lt;-</span> merge(flist_geo, city_codes, by = )
 flist_geo2
 
-<span style="color: #5F7F5F;">## </span><span style="color: #7F9F7F;">make shapefile</span>
-epsg <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> make_EPSG()
-prj_code <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> epsg[grep(<span style="color: #CC9393;">"WGS 84$"</span>, epsg$note),]
+<span style="color: #586e75;">## </span><span style="color: #586e75;">make shapefile</span>
+epsg <span style="color: #268bd2; font-weight: bold;">&lt;-</span> make_EPSG()
+prj_code <span style="color: #268bd2; font-weight: bold;">&lt;-</span> epsg[grep(<span style="color: #2aa198;">"WGS 84$"</span>, epsg$note),]
 prj_code
-shp <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> SpatialPointsDataFrame(cbind(flist_geo2$long,flist_geo2$lat),flist_geo2,
+shp <span style="color: #268bd2; font-weight: bold;">&lt;-</span> SpatialPointsDataFrame(cbind(flist_geo2$long,flist_geo2$lat),flist_geo2,
                               proj4string = CRS(
                                   epsg$prj4[which(epsg$code ==prj_code$code)]
                                   )
                               )
-writeOGR(shp, <span style="color: #CC9393;">'cities.shp'</span>, <span style="color: #CC9393;">'cities'</span>, driver=<span style="color: #CC9393;">'ESRI Shapefile'</span>)
+writeOGR(shp, <span style="color: #2aa198;">'cities.shp'</span>, <span style="color: #2aa198;">'cities'</span>, driver=<span style="color: #2aa198;">'ESRI Shapefile'</span>)
 
 </pre>
 
@@ -411,7 +433,7 @@ writeOGR(shp, <span style="color: #CC9393;">'cities.shp'</span>, <span style="co
 <h4 id="sec-2-3-2"><span class="section-number-4">2.3.2</span> Map Shapefile Output</h4>
 <div class="outline-text-4" id="text-2-3-2">
 
-<p><img src="images/nmmaps-eg-cities.png"  alt="images/nmmaps-eg-cities.png" />
+<p><img src="NMMAPS-example/images/nmmaps-eg-cities.png"  alt="NMMAPS-example/images/nmmaps-eg-cities.png" />
 </p>
 </div>
 </div>
@@ -432,53 +454,57 @@ writeOGR(shp, <span style="color: #CC9393;">'cities.shp'</span>, <span style="co
 <ul>
 <li id="sec-2-4-1-1">A Code Skeleton<br/>
 The process for getting the population data from the websites is a bit of a pain, with repeated copy and paste operations.  To make sure this is recorded I set up a skeleton to paste into.
+</li>
+</ul>
+<ul>
+<li id="sec-2-4-1-2"><span class="todo TODO">TODO</span> better to use gsub() to remove the ","<br/>
 
 
 
-<pre class="src src-R"><span style="color: #5F7F5F;">################################################################</span>
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">name:population-data</span>
+<pre class="src src-R"><span style="color: #586e75;">################################################################</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">name:population-data</span>
 
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">func</span>
-setwd(<span style="color: #CC9393;">"~/projects/spatiotemporal-regression-models"</span>)
-<span style="color: #BFEBBF; font-weight: bold;">require</span>(gisviz)
+<span style="color: #586e75;"># </span><span style="color: #586e75;">func</span>
+setwd(<span style="color: #2aa198;">"~/projects/spatiotemporal-regression-models"</span>)
+<span style="color: #268bd2; font-weight: bold;">require</span>(gisviz)
 
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">load</span>
-<span style="color: #5F7F5F;">## </span><span style="color: #7F9F7F;">citycodes</span>
-shp <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> readOGR(<span style="color: #CC9393;">"cities.shp"</span>, <span style="color: #CC9393;">"cities"</span>)
+<span style="color: #586e75;"># </span><span style="color: #586e75;">load</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">citycodes</span>
+shp <span style="color: #268bd2; font-weight: bold;">&lt;-</span> readOGR(<span style="color: #2aa198;">"cities.shp"</span>, <span style="color: #2aa198;">"cities"</span>)
 shp@data
-cityname <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> <span style="color: #CC9393;">"SELECTED CITY"</span>
+cityname <span style="color: #268bd2; font-weight: bold;">&lt;-</span> <span style="color: #2aa198;">"SELECTED CITY"</span>
 
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">do</span>
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">save url</span>
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">xxx</span>
-population_input <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> read.table(textConnection(
-<span style="color: #CC9393;">"age: population</span>
-<span style="color: #CC9393;">xxx</span>
-<span style="color: #CC9393;">"</span>), sep = <span style="color: #CC9393;">":"</span>, header = <span style="color: #7CB8BB;">TRUE</span>)
+<span style="color: #586e75;"># </span><span style="color: #586e75;">do</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">save url</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">xxx</span>
+population_input <span style="color: #268bd2; font-weight: bold;">&lt;-</span> read.table(textConnection(
+<span style="color: #2aa198;">"age: population</span>
+<span style="color: #2aa198;">xxx</span>
+<span style="color: #2aa198;">"</span>), sep = <span style="color: #2aa198;">":"</span>, header = <span style="color: #b58900;">TRUE</span>)
 
-<span style="color: #5F7F5F;">## </span><span style="color: #7F9F7F;">agecats</span>
-<span style="color: #5F7F5F;">## </span><span style="color: #7F9F7F;">65to74     75p under65  </span>
-population_input$agecat <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> c(rep(<span style="color: #CC9393;">"under65"</span>, 10),
-                             rep(<span style="color: #CC9393;">"65to74"</span>),
-                             rep(<span style="color: #CC9393;">"75p"</span>,2)
+<span style="color: #586e75;">## </span><span style="color: #586e75;">agecats</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">65to74     75p under65  </span>
+population_input$agecat <span style="color: #268bd2; font-weight: bold;">&lt;-</span> c(rep(<span style="color: #2aa198;">"under65"</span>, 10),
+                             rep(<span style="color: #2aa198;">"65to74"</span>),
+                             rep(<span style="color: #2aa198;">"75p"</span>,2)
                              )
 
-citycode <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> subset(shp@data, address == cityname,
+citycode <span style="color: #268bd2; font-weight: bold;">&lt;-</span> subset(shp@data, address == cityname,
                    select = city)
 
-population_input$city <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> rep(
+population_input$city <span style="color: #268bd2; font-weight: bold;">&lt;-</span> rep(
     as.character(citycode[1,1])        
     , 13
     )
 
 population_input
-<span style="color: #F0DFAF; font-weight: bold;">if</span>(exists(<span style="color: #CC9393;">"population"</span>))
+<span style="color: #859900; font-weight: bold;">if</span>(exists(<span style="color: #2aa198;">"population"</span>))
     {
-        population <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> rbind(population,
+        population <span style="color: #268bd2; font-weight: bold;">&lt;-</span> rbind(population,
                             population_input
                             )        
-    } <span style="color: #F0DFAF; font-weight: bold;">else</span> {
-        population <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> population_input
+    } <span style="color: #859900; font-weight: bold;">else</span> {
+        population <span style="color: #268bd2; font-weight: bold;">&lt;-</span> population_input
     }
 
 </pre>
@@ -488,68 +514,68 @@ population_input
 </li>
 </ul>
 <ul>
-<li id="sec-2-4-1-2">Baton Rouge<br/>
+<li id="sec-2-4-1-3">Baton Rouge<br/>
 
 
 
-<pre class="src src-R"><span style="color: #5F7F5F;">################################################################</span>
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">name:population-data</span>
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">first city, remove population data.frame</span>
+<pre class="src src-R"><span style="color: #586e75;">################################################################</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">name:population-data</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">first city, remove population data.frame</span>
 rm(population)
 
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">func</span>
-setwd(<span style="color: #CC9393;">"~/projects/spatiotemporal-regression-models"</span>)
-<span style="color: #BFEBBF; font-weight: bold;">require</span>(gisviz)
+<span style="color: #586e75;"># </span><span style="color: #586e75;">func</span>
+setwd(<span style="color: #2aa198;">"~/projects/spatiotemporal-regression-models"</span>)
+<span style="color: #268bd2; font-weight: bold;">require</span>(gisviz)
 
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">load</span>
-<span style="color: #5F7F5F;">## </span><span style="color: #7F9F7F;">citycodes</span>
-shp <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> readOGR(<span style="color: #CC9393;">"cities.shp"</span>, <span style="color: #CC9393;">"cities"</span>)
+<span style="color: #586e75;"># </span><span style="color: #586e75;">load</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">citycodes</span>
+shp <span style="color: #268bd2; font-weight: bold;">&lt;-</span> readOGR(<span style="color: #2aa198;">"cities.shp"</span>, <span style="color: #2aa198;">"cities"</span>)
 shp@data
-cityname <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> <span style="color: #CC9393;">"Baton Rouge"</span>
+cityname <span style="color: #268bd2; font-weight: bold;">&lt;-</span> <span style="color: #2aa198;">"Baton Rouge"</span>
 
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">do</span>
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">save url</span>
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">http://www.city-data.com/us-cities/The-South/Baton-Rouge-Population-Profile.html</span>
-population_input <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> read.table(textConnection(
-<span style="color: #CC9393;">"age: population</span>
-<span style="color: #CC9393;">Population Under 5 years: 15502</span>
-<span style="color: #CC9393;">Population 5 to 9 years: 15609</span>
-<span style="color: #CC9393;">Population 10 to 14 years: 15248</span>
-<span style="color: #CC9393;">Population 15 to 19 years: 21954</span>
-<span style="color: #CC9393;">Population 20 to 24 years: 27230</span>
-<span style="color: #CC9393;">Population 25 to 34 years: 31719</span>
-<span style="color: #CC9393;">Population 35 to 44 years: 30343</span>
-<span style="color: #CC9393;">Population 45 to 54 years: 27166</span>
-<span style="color: #CC9393;">Population 55 to 59 years: 9495</span>
-<span style="color: #CC9393;">Population 60 to 64 years: 7490</span>
-<span style="color: #CC9393;">Population 65 to 74 years: 13312</span>
-<span style="color: #CC9393;">Population 75 to 84 years: 9611</span>
-<span style="color: #CC9393;">Population 85 years and over: 3139</span>
-<span style="color: #CC9393;">"</span>), sep = <span style="color: #CC9393;">":"</span>, header = <span style="color: #7CB8BB;">TRUE</span>)
+<span style="color: #586e75;"># </span><span style="color: #586e75;">do</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">save url</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">http://www.city-data.com/us-cities/The-South/Baton-Rouge-Population-Profile.html</span>
+population_input <span style="color: #268bd2; font-weight: bold;">&lt;-</span> read.table(textConnection(
+<span style="color: #2aa198;">"age: population</span>
+<span style="color: #2aa198;">Population Under 5 years: 15502</span>
+<span style="color: #2aa198;">Population 5 to 9 years: 15609</span>
+<span style="color: #2aa198;">Population 10 to 14 years: 15248</span>
+<span style="color: #2aa198;">Population 15 to 19 years: 21954</span>
+<span style="color: #2aa198;">Population 20 to 24 years: 27230</span>
+<span style="color: #2aa198;">Population 25 to 34 years: 31719</span>
+<span style="color: #2aa198;">Population 35 to 44 years: 30343</span>
+<span style="color: #2aa198;">Population 45 to 54 years: 27166</span>
+<span style="color: #2aa198;">Population 55 to 59 years: 9495</span>
+<span style="color: #2aa198;">Population 60 to 64 years: 7490</span>
+<span style="color: #2aa198;">Population 65 to 74 years: 13312</span>
+<span style="color: #2aa198;">Population 75 to 84 years: 9611</span>
+<span style="color: #2aa198;">Population 85 years and over: 3139</span>
+<span style="color: #2aa198;">"</span>), sep = <span style="color: #2aa198;">":"</span>, header = <span style="color: #b58900;">TRUE</span>)
 
-<span style="color: #5F7F5F;">## </span><span style="color: #7F9F7F;">agecats</span>
-<span style="color: #5F7F5F;">## </span><span style="color: #7F9F7F;">65to74     75p under65  </span>
-population_input$agecat <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> c(rep(<span style="color: #CC9393;">"under65"</span>, 10),
-                             rep(<span style="color: #CC9393;">"65to74"</span>),
-                             rep(<span style="color: #CC9393;">"75p"</span>,2)
+<span style="color: #586e75;">## </span><span style="color: #586e75;">agecats</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">65to74     75p under65  </span>
+population_input$agecat <span style="color: #268bd2; font-weight: bold;">&lt;-</span> c(rep(<span style="color: #2aa198;">"under65"</span>, 10),
+                             rep(<span style="color: #2aa198;">"65to74"</span>),
+                             rep(<span style="color: #2aa198;">"75p"</span>,2)
                              )
 
-citycode <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> subset(shp@data, address == cityname,
+citycode <span style="color: #268bd2; font-weight: bold;">&lt;-</span> subset(shp@data, address == cityname,
                    select = city)
 
-population_input$city <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> rep(
+population_input$city <span style="color: #268bd2; font-weight: bold;">&lt;-</span> rep(
     as.character(citycode[1,1])        
     , 13
     )
 
 population_input
-<span style="color: #F0DFAF; font-weight: bold;">if</span>(exists(<span style="color: #CC9393;">"population"</span>))
+<span style="color: #859900; font-weight: bold;">if</span>(exists(<span style="color: #2aa198;">"population"</span>))
     {
-        population <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> rbind(population,
+        population <span style="color: #268bd2; font-weight: bold;">&lt;-</span> rbind(population,
                             population_input
                             )        
-    } <span style="color: #F0DFAF; font-weight: bold;">else</span> {
-        population <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> population_input
+    } <span style="color: #859900; font-weight: bold;">else</span> {
+        population <span style="color: #268bd2; font-weight: bold;">&lt;-</span> population_input
     }
 
 </pre>
@@ -558,66 +584,66 @@ population_input
 </li>
 </ul>
 <ul>
-<li id="sec-2-4-1-3">Los Angeles<br/>
+<li id="sec-2-4-1-4">Los Angeles<br/>
 
 
 
-<pre class="src src-R"><span style="color: #5F7F5F;">################################################################</span>
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">name:population-data</span>
+<pre class="src src-R"><span style="color: #586e75;">################################################################</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">name:population-data</span>
 
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">func</span>
-<span style="color: #5F7F5F;">#</span><span style="color: #7F9F7F;">setwd("~/projects/spatiotemporal-regression-models")</span>
-<span style="color: #5F7F5F;">#</span><span style="color: #7F9F7F;">require(gisviz)</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">func</span>
+<span style="color: #586e75;">#</span><span style="color: #586e75;">setwd("~/projects/spatiotemporal-regression-models")</span>
+<span style="color: #586e75;">#</span><span style="color: #586e75;">require(gisviz)</span>
 
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">load</span>
-<span style="color: #5F7F5F;">## </span><span style="color: #7F9F7F;">citycodes</span>
-shp <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> readOGR(<span style="color: #CC9393;">"cities.shp"</span>, <span style="color: #CC9393;">"cities"</span>)
+<span style="color: #586e75;"># </span><span style="color: #586e75;">load</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">citycodes</span>
+shp <span style="color: #268bd2; font-weight: bold;">&lt;-</span> readOGR(<span style="color: #2aa198;">"cities.shp"</span>, <span style="color: #2aa198;">"cities"</span>)
 shp@data
-cityname <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> <span style="color: #CC9393;">"Los Angeles"</span>
+cityname <span style="color: #268bd2; font-weight: bold;">&lt;-</span> <span style="color: #2aa198;">"Los Angeles"</span>
 
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">do</span>
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">save url</span>
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">http://www.city-data.com/us-cities/The-West/Los-Angeles-Population-Profile.html</span>
-population_input <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> read.table(textConnection(
-<span style="color: #CC9393;">"age: population</span>
-<span style="color: #CC9393;">Population under 5 years old: 285976</span>
-<span style="color: #CC9393;">Population 5 to 9 years old: 297837</span>
-<span style="color: #CC9393;">Population 10 to 14 years old: 255604</span>
-<span style="color: #CC9393;">Population 15 to 19 years old: 251632</span>
-<span style="color: #CC9393;">Population 20 to 24 years old: 299906</span>
-<span style="color: #CC9393;">Population 25 to 34 years old: 674098</span>
-<span style="color: #CC9393;">Population 35 to 44 years old: 584036</span>
-<span style="color: #CC9393;">Population 45 to 54 years old: 428974</span>
-<span style="color: #CC9393;">Population 55 to 59 years old: 143965</span>
-<span style="color: #CC9393;">Population 60 to 64 years old: 115663</span>
-<span style="color: #CC9393;">Population 65 to 74 years old: 18711</span>
-<span style="color: #CC9393;">Population 75 to 84 years old: 125829</span>
-<span style="color: #CC9393;">Population 85 years and over: 44189</span>
-<span style="color: #CC9393;">"</span>), sep = <span style="color: #CC9393;">":"</span>, header = <span style="color: #7CB8BB;">TRUE</span>)
+<span style="color: #586e75;"># </span><span style="color: #586e75;">do</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">save url</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">http://www.city-data.com/us-cities/The-West/Los-Angeles-Population-Profile.html</span>
+population_input <span style="color: #268bd2; font-weight: bold;">&lt;-</span> read.table(textConnection(
+<span style="color: #2aa198;">"age: population</span>
+<span style="color: #2aa198;">Population under 5 years old: 285976</span>
+<span style="color: #2aa198;">Population 5 to 9 years old: 297837</span>
+<span style="color: #2aa198;">Population 10 to 14 years old: 255604</span>
+<span style="color: #2aa198;">Population 15 to 19 years old: 251632</span>
+<span style="color: #2aa198;">Population 20 to 24 years old: 299906</span>
+<span style="color: #2aa198;">Population 25 to 34 years old: 674098</span>
+<span style="color: #2aa198;">Population 35 to 44 years old: 584036</span>
+<span style="color: #2aa198;">Population 45 to 54 years old: 428974</span>
+<span style="color: #2aa198;">Population 55 to 59 years old: 143965</span>
+<span style="color: #2aa198;">Population 60 to 64 years old: 115663</span>
+<span style="color: #2aa198;">Population 65 to 74 years old: 18711</span>
+<span style="color: #2aa198;">Population 75 to 84 years old: 125829</span>
+<span style="color: #2aa198;">Population 85 years and over: 44189</span>
+<span style="color: #2aa198;">"</span>), sep = <span style="color: #2aa198;">":"</span>, header = <span style="color: #b58900;">TRUE</span>)
 
-<span style="color: #5F7F5F;">## </span><span style="color: #7F9F7F;">agecats</span>
-<span style="color: #5F7F5F;">## </span><span style="color: #7F9F7F;">65to74     75p under65  </span>
-population_input$agecat <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> c(rep(<span style="color: #CC9393;">"under65"</span>, 10),
-                             rep(<span style="color: #CC9393;">"65to74"</span>),
-                             rep(<span style="color: #CC9393;">"75p"</span>,2)
+<span style="color: #586e75;">## </span><span style="color: #586e75;">agecats</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">65to74     75p under65  </span>
+population_input$agecat <span style="color: #268bd2; font-weight: bold;">&lt;-</span> c(rep(<span style="color: #2aa198;">"under65"</span>, 10),
+                             rep(<span style="color: #2aa198;">"65to74"</span>),
+                             rep(<span style="color: #2aa198;">"75p"</span>,2)
                              )
 
-citycode <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> subset(shp@data, address == cityname,
+citycode <span style="color: #268bd2; font-weight: bold;">&lt;-</span> subset(shp@data, address == cityname,
                    select = city)
 
-population_input$city <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> rep(
+population_input$city <span style="color: #268bd2; font-weight: bold;">&lt;-</span> rep(
     as.character(citycode[1,1])        
     , 13
     )
 
 population_input
-<span style="color: #F0DFAF; font-weight: bold;">if</span>(exists(<span style="color: #CC9393;">"population"</span>))
+<span style="color: #859900; font-weight: bold;">if</span>(exists(<span style="color: #2aa198;">"population"</span>))
     {
-        population <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> rbind(population,
+        population <span style="color: #268bd2; font-weight: bold;">&lt;-</span> rbind(population,
                             population_input
                             )        
-    } <span style="color: #F0DFAF; font-weight: bold;">else</span> {
-        population <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> population_input
+    } <span style="color: #859900; font-weight: bold;">else</span> {
+        population <span style="color: #268bd2; font-weight: bold;">&lt;-</span> population_input
     }
 
 </pre>
@@ -627,66 +653,66 @@ population_input
 </li>
 </ul>
 <ul>
-<li id="sec-2-4-1-4">Tucson<br/>
+<li id="sec-2-4-1-5">Tucson<br/>
 
 
 
-<pre class="src src-R"><span style="color: #5F7F5F;">################################################################</span>
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">name:population-data</span>
+<pre class="src src-R"><span style="color: #586e75;">################################################################</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">name:population-data</span>
 
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">func</span>
-<span style="color: #5F7F5F;">#</span><span style="color: #7F9F7F;">setwd("~/projects/spatiotemporal-regression-models")</span>
-<span style="color: #5F7F5F;">#</span><span style="color: #7F9F7F;">require(gisviz)</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">func</span>
+<span style="color: #586e75;">#</span><span style="color: #586e75;">setwd("~/projects/spatiotemporal-regression-models")</span>
+<span style="color: #586e75;">#</span><span style="color: #586e75;">require(gisviz)</span>
 
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">load</span>
-<span style="color: #5F7F5F;">## </span><span style="color: #7F9F7F;">citycodes</span>
-shp <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> readOGR(<span style="color: #CC9393;">"cities.shp"</span>, <span style="color: #CC9393;">"cities"</span>)
+<span style="color: #586e75;"># </span><span style="color: #586e75;">load</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">citycodes</span>
+shp <span style="color: #268bd2; font-weight: bold;">&lt;-</span> readOGR(<span style="color: #2aa198;">"cities.shp"</span>, <span style="color: #2aa198;">"cities"</span>)
 shp@data
-cityname <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> <span style="color: #CC9393;">"Tucson"</span>
+cityname <span style="color: #268bd2; font-weight: bold;">&lt;-</span> <span style="color: #2aa198;">"Tucson"</span>
 
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">do</span>
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">save url</span>
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">http://www.city-data.com/us-cities/The-West/Tucson-Population-Profile.html</span>
-population_input <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> read.table(textConnection(
-<span style="color: #CC9393;">"age: population</span>
-<span style="color: #CC9393;">Population under 5 years old: 35201</span>
-<span style="color: #CC9393;">Population 5 to 9 years old: 34189</span>
-<span style="color: #CC9393;">Population 10 to 14 years old: 31939</span>
-<span style="color: #CC9393;">Population 15 to 19 years old: 38170</span>
-<span style="color: #CC9393;">Population 20 to 24 years old: 47428</span>
-<span style="color: #CC9393;">Population 25 to 34 years old: 76394</span>
-<span style="color: #CC9393;">Population 35 to 44 years old: 72289</span>
-<span style="color: #CC9393;">Population 45 to 54 years old: 57608</span>
-<span style="color: #CC9393;">Population 55 to 59 years old: 19597</span>
-<span style="color: #CC9393;">Population 60 to 64 years old: 16056</span>
-<span style="color: #CC9393;">Population 65 to 74 years old: 29117</span>
-<span style="color: #CC9393;">Population 75 to 84 years old: 21394</span>
-<span style="color: #CC9393;">Population 85 years and older: 7317</span>
-<span style="color: #CC9393;">"</span>), sep = <span style="color: #CC9393;">":"</span>, header = <span style="color: #7CB8BB;">TRUE</span>)
+<span style="color: #586e75;"># </span><span style="color: #586e75;">do</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">save url</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">http://www.city-data.com/us-cities/The-West/Tucson-Population-Profile.html</span>
+population_input <span style="color: #268bd2; font-weight: bold;">&lt;-</span> read.table(textConnection(
+<span style="color: #2aa198;">"age: population</span>
+<span style="color: #2aa198;">Population under 5 years old: 35201</span>
+<span style="color: #2aa198;">Population 5 to 9 years old: 34189</span>
+<span style="color: #2aa198;">Population 10 to 14 years old: 31939</span>
+<span style="color: #2aa198;">Population 15 to 19 years old: 38170</span>
+<span style="color: #2aa198;">Population 20 to 24 years old: 47428</span>
+<span style="color: #2aa198;">Population 25 to 34 years old: 76394</span>
+<span style="color: #2aa198;">Population 35 to 44 years old: 72289</span>
+<span style="color: #2aa198;">Population 45 to 54 years old: 57608</span>
+<span style="color: #2aa198;">Population 55 to 59 years old: 19597</span>
+<span style="color: #2aa198;">Population 60 to 64 years old: 16056</span>
+<span style="color: #2aa198;">Population 65 to 74 years old: 29117</span>
+<span style="color: #2aa198;">Population 75 to 84 years old: 21394</span>
+<span style="color: #2aa198;">Population 85 years and older: 7317</span>
+<span style="color: #2aa198;">"</span>), sep = <span style="color: #2aa198;">":"</span>, header = <span style="color: #b58900;">TRUE</span>)
 
-<span style="color: #5F7F5F;">## </span><span style="color: #7F9F7F;">agecats</span>
-<span style="color: #5F7F5F;">## </span><span style="color: #7F9F7F;">65to74     75p under65  </span>
-population_input$agecat <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> c(rep(<span style="color: #CC9393;">"under65"</span>, 10),
-                             rep(<span style="color: #CC9393;">"65to74"</span>),
-                             rep(<span style="color: #CC9393;">"75p"</span>,2)
+<span style="color: #586e75;">## </span><span style="color: #586e75;">agecats</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">65to74     75p under65  </span>
+population_input$agecat <span style="color: #268bd2; font-weight: bold;">&lt;-</span> c(rep(<span style="color: #2aa198;">"under65"</span>, 10),
+                             rep(<span style="color: #2aa198;">"65to74"</span>),
+                             rep(<span style="color: #2aa198;">"75p"</span>,2)
                              )
 
-citycode <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> subset(shp@data, address == cityname,
+citycode <span style="color: #268bd2; font-weight: bold;">&lt;-</span> subset(shp@data, address == cityname,
                    select = city)
 
-population_input$city <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> rep(
+population_input$city <span style="color: #268bd2; font-weight: bold;">&lt;-</span> rep(
     as.character(citycode[1,1])        
     , 13
     )
 
 population_input
-<span style="color: #F0DFAF; font-weight: bold;">if</span>(exists(<span style="color: #CC9393;">"population"</span>))
+<span style="color: #859900; font-weight: bold;">if</span>(exists(<span style="color: #2aa198;">"population"</span>))
     {
-        population <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> rbind(population,
+        population <span style="color: #268bd2; font-weight: bold;">&lt;-</span> rbind(population,
                             population_input
                             )        
-    } <span style="color: #F0DFAF; font-weight: bold;">else</span> {
-        population <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> population_input
+    } <span style="color: #859900; font-weight: bold;">else</span> {
+        population <span style="color: #268bd2; font-weight: bold;">&lt;-</span> population_input
     }
 
 </pre>
@@ -695,67 +721,67 @@ population_input
 </li>
 </ul>
 <ul>
-<li id="sec-2-4-1-5">Denver<br/>
+<li id="sec-2-4-1-6">Denver<br/>
 
 
 
-<pre class="src src-R"><span style="color: #5F7F5F;">################################################################</span>
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">name:population-data</span>
+<pre class="src src-R"><span style="color: #586e75;">################################################################</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">name:population-data</span>
 
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">func</span>
-<span style="color: #5F7F5F;">#</span><span style="color: #7F9F7F;">setwd("~/projects/spatiotemporal-regression-models")</span>
-<span style="color: #5F7F5F;">#</span><span style="color: #7F9F7F;">require(gisviz)</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">func</span>
+<span style="color: #586e75;">#</span><span style="color: #586e75;">setwd("~/projects/spatiotemporal-regression-models")</span>
+<span style="color: #586e75;">#</span><span style="color: #586e75;">require(gisviz)</span>
 
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">load</span>
-<span style="color: #5F7F5F;">## </span><span style="color: #7F9F7F;">citycodes</span>
-shp <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> readOGR(<span style="color: #CC9393;">"cities.shp"</span>, <span style="color: #CC9393;">"cities"</span>)
+<span style="color: #586e75;"># </span><span style="color: #586e75;">load</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">citycodes</span>
+shp <span style="color: #268bd2; font-weight: bold;">&lt;-</span> readOGR(<span style="color: #2aa198;">"cities.shp"</span>, <span style="color: #2aa198;">"cities"</span>)
 shp@data
-cityname <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> <span style="color: #CC9393;">"Denver"</span>
+cityname <span style="color: #268bd2; font-weight: bold;">&lt;-</span> <span style="color: #2aa198;">"Denver"</span>
 
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">do</span>
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">save url</span>
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">http://www.city-data.com/us-cities/The-West/Denver-Population-Profile.html</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">do</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">save url</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">http://www.city-data.com/us-cities/The-West/Denver-Population-Profile.html</span>
 
-population_input <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> read.table(textConnection(
-<span style="color: #CC9393;">"age: population</span>
-<span style="color: #CC9393;">Population under 5 years old: 37769</span>
-<span style="color: #CC9393;">Population 5 to 9 years old: 34473</span>
-<span style="color: #CC9393;">Population 10 to 14 years old: 31315</span>
-<span style="color: #CC9393;">Population 15 to 19 years old: 32259</span>
-<span style="color: #CC9393;">Population 20 to 24 years old: 45534</span>
-<span style="color: #CC9393;">Population 25 to 34 years old: 113676</span>
-<span style="color: #CC9393;">Population 35 to 44 years old: 86420</span>
-<span style="color: #CC9393;">Population 45 to 54 years old: 71000</span>
-<span style="color: #CC9393;">Population 55 to 59 years old: 22573</span>
-<span style="color: #CC9393;">Population 60 to 64 years old: 17191</span>
-<span style="color: #CC9393;">Population 65 to 74 years old: 30643</span>
-<span style="color: #CC9393;">Population 75 to 84 years old: 23369</span>
-<span style="color: #CC9393;">Population 85 years and over: 8414</span>
-<span style="color: #CC9393;">"</span>), sep = <span style="color: #CC9393;">":"</span>, header = <span style="color: #7CB8BB;">TRUE</span>)
+population_input <span style="color: #268bd2; font-weight: bold;">&lt;-</span> read.table(textConnection(
+<span style="color: #2aa198;">"age: population</span>
+<span style="color: #2aa198;">Population under 5 years old: 37769</span>
+<span style="color: #2aa198;">Population 5 to 9 years old: 34473</span>
+<span style="color: #2aa198;">Population 10 to 14 years old: 31315</span>
+<span style="color: #2aa198;">Population 15 to 19 years old: 32259</span>
+<span style="color: #2aa198;">Population 20 to 24 years old: 45534</span>
+<span style="color: #2aa198;">Population 25 to 34 years old: 113676</span>
+<span style="color: #2aa198;">Population 35 to 44 years old: 86420</span>
+<span style="color: #2aa198;">Population 45 to 54 years old: 71000</span>
+<span style="color: #2aa198;">Population 55 to 59 years old: 22573</span>
+<span style="color: #2aa198;">Population 60 to 64 years old: 17191</span>
+<span style="color: #2aa198;">Population 65 to 74 years old: 30643</span>
+<span style="color: #2aa198;">Population 75 to 84 years old: 23369</span>
+<span style="color: #2aa198;">Population 85 years and over: 8414</span>
+<span style="color: #2aa198;">"</span>), sep = <span style="color: #2aa198;">":"</span>, header = <span style="color: #b58900;">TRUE</span>)
 
-<span style="color: #5F7F5F;">## </span><span style="color: #7F9F7F;">agecats</span>
-<span style="color: #5F7F5F;">## </span><span style="color: #7F9F7F;">65to74     75p under65  </span>
-population_input$agecat <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> c(rep(<span style="color: #CC9393;">"under65"</span>, 10),
-                             rep(<span style="color: #CC9393;">"65to74"</span>),
-                             rep(<span style="color: #CC9393;">"75p"</span>,2)
+<span style="color: #586e75;">## </span><span style="color: #586e75;">agecats</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">65to74     75p under65  </span>
+population_input$agecat <span style="color: #268bd2; font-weight: bold;">&lt;-</span> c(rep(<span style="color: #2aa198;">"under65"</span>, 10),
+                             rep(<span style="color: #2aa198;">"65to74"</span>),
+                             rep(<span style="color: #2aa198;">"75p"</span>,2)
                              )
 
-citycode <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> subset(shp@data, address == cityname,
+citycode <span style="color: #268bd2; font-weight: bold;">&lt;-</span> subset(shp@data, address == cityname,
                    select = city)
 
-population_input$city <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> rep(
+population_input$city <span style="color: #268bd2; font-weight: bold;">&lt;-</span> rep(
     as.character(citycode[1,1])        
     , 13
     )
 
 population_input
-<span style="color: #F0DFAF; font-weight: bold;">if</span>(exists(<span style="color: #CC9393;">"population"</span>))
+<span style="color: #859900; font-weight: bold;">if</span>(exists(<span style="color: #2aa198;">"population"</span>))
     {
-        population <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> rbind(population,
+        population <span style="color: #268bd2; font-weight: bold;">&lt;-</span> rbind(population,
                             population_input
                             )        
-    } <span style="color: #F0DFAF; font-weight: bold;">else</span> {
-        population <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> population_input
+    } <span style="color: #859900; font-weight: bold;">else</span> {
+        population <span style="color: #268bd2; font-weight: bold;">&lt;-</span> population_input
     }
 
 </pre>
@@ -763,14 +789,86 @@ population_input
 </li>
 </ul>
 <ul>
-<li id="sec-2-4-1-6">Save Population Dataset<br/>
+<li id="sec-2-4-1-7">Louisville<br/>
 
 
 
-<pre class="src src-R"><span style="color: #5F7F5F;">################################################################</span>
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">name:save-population</span>
-write.csv(population, <span style="color: #CC9393;">"population.csv"</span>,
-          row.names = <span style="color: #7CB8BB;">FALSE</span>
+<pre class="src src-R"><span style="color: #586e75;">################################################################</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">name:population-data</span>
+
+<span style="color: #586e75;"># </span><span style="color: #586e75;">func</span>
+setwd(<span style="color: #2aa198;">"~/projects/spatiotemporal-regression-models"</span>)
+<span style="color: #268bd2; font-weight: bold;">require</span>(gisviz)
+
+<span style="color: #586e75;"># </span><span style="color: #586e75;">load</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">citycodes</span>
+shp <span style="color: #268bd2; font-weight: bold;">&lt;-</span> readOGR(<span style="color: #2aa198;">"cities.shp"</span>, <span style="color: #2aa198;">"cities"</span>)
+shp@data
+
+cityname <span style="color: #268bd2; font-weight: bold;">&lt;-</span> <span style="color: #2aa198;">"Louisville"</span>
+
+<span style="color: #586e75;"># </span><span style="color: #586e75;">do</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">save url</span>
+<span style="color: #586e75;">#</span><span style="color: #586e75;">http://www.city-data.com/us-cities/The-South/Louisville-Population-Profile.html</span>
+
+<span style="color: #586e75;">## </span><span style="color: #586e75;">NB error in table, 75-84 was missing.  used same from baton rouge</span>
+population_input <span style="color: #268bd2; font-weight: bold;">&lt;-</span> read.table(textConnection(
+  <span style="color: #2aa198;">"age: population</span>
+<span style="color: #2aa198;">  Population under 5 years old: 16926</span>
+<span style="color: #2aa198;">  Population 5 to 9 years old: 17359</span>
+<span style="color: #2aa198;">  Population 10 to 14 years old: 16627</span>
+<span style="color: #2aa198;">  Population 15 to 19 years old: 17362</span>
+<span style="color: #2aa198;">  Population 20 to 24 years old: 18923</span>
+<span style="color: #2aa198;">  Population 25 to 34 years old: 37541</span>
+<span style="color: #2aa198;">  Population 35 to 44 years old: 40354</span>
+<span style="color: #2aa198;">  Population 45 to 54 years old: 33755</span>
+<span style="color: #2aa198;">  Population 55 to 59 years old: 10716</span>
+<span style="color: #2aa198;">  Population 60 to 64 years old: 9211</span>
+<span style="color: #2aa198;">  Population 65 to 74 years old: 18577</span>
+<span style="color: #2aa198;">  Population 75 to 84 years: 9611</span>
+<span style="color: #2aa198;">  Population 85 years and older: 5075</span>
+<span style="color: #2aa198;">  "</span>), sep = <span style="color: #2aa198;">":"</span>, header = <span style="color: #b58900;">TRUE</span>)
+
+<span style="color: #586e75;">## </span><span style="color: #586e75;">agecats</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">65to74     75p under65  </span>
+population_input$agecat <span style="color: #268bd2; font-weight: bold;">&lt;-</span> c(rep(<span style="color: #2aa198;">"under65"</span>, 10),
+                             rep(<span style="color: #2aa198;">"65to74"</span>),
+                             rep(<span style="color: #2aa198;">"75p"</span>,2)
+                             )
+
+citycode <span style="color: #268bd2; font-weight: bold;">&lt;-</span> subset(shp@data, address == cityname,
+                   select = city)
+
+population_input$city <span style="color: #268bd2; font-weight: bold;">&lt;-</span> rep(
+    as.character(citycode[1,1])        
+    , 13
+    )
+
+population_input
+<span style="color: #859900; font-weight: bold;">if</span>(exists(<span style="color: #2aa198;">"population"</span>))
+    {
+        population <span style="color: #268bd2; font-weight: bold;">&lt;-</span> rbind(population,
+                            population_input
+                            )        
+    } <span style="color: #859900; font-weight: bold;">else</span> {
+        population <span style="color: #268bd2; font-weight: bold;">&lt;-</span> population_input
+    }
+
+</pre>
+
+
+
+</li>
+</ul>
+<ul>
+<li id="sec-2-4-1-8">Save Population Dataset<br/>
+
+
+
+<pre class="src src-R"><span style="color: #586e75;">################################################################</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">name:save-population</span>
+write.csv(population, <span style="color: #2aa198;">"population.csv"</span>,
+          row.names = <span style="color: #b58900;">FALSE</span>
           )
 </pre>
 
@@ -788,28 +886,28 @@ write.csv(population, <span style="color: #CC9393;">"population.csv"</span>,
 
 
 
-<pre class="src src-R"><span style="color: #5F7F5F;">################################################################</span>
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">name:Population Summary</span>
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">func</span>
-<span style="color: #BFEBBF; font-weight: bold;">require</span>(plyr)
+<pre class="src src-R"><span style="color: #586e75;">################################################################</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">name:Population Summary</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">func</span>
+<span style="color: #268bd2; font-weight: bold;">require</span>(plyr)
 
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">load</span>
-population <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> read.csv(<span style="color: #CC9393;">"population.csv"</span>)
+<span style="color: #586e75;"># </span><span style="color: #586e75;">load</span>
+population <span style="color: #268bd2; font-weight: bold;">&lt;-</span> read.csv(<span style="color: #2aa198;">"population.csv"</span>)
 str(population)
-population <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> population[,c(<span style="color: #CC9393;">"city"</span>, <span style="color: #CC9393;">"agecat"</span>, <span style="color: #CC9393;">"population"</span>)]
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">do</span>
-population_summary <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> ddply(population,
-                           .variables = c(<span style="color: #CC9393;">"city"</span>,
-                               <span style="color: #CC9393;">"agecat"</span>),
+population <span style="color: #268bd2; font-weight: bold;">&lt;-</span> population[,c(<span style="color: #2aa198;">"city"</span>, <span style="color: #2aa198;">"agecat"</span>, <span style="color: #2aa198;">"population"</span>)]
+<span style="color: #586e75;"># </span><span style="color: #586e75;">do</span>
+population_summary <span style="color: #268bd2; font-weight: bold;">&lt;-</span> ddply(population,
+                           .variables = c(<span style="color: #2aa198;">"city"</span>,
+                               <span style="color: #2aa198;">"agecat"</span>),
                            .fun = summarise,
                            sum(population)
                            )
 
-names(population_summary) <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> c(<span style="color: #CC9393;">"city"</span>,<span style="color: #CC9393;">"agecat"</span>,<span style="color: #CC9393;">"pop"</span>)
+names(population_summary) <span style="color: #268bd2; font-weight: bold;">&lt;-</span> c(<span style="color: #2aa198;">"city"</span>,<span style="color: #2aa198;">"agecat"</span>,<span style="color: #2aa198;">"pop"</span>)
 
 write.csv(population_summary,
-          <span style="color: #CC9393;">"population_summary.csv"</span>,
-          row.names = <span style="color: #7CB8BB;">FALSE</span>
+          <span style="color: #2aa198;">"population_summary.csv"</span>,
+          row.names = <span style="color: #b58900;">FALSE</span>
           )
 </pre>
 
@@ -827,23 +925,23 @@ write.csv(population_summary,
 
 
 
-<pre class="src src-R"><span style="color: #5F7F5F;">################################################################</span>
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">name:merge</span>
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">func</span>
-setwd(<span style="color: #CC9393;">"~/projects/spatiotemporal-regression-models"</span>)
+<pre class="src src-R"><span style="color: #586e75;">################################################################</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">name:merge</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">func</span>
+setwd(<span style="color: #2aa198;">"~/projects/spatiotemporal-regression-models/NMMAPS-example"</span>)
 
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">load</span>
-outcome <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> read.csv(<span style="color: #CC9393;">"outcome.csv"</span>)
+<span style="color: #586e75;"># </span><span style="color: #586e75;">load</span>
+outcome <span style="color: #268bd2; font-weight: bold;">&lt;-</span> read.csv(<span style="color: #2aa198;">"outcome.csv"</span>)
 str(outcome)
-outcome$date <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> as.Date(outcome$date)
+outcome$date <span style="color: #268bd2; font-weight: bold;">&lt;-</span> as.Date(outcome$date)
 
-population <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> read.csv(<span style="color: #CC9393;">"population_summary.csv"</span>)
+population <span style="color: #268bd2; font-weight: bold;">&lt;-</span> read.csv(<span style="color: #2aa198;">"population_summary.csv"</span>)
 str(population)
 population
 
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">do</span>
-analyte <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> merge(outcome, population)
-write.csv(analyte, <span style="color: #CC9393;">"analyte.csv"</span>, row.names = <span style="color: #7CB8BB;">FALSE</span>)
+<span style="color: #586e75;"># </span><span style="color: #586e75;">do</span>
+analyte <span style="color: #268bd2; font-weight: bold;">&lt;-</span> merge(outcome, population)
+write.csv(analyte, <span style="color: #2aa198;">"analyte.csv"</span>, row.names = <span style="color: #b58900;">FALSE</span>)
 </pre>
 
 
@@ -866,34 +964,34 @@ write.csv(analyte, <span style="color: #CC9393;">"analyte.csv"</span>, row.names
 
 
 
-<pre class="src src-R"><span style="color: #5F7F5F;">################################################################</span>
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">name:eda-tsplots</span>
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">func</span>
-setwd(<span style="color: #CC9393;">"~/projects/spatiotemporal-regression-models"</span>)
+<pre class="src src-R"><span style="color: #586e75;">################################################################</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">name:eda-tsplots</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">func</span>
+setwd(<span style="color: #2aa198;">"~/projects/spatiotemporal-regression-models/NMMAPS-example"</span>)
   
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">load</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">load</span>
 flist
-fname <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> flist[7]; print(fname)
-df <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> read.csv(file.path(<span style="color: #CC9393;">"NMMAPS-example/data"</span>, fname))
+fname <span style="color: #268bd2; font-weight: bold;">&lt;-</span> flist[7]; print(fname)
+df <span style="color: #268bd2; font-weight: bold;">&lt;-</span> read.csv(file.path(<span style="color: #2aa198;">"data"</span>, fname))
 
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">clean</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">clean</span>
 str(df)
 summary(df$tmax); summary(df$dptp)
 
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">do</span>
-<span style="color: #5F7F5F;">## </span><span style="color: #7F9F7F;">we will only consider cities with long periods temp and humidity observed</span>
-png(<span style="color: #CC9393;">"images/nmmaps-eg-dateranges.png"</span>, width = 1000, height=500, res = 150)
+<span style="color: #586e75;"># </span><span style="color: #586e75;">do</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">we will only consider cities with long periods temp and humidity observed</span>
+png(<span style="color: #2aa198;">"images/nmmaps-eg-dateranges.png"</span>, width = 1000, height=500, res = 150)
 par(mfrow=c(6,5), mar=c(0,3,3,0), cex=.25)
-<span style="color: #F0DFAF; font-weight: bold;">for</span>(fi <span style="color: #F0DFAF; font-weight: bold;">in</span> 1:length(flist))
+<span style="color: #859900; font-weight: bold;">for</span>(fi <span style="color: #859900; font-weight: bold;">in</span> 1:length(flist))
     {
-        <span style="color: #5F7F5F;">#</span><span style="color: #7F9F7F;">fi &lt;- 4</span>
-        fname <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> flist[fi]
-        df <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> read.csv(file.path(<span style="color: #CC9393;">"NMMAPS-example/data"</span>, fname))
+        <span style="color: #586e75;">#</span><span style="color: #586e75;">fi &lt;- 4</span>
+        fname <span style="color: #268bd2; font-weight: bold;">&lt;-</span> flist[fi]
+        df <span style="color: #268bd2; font-weight: bold;">&lt;-</span> read.csv(file.path(<span style="color: #2aa198;">"data"</span>, fname))
         print(fi); print(fname);
-        with(df, plot(as.Date(date), tmax, type = <span style="color: #CC9393;">"l"</span>))
-        title(paste(fname, <span style="color: #CC9393;">"tmax"</span>))
-        with(df, plot(as.Date(date), dptp, type = <span style="color: #CC9393;">"l"</span>))
-        title(paste(fname, <span style="color: #CC9393;">"dptp"</span>))
+        with(df, plot(as.Date(date), tmax, type = <span style="color: #2aa198;">"l"</span>))
+        title(paste(fname, <span style="color: #2aa198;">"tmax"</span>))
+        with(df, plot(as.Date(date), dptp, type = <span style="color: #2aa198;">"l"</span>))
+        title(paste(fname, <span style="color: #2aa198;">"dptp"</span>))
     }
 dev.off()
 
@@ -907,65 +1005,9 @@ dev.off()
 <h4 id="sec-2-6-2"><span class="section-number-4">2.6.2</span> Time-series Plots Output</h4>
 <div class="outline-text-4" id="text-2-6-2">
 
-<p><img src="images/nmmaps-eg-dateranges.png"  alt="images/nmmaps-eg-dateranges.png" />
-</p></div>
-
+<p><img src="NMMAPS-example/images/nmmaps-eg-dateranges.png"  alt="NMMAPS-example/images/nmmaps-eg-dateranges.png" />
+</p>
 </div>
-
-<div id="outline-container-2-6-3" class="outline-4">
-<h4 id="sec-2-6-3"><span class="section-number-4">2.6.3</span> Spatial Neighbours Code</h4>
-<div class="outline-text-4" id="text-2-6-3">
-
-
-
-
-<pre class="src src-R"><span style="color: #5F7F5F;">################################################################</span>
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">name:spatwat</span>
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">func</span>
-setwd(<span style="color: #CC9393;">"~/projects/spatiotemporal-regression-models"</span>)
-<span style="color: #BFEBBF; font-weight: bold;">require</span>(gisviz)
-
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">load</span>
-dir()
-shp <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> readOGR(<span style="color: #CC9393;">"cities.shp"</span>, <span style="color: #CC9393;">"cities"</span>)
-
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">clean</span>
-head(shp@data)
-
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">do</span>
-<span style="color: #5F7F5F;">## </span><span style="color: #7F9F7F;">I will use nearest neighbour within a distance threshold, but</span>
-<span style="color: #5F7F5F;">## </span><span style="color: #7F9F7F;">usually polygon datasets would use poly2nb</span>
-nb <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> dnearneigh(shp, d1 = 1, d2 = 1000)                      
-head(nb)
-shp[[1]][1]
-shp[[1]][nb[[1]]]
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">map</span>
-nudge <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> 10
-png(<span style="color: #CC9393;">"images/nmmaps-eg-neighbourhood.png"</span>)
-plotMyMap(
-    shp@coords, xl = c(min(shp@coords[,1])-nudge, max(shp@coords[,1])+nudge),
-    yl = c(min(shp@coords[,2])-nudge, max(shp@coords[,2])+nudge)
-    )
-plot(nb, shp@coords, add=<span style="color: #7CB8BB;">TRUE</span>)
-text(shp@data$long, shp@data$lat, shp@data$address, pos=3)
-points(shp@coords[nb[[1]],], col = <span style="color: #CC9393;">'green'</span>, pch = 16)
-points(shp@data[1,c(<span style="color: #CC9393;">"long"</span>,<span style="color: #CC9393;">"lat"</span>)],col = <span style="color: #CC9393;">'blue'</span>, pch = 16)
-dev.off()
-
-
-</pre>
-
-
-</div>
-
-</div>
-
-<div id="outline-container-2-6-4" class="outline-4">
-<h4 id="sec-2-6-4"><span class="section-number-4">2.6.4</span> Spatial Neighbours Output</h4>
-<div class="outline-text-4" id="text-2-6-4">
-
-<p><img src="images/nmmaps-eg-neighbourhood.png"  alt="images/nmmaps-eg-neighbourhood.png" />
-</p></div>
 </div>
 
 </div>
@@ -984,39 +1026,39 @@ dev.off()
 
 
 
-<pre class="src src-R"><span style="color: #5F7F5F;">################################################################</span>
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">name:core</span>
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">func</span>
-setwd(<span style="color: #CC9393;">"~/projects/spatiotemporal-regression-models"</span>)
-<span style="color: #BFEBBF; font-weight: bold;">require</span>(mgcv)
-<span style="color: #BFEBBF; font-weight: bold;">require</span>(splines)
+<pre class="src src-R"><span style="color: #586e75;">################################################################</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">name:core</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">func</span>
+setwd(<span style="color: #2aa198;">"~/projects/spatiotemporal-regression-models/NMMAPS-example"</span>)
+<span style="color: #268bd2; font-weight: bold;">require</span>(mgcv)
+<span style="color: #268bd2; font-weight: bold;">require</span>(splines)
 
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">load</span>
-analyte <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> read.csv(<span style="color: #CC9393;">"analyte.csv"</span>)
+<span style="color: #586e75;"># </span><span style="color: #586e75;">load</span>
+analyte <span style="color: #268bd2; font-weight: bold;">&lt;-</span> read.csv(<span style="color: #2aa198;">"analyte.csv"</span>)
 
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">clean</span>
-analyte$yy <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> substr(analyte$date,1,4)
-numYears<span style="color: #BFEBBF; font-weight: bold;">&lt;-</span>length(names(table(analyte$yy)))
-analyte$date <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> as.Date(analyte$date)
-analyte$time <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> as.numeric(analyte$date)
-analyte$agecat <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> factor(analyte$agecat,
-                          levels = c(<span style="color: #CC9393;">"under65"</span>,
-                              <span style="color: #CC9393;">"65to74"</span>, <span style="color: #CC9393;">"75p"</span>),
-                          ordered = <span style="color: #7CB8BB;">TRUE</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">clean</span>
+analyte$yy <span style="color: #268bd2; font-weight: bold;">&lt;-</span> substr(analyte$date,1,4)
+numYears<span style="color: #268bd2; font-weight: bold;">&lt;-</span>length(names(table(analyte$yy)))
+analyte$date <span style="color: #268bd2; font-weight: bold;">&lt;-</span> as.Date(analyte$date)
+analyte$time <span style="color: #268bd2; font-weight: bold;">&lt;-</span> as.numeric(analyte$date)
+analyte$agecat <span style="color: #268bd2; font-weight: bold;">&lt;-</span> factor(analyte$agecat,
+                          levels = c(<span style="color: #2aa198;">"under65"</span>,
+                              <span style="color: #2aa198;">"65to74"</span>, <span style="color: #2aa198;">"75p"</span>),
+                          ordered = <span style="color: #b58900;">TRUE</span>
                           )
 
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">do</span>
-fit <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> gam(cvd ~ s(tmax) + s(dptp) +
+<span style="color: #586e75;"># </span><span style="color: #586e75;">do</span>
+fit <span style="color: #268bd2; font-weight: bold;">&lt;-</span> gam(cvd ~ s(tmax) + s(dptp) +
            city + agecat +
            s(time, k= 7*numYears, fx=T) +
            offset(log(pop)),
            data = analyte, family = poisson
            )
 
-<span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">plot of response functions</span>
-png(<span style="color: #CC9393;">"images/nmmaps-eg-core.png"</span>, width = 1000, height = 750, res = 150)
+<span style="color: #586e75;"># </span><span style="color: #586e75;">plot of response functions</span>
+png(<span style="color: #2aa198;">"images/nmmaps-eg-core.png"</span>, width = 1000, height = 750, res = 150)
 par(mfrow=c(2,3))
-plot(fit, all.terms = <span style="color: #7CB8BB;">TRUE</span>)
+plot(fit, all.terms = <span style="color: #b58900;">TRUE</span>)
 dev.off()
 
 
@@ -1030,10 +1072,88 @@ dev.off()
 <h4 id="sec-2-7-2"><span class="section-number-4">2.7.2</span> Core Model Plots</h4>
 <div class="outline-text-4" id="text-2-7-2">
 
-<p><img src="images/nmmaps-eg-core.png"  alt="images/nmmaps-eg-core.png" />
+<p><img src="NMMAPS-example/images/nmmaps-eg-core.png"  alt="NMMAPS-example/images/nmmaps-eg-core.png" />
 </p>
 
 </div>
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> Case Study 2: Spatial Lag and Timeseries with NMMAPS</h2>
+<div class="outline-text-2" id="text-3">
+
+<p>I will use the same NMMAPSlite to show how I'd approach a simple "Spatio-Temporal" model.
+</p><ul>
+<li id="sec-3-1"><span class="todo TODO">TODO</span> The following is a stub of an idea.  For further development<br/>
+</li>
+</ul>
+
+</div>
+
+<div id="outline-container-3-1" class="outline-3">
+<h3 id="sec-3-1"><span class="section-number-3">3.1</span> Zones</h3>
+<div class="outline-text-3" id="text-3-1">
+
+
+</div>
+
+<div id="outline-container-3-1-1" class="outline-4">
+<h4 id="sec-3-1-1"><span class="section-number-4">3.1.1</span> Spatial Neighbours Code</h4>
+<div class="outline-text-4" id="text-3-1-1">
+
+
+
+
+<pre class="src src-R"><span style="color: #586e75;">################################################################</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">name:spatwat</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">func</span>
+setwd(<span style="color: #2aa198;">"~/projects/spatiotemporal-regression-models/NMMAPS-example"</span>)
+<span style="color: #268bd2; font-weight: bold;">require</span>(gisviz)
+
+<span style="color: #586e75;"># </span><span style="color: #586e75;">load</span>
+dir()
+shp <span style="color: #268bd2; font-weight: bold;">&lt;-</span> readOGR(<span style="color: #2aa198;">"cities.shp"</span>, <span style="color: #2aa198;">"cities"</span>)
+
+<span style="color: #586e75;"># </span><span style="color: #586e75;">clean</span>
+head(shp@data)
+
+<span style="color: #586e75;"># </span><span style="color: #586e75;">do</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">I will use nearest neighbour within a distance threshold, but</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">usually polygon datasets would use poly2nb</span>
+nb <span style="color: #268bd2; font-weight: bold;">&lt;-</span> dnearneigh(shp, d1 = 1, d2 = 1000)                      
+head(nb)
+shp[[1]][1]
+shp[[1]][nb[[1]]]
+<span style="color: #586e75;"># </span><span style="color: #586e75;">map</span>
+nudge <span style="color: #268bd2; font-weight: bold;">&lt;-</span> 10
+png(<span style="color: #2aa198;">"images/nmmaps-eg-neighbourhood.png"</span>)
+plotMyMap(
+    shp@coords, xl = c(min(shp@coords[,1])-nudge, max(shp@coords[,1])+nudge),
+    yl = c(min(shp@coords[,2])-nudge, max(shp@coords[,2])+nudge)
+    )
+plot(nb, shp@coords, add=<span style="color: #b58900;">TRUE</span>)
+text(shp@data$long, shp@data$lat, shp@data$address, pos=3)
+points(shp@coords[nb[[1]],], col = <span style="color: #2aa198;">'green'</span>, pch = 16)
+points(shp@data[1,c(<span style="color: #2aa198;">"long"</span>,<span style="color: #2aa198;">"lat"</span>)],col = <span style="color: #2aa198;">'blue'</span>, pch = 16)
+dev.off()
+
+
+</pre>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-3-1-2" class="outline-4">
+<h4 id="sec-3-1-2"><span class="section-number-4">3.1.2</span> Spatial Neighbours Output</h4>
+<div class="outline-text-4" id="text-3-1-2">
+
+<p><img src="NMMAPS-example/images/nmmaps-eg-neighbourhood.png"  alt="NMMAPS-example/images/nmmaps-eg-neighbourhood.png" />
+</p></div>
 </div>
 </div>
 </div>
