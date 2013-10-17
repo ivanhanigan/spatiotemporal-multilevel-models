@@ -430,7 +430,7 @@ population
 
 # do
 analyte <- merge(outcome, population, by = c("city", "agecat"))
-
+analyte <- arrange(analyte, city, date, agecat)
 # check
 subset(analyte, date == as.Date("1990-01-01"))
 
