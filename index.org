@@ -1934,6 +1934,41 @@ The process for getting the population data from the websites is a bit of a pain
 ** Data Checking
 *** Check Assumption of Proportional Hazards
 #+begin_src R :session *R* :tangle NMMAPS-example/case-study-1-data-checking.r :exports reports :eval no
+  # Checking the proportional hazards assumption for Indirect Age Standardisation
+  
+  # Background
+  ## Indirect SMRs from different index/study populations are not strictly comparable
+  ## because they are calculated using different weighting schemes that
+  ## depend upon the age structures of the index/study populations
+  ## (see http://www.statsdirect.com/webhelp/#rates/smr.htm).
+  
+  ## Indirect SMRs can be compared if you make the assumption that the
+  ## ratio of rates between index and reference populations is constant;
+  ## this is similar to the assumption of proportional hazards in Cox
+  ## regression (Armitage and Berry, 1994).
+  
+  ## So we need to check if the rate ratio of the study population(s)
+  ## compared to the standard population varies substantially with age.
+  ## If not the proportional hazards assumption holds for the standard
+  ## rates compared with the observed rates and the Indirect SMRs are
+  ## comparable.  To do this check we calculate the Annualised Age Specific
+  ## Rates for our study areas and for our standard for several years at
+  ## periodic timepoints across the study period, and then calculate the
+  ## ratio of these at each timepoint we could reassure our selves that
+  ## this assumption holds.
+  
+  ## An additional issue arises when there are non-negligible differences
+  ## in the age distributions of the study population(s) and the standard
+  ## population. In this situation, indirect standardisation produces
+  ## biased results due to residual confounding by age
+  
+  ## Also see Australian Institute of Health and Welfare. (2011). Principles on
+  ## the use of direct age-standardisation in administrative data
+  ## collections For measuring the gap between Indigenous and
+  ## non-Indigenous Australians. Data linkage series. Cat. no. CSI 12.
+  ## Canberra: AIHW. Retrieved from
+  ## http://www.aihw.gov.au/publication-detail/?id=10737420133
+  
   ################################################################
   # func
   setwd("~/projects/spatiotemporal-regression-models/NMMAPS-example")

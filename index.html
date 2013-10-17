@@ -7,7 +7,7 @@
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="title" content="Spatiotemporal Regression Modelling"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2013-10-18T10:05+1100"/>
+<meta name="generated" content="2013-10-18T10:29+1100"/>
 <meta name="author" content="Ivan Hanigan"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -976,7 +976,42 @@ write.csv(analyte, <span style="color: #cc9393;">"analyte.csv"</span>, row.names
 
 
 
-<pre class="src src-R"><span style="color: #7f9f7f;">################################################################</span>
+<pre class="src src-R"><span style="color: #7f9f7f;"># </span><span style="color: #7f9f7f;">Checking the proportional hazards assumption for Indirect Age Standardisation</span>
+
+<span style="color: #7f9f7f;"># </span><span style="color: #7f9f7f;">Background</span>
+<span style="color: #7f9f7f;">## </span><span style="color: #7f9f7f;">Indirect SMRs from different index/study populations are not strictly comparable</span>
+<span style="color: #7f9f7f;">## </span><span style="color: #7f9f7f;">because they are calculated using different weighting schemes that</span>
+<span style="color: #7f9f7f;">## </span><span style="color: #7f9f7f;">depend upon the age structures of the index/study populations</span>
+<span style="color: #7f9f7f;">## </span><span style="color: #7f9f7f;">(see http://www.statsdirect.com/webhelp/#rates/smr.htm).</span>
+
+<span style="color: #7f9f7f;">## </span><span style="color: #7f9f7f;">Indirect SMRs can be compared if you make the assumption that the</span>
+<span style="color: #7f9f7f;">## </span><span style="color: #7f9f7f;">ratio of rates between index and reference populations is constant;</span>
+<span style="color: #7f9f7f;">## </span><span style="color: #7f9f7f;">this is similar to the assumption of proportional hazards in Cox</span>
+<span style="color: #7f9f7f;">## </span><span style="color: #7f9f7f;">regression (Armitage and Berry, 1994).</span>
+
+<span style="color: #7f9f7f;">## </span><span style="color: #7f9f7f;">So we need to check if the rate ratio of the study population(s)</span>
+<span style="color: #7f9f7f;">## </span><span style="color: #7f9f7f;">compared to the standard population varies substantially with age.</span>
+<span style="color: #7f9f7f;">## </span><span style="color: #7f9f7f;">If not the proportional hazards assumption holds for the standard</span>
+<span style="color: #7f9f7f;">## </span><span style="color: #7f9f7f;">rates compared with the observed rates and the Indirect SMRs are</span>
+<span style="color: #7f9f7f;">## </span><span style="color: #7f9f7f;">comparable.  To do this check we calculate the Annualised Age Specific</span>
+<span style="color: #7f9f7f;">## </span><span style="color: #7f9f7f;">Rates for our study areas and for our standard for several years at</span>
+<span style="color: #7f9f7f;">## </span><span style="color: #7f9f7f;">periodic timepoints across the study period, and then calculate the</span>
+<span style="color: #7f9f7f;">## </span><span style="color: #7f9f7f;">ratio of these at each timepoint we could reassure our selves that</span>
+<span style="color: #7f9f7f;">## </span><span style="color: #7f9f7f;">this assumption holds.</span>
+
+<span style="color: #7f9f7f;">## </span><span style="color: #7f9f7f;">An additional issue arises when there are non-negligible differences</span>
+<span style="color: #7f9f7f;">## </span><span style="color: #7f9f7f;">in the age distributions of the study population(s) and the standard</span>
+<span style="color: #7f9f7f;">## </span><span style="color: #7f9f7f;">population. In this situation, indirect standardisation produces</span>
+<span style="color: #7f9f7f;">## </span><span style="color: #7f9f7f;">biased results due to residual confounding by age</span>
+
+<span style="color: #7f9f7f;">## </span><span style="color: #7f9f7f;">Also see Australian Institute of Health and Welfare. (2011). Principles on</span>
+<span style="color: #7f9f7f;">## </span><span style="color: #7f9f7f;">the use of direct age-standardisation in administrative data</span>
+<span style="color: #7f9f7f;">## </span><span style="color: #7f9f7f;">collections For measuring the gap between Indigenous and</span>
+<span style="color: #7f9f7f;">## </span><span style="color: #7f9f7f;">non-Indigenous Australians. Data linkage series. Cat. no. CSI 12.</span>
+<span style="color: #7f9f7f;">## </span><span style="color: #7f9f7f;">Canberra: AIHW. Retrieved from</span>
+<span style="color: #7f9f7f;">## </span><span style="color: #7f9f7f;">http://www.aihw.gov.au/publication-detail/?id=10737420133</span>
+
+<span style="color: #7f9f7f;">################################################################</span>
 <span style="color: #7f9f7f;"># </span><span style="color: #7f9f7f;">func</span>
 setwd(<span style="color: #cc9393;">"~/projects/spatiotemporal-regression-models/NMMAPS-example"</span>)
 <span style="color: #bfebbf; font-weight: bold;">require</span>(plyr)
