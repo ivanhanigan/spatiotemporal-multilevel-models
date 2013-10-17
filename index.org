@@ -1933,7 +1933,7 @@ The process for getting the population data from the websites is a bit of a pain
 
 ** Data Checking
 *** Check Assumption of Proportional Hazards
-#+begin_src R :session *R* :tangle no :exports reports :eval no
+#+begin_src R :session *R* :tangle NMMAPS-example/case-study-1-data-checking.r :exports reports :eval no
   ################################################################
   # func
   setwd("~/projects/spatiotemporal-regression-models/NMMAPS-example")
