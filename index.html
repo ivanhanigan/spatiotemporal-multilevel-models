@@ -7,7 +7,7 @@
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="title" content="Spatiotemporal Regression Modelling"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2013-10-17T23:27+1100"/>
+<meta name="generated" content="2013-10-18T10:05+1100"/>
 <meta name="author" content="Ivan Hanigan"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -991,19 +991,28 @@ analyte$yy  <span style="color: #bfebbf; font-weight: bold;">&lt;-</span> substr
 <span style="color: #7f9f7f;"># </span><span style="color: #7f9f7f;">do</span>
 <span style="color: #7f9f7f;">## </span><span style="color: #7f9f7f;">first we want to see if the age specific rates vary across the</span>
 <span style="color: #7f9f7f;">## </span><span style="color: #7f9f7f;">study sites</span>
-stdysites  <span style="color: #bfebbf; font-weight: bold;">&lt;-</span> ddply(analyte, c(<span style="color: #cc9393;">"city"</span>, <span style="color: #cc9393;">"agecat"</span>, <span style="color: #cc9393;">"yy"</span>),
-                     <span style="color: #f0dfaf; font-weight: bold;">function</span>(df) <span style="color: #f0dfaf; font-weight: bold;">return</span>(
-                       c(observed = sum(df[,<span style="color: #cc9393;">"cvd"</span>]),
-                         pop = mean(df[,<span style="color: #cc9393;">"pop"</span>]),
-                         crude.rate = sum(df[,<span style="color: #cc9393;">"cvd"</span>])/mean(df[,<span style="color: #cc9393;">"pop"</span>])
-                         )
-                       )
-                    )
-subset(stdysites, yy == 1987 &amp; city == <span style="color: #cc9393;">"batr"</span>)
-stdy <span style="color: #bfebbf; font-weight: bold;">&lt;-</span> subset(stdysites, yy == 2000)
+disease_colname <span style="color: #bfebbf; font-weight: bold;">&lt;-</span> <span style="color: #cc9393;">"cvd"</span>
+pop_colname <span style="color: #bfebbf; font-weight: bold;">&lt;-</span> <span style="color: #cc9393;">"pop"</span>
+by_cols  <span style="color: #bfebbf; font-weight: bold;">&lt;-</span> c(<span style="color: #cc9393;">"city"</span>, <span style="color: #cc9393;">"agecat"</span>, <span style="color: #cc9393;">"yy"</span>)
 
-<span style="color: #7f9f7f;">## </span><span style="color: #7f9f7f;">standard</span>
-standard  <span style="color: #bfebbf; font-weight: bold;">&lt;-</span> ddply(stdysites, c(<span style="color: #cc9393;">"agecat"</span>, <span style="color: #cc9393;">"yy"</span>),
+stdysites  <span style="color: #bfebbf; font-weight: bold;">&lt;-</span> ddply(analyte, by_cols,
+                    <span style="color: #f0dfaf; font-weight: bold;">function</span>(df) <span style="color: #f0dfaf; font-weight: bold;">return</span>(
+                      c(observed = sum(df[,disease_colname]),
+                        pop = mean(df[,pop_colname]),
+                        crude.rate = sum(df[,disease_colname])/mean(df[,pop_colname])
+                        )
+                      )
+                    )
+<span style="color: #7f9f7f;">## </span><span style="color: #7f9f7f;">check</span>
+head(stdysites)
+subset(stdysites, yy == 1987 &amp; city == <span style="color: #cc9393;">"batr"</span>)
+
+<span style="color: #7f9f7f;">## </span><span style="color: #7f9f7f;">define the subset we will use just the deaths and pop in 2000</span>
+stdy <span style="color: #bfebbf; font-weight: bold;">&lt;-</span> subset(stdysites, yy == 2000)
+stdy
+
+<span style="color: #7f9f7f;">## </span><span style="color: #7f9f7f;">now define the standard population as the entire country</span>
+standard  <span style="color: #bfebbf; font-weight: bold;">&lt;-</span> ddply(stdy, c(<span style="color: #cc9393;">"agecat"</span>),
                      <span style="color: #f0dfaf; font-weight: bold;">function</span>(df) <span style="color: #f0dfaf; font-weight: bold;">return</span>(
                        c(observed = sum(df[,<span style="color: #cc9393;">"observed"</span>]),
                          pop = sum(df[,<span style="color: #cc9393;">"pop"</span>]),
@@ -1012,12 +1021,13 @@ standard  <span style="color: #bfebbf; font-weight: bold;">&lt;-</span> ddply(st
                          )
                        )
                     )
-stnd <span style="color: #bfebbf; font-weight: bold;">&lt;-</span> subset(standard, yy == 2000)
+standard
 
-stdyByStnd  <span style="color: #bfebbf; font-weight: bold;">&lt;-</span> merge(stdy, stnd, by = <span style="color: #cc9393;">"agecat"</span>)
+<span style="color: #7f9f7f;">## </span><span style="color: #7f9f7f;">Merge the studysites and the standard</span>
+stdyByStnd  <span style="color: #bfebbf; font-weight: bold;">&lt;-</span> merge(stdy, standard, by = <span style="color: #cc9393;">"agecat"</span>)
 stdyByStnd
 
-<span style="color: #7f9f7f;">## </span><span style="color: #7f9f7f;">ratio</span>
+<span style="color: #7f9f7f;">## </span><span style="color: #7f9f7f;">plot the rate ratios</span>
 png(<span style="color: #cc9393;">"images/ratio-stdy-by-stnd.png"</span>)
 mp <span style="color: #bfebbf; font-weight: bold;">&lt;-</span> barplot(stdyByStnd$crude.rate.x/stdyByStnd$crude.rate.y)
 text(mp, par(<span style="color: #cc9393;">"usr"</span>)[3],
@@ -1027,13 +1037,17 @@ text(mp, par(<span style="color: #cc9393;">"usr"</span>)[3],
 abline(1,0)
 dev.off()
 
-<span style="color: #7f9f7f;">## </span><span style="color: #7f9f7f;">Second we will check if populations vary</span>
+<span style="color: #7f9f7f;">## </span><span style="color: #7f9f7f;">we can see that LA has an issue with the 65to74 agecat</span>
+
+<span style="color: #7f9f7f;">## </span><span style="color: #7f9f7f;">Second we will check if ratio of the proportions in each population</span>
+<span style="color: #7f9f7f;">## </span><span style="color: #7f9f7f;">agecat vary between study sites and the standard</span>
 totals <span style="color: #bfebbf; font-weight: bold;">&lt;-</span> ddply(stdyByStnd, c(<span style="color: #cc9393;">"city"</span>), summarise,
                 sum(pop.x)
                 )
 totals <span style="color: #bfebbf; font-weight: bold;">&lt;-</span> merge(stdyByStnd[,c(<span style="color: #cc9393;">"city"</span>,<span style="color: #cc9393;">"agecat"</span>,<span style="color: #cc9393;">"pop.x"</span>)], totals)
 totals$pop.wt  <span style="color: #bfebbf; font-weight: bold;">&lt;-</span> totals[,3] / totals[,4]
 totals <span style="color: #bfebbf; font-weight: bold;">&lt;-</span> arrange(totals, city, agecat)
+totals
 
 totalsStnd <span style="color: #bfebbf; font-weight: bold;">&lt;-</span> ddply(stdyByStnd, c(<span style="color: #cc9393;">"agecat"</span>), summarise,
                 sum(pop.x)
@@ -1041,9 +1055,12 @@ totalsStnd <span style="color: #bfebbf; font-weight: bold;">&lt;-</span> ddply(s
 totalsStnd$totalPop <span style="color: #bfebbf; font-weight: bold;">&lt;-</span> sum(totalsStnd[,2])
 totalsStnd$pop.wt.total <span style="color: #bfebbf; font-weight: bold;">&lt;-</span> totalsStnd[,2]/totalsStnd[,3]
 totalsStnd
-totals
+
+<span style="color: #7f9f7f;">## </span><span style="color: #7f9f7f;">merge these so we can look at the ratios</span>
 totals2 <span style="color: #bfebbf; font-weight: bold;">&lt;-</span> merge(totals, totalsStnd, by = <span style="color: #cc9393;">"agecat"</span>)
 totals2 <span style="color: #bfebbf; font-weight: bold;">&lt;-</span> arrange(totals2, agecat, city)
+
+<span style="color: #7f9f7f;">## </span><span style="color: #7f9f7f;">now plot the ratios</span>
 png(<span style="color: #cc9393;">"images/ratio-stdy-by-stnd-pops.png"</span>)
 mp <span style="color: #bfebbf; font-weight: bold;">&lt;-</span> barplot(totals2$pop.wt/totals2$pop.wt.total)
 text(mp, par(<span style="color: #cc9393;">"usr"</span>)[3],
@@ -1052,6 +1069,9 @@ text(mp, par(<span style="color: #cc9393;">"usr"</span>)[3],
      )
 abline(1,0)
 dev.off()
+
+<span style="color: #7f9f7f;">## </span><span style="color: #7f9f7f;">and we can see that there are far fewer 65to74 aged persons in LA</span>
+<span style="color: #7f9f7f;">## </span><span style="color: #7f9f7f;">than expected.</span>
 
 
 </pre>
