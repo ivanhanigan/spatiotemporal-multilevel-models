@@ -41,6 +41,7 @@ require(plyr)
 
 # load
 analyte <- read.csv("analyte.csv")
+View(analyte)
 
 # clean
 head(analyte)
@@ -94,6 +95,7 @@ text(mp, par("usr")[3],
      )
 abline(1,0)
 dev.off()
+plot(mp)
 
 ## we can see that LA has an issue with the 65to74 agecat
 
@@ -117,7 +119,7 @@ totalsStnd
 ## merge these so we can look at the ratios
 totals2 <- merge(totals, totalsStnd, by = "agecat")
 totals2 <- arrange(totals2, agecat, city)
-
+totals2
 ## now plot the ratios
 png("images/ratio-stdy-by-stnd-pops.png")
 mp <- barplot(totals2$pop.wt/totals2$pop.wt.total)
