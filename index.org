@@ -1335,6 +1335,26 @@ Where:<br/>
   
 #+end_src
 # ![nmmaps-eg-core.png](/images/nmmaps-eg-core.png)
+** 2013-10-28-spatial-lag-and-timeseries-model-with-nmmaps
+#+name:spatial-lag-and-timeseries-model-with-nmmaps-header
+#+begin_src markdown :tangle ~/projects/ivanhanigan.github.com.raw/_posts/2013-10-28-spatial-lag-and-timeseries-model-with-nmmaps.md :exports none :eval no :padline no
+---
+name: spatial-lag-and-timeseries-model-with-nmmaps
+layout: post
+title: spatial-lag-and-timeseries-model-with-nmmaps
+date: 2013-10-28
+categories:
+- spatial dependence
+---
+
+- Today I chatted with Phil Kokic at CSIRO Mathematics, Informatics and Statistics about the way the spatially lagged neighbours variable absorbs any residual spatial correlation in the errors
+- We agreed that this is a pretty minimal attempt, not as good as a spatial error model but pretty easy to implement
+- I've hacked together some very very ugly code to construct the lagged variable
+- [http://ivanhanigan.github.io/spatiotemporal-regression-models/#sec-3](http://ivanhanigan.github.io/spatiotemporal-regression-models/#sec-3)
+- There may be errors, it's been a long day.
+
+#+end_src
+
 * Case Study 1: Spatially Structured Timeseries with NMMAPS
 I will use the NMMAPSlite datasets for a simple example of what I describe as "Spatially Structured Timeseries" as opposed to "Spatio-Temporal" which I think more explicitly includes spatial structure in the model.
 ** Outcome Data
