@@ -2489,7 +2489,8 @@ I will use the same NMMAPSlite to show how I'd approach a simple "Spatio-Tempora
 [[file:NMMAPS-example/images/nmmaps-eg-neighbourhood.png]]
 *** Outcome
 #+name:load-suicide
-#+begin_src R :session *R* :tangle no :exports reports :eval no
+#+begin_src R :session *R* :tangle NMMAPS-example/case-study-2-load.r :exports reports :eval no
+  #### Now do the Neighbourhood autoregressive lagged variable  ####
   # func
   setwd("~/projects/spatiotemporal-regression-models/NMMAPS-example")
   require(gisviz)
@@ -2555,7 +2556,7 @@ I will use the same NMMAPSlite to show how I'd approach a simple "Spatio-Tempora
 
 ** Analysis
 *** Model with Spatial Lag
-#+begin_src R :session *R* :tangle no :exports reports :eval no
+#+begin_src R :session *R* :tangle NMMAPS-example/case-study-2-do.r :exports reports :eval no
   # func
   require(splines)
   
