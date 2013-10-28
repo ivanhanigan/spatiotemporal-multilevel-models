@@ -1351,7 +1351,7 @@ categories:
 - We agreed that this is a pretty minimal attempt, not as good as a spatial error model but pretty easy to implement
 - I've hacked together some very very ugly code to construct the lagged variable
 - [http://ivanhanigan.github.io/spatiotemporal-regression-models/#sec-3](http://ivanhanigan.github.io/spatiotemporal-regression-models/#sec-3)
-- There may be errors, it's been a long day.
+- There may be errors, it's been a long day, but I won't have a chance to check back on this till next week so I thought I'd put it out there as is.
 
 #+end_src
 
