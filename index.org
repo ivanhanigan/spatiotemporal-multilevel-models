@@ -2424,8 +2424,9 @@ cd ..
 * Case Study 2: Spatial Lag and Timeseries with NMMAPS
 I will use the same NMMAPSlite to show how I'd approach a simple "Spatio-Temporal" model.
 **** TODO The following is a stub of an idea.  For further development
-** Zones
-*** Spatial Neighbours Code
+** Data
+*** Zones
+**** Spatial Neighbours Code
 #+name:spatwat
 #+begin_src R :session *shell* :tangle NMMAPS-example/case-study-2-load.r :exports reports :eval no
   ################################################################
@@ -2464,5 +2465,102 @@ I will use the same NMMAPSlite to show how I'd approach a simple "Spatio-Tempora
   
 #+end_src
 
-*** Spatial Neighbours Output
+**** Spatial Neighbours Output
 [[file:NMMAPS-example/images/nmmaps-eg-neighbourhood.png]]
+*** Outcome
+#+name:load-suicide
+#+begin_src R :session *R* :tangle no :exports reports :eval no
+  # func
+  setwd("~/projects/spatiotemporal-regression-models/NMMAPS-example")
+  require(gisviz)
+  require(plyr)
+  
+  # load
+  analyte <- read.csv("analyte.csv")
+  shp <- readOGR("cities.shp", "cities")
+  
+  # clean
+  analyte$yy <- substr(analyte$date,1,4)
+  numYears<-length(names(table(analyte$yy)))
+  analyte$date <- as.Date(analyte$date)
+  analyte$time <- as.numeric(analyte$date)
+  analyte$agecat <- factor(analyte$agecat,
+                            levels = c("under65",
+                                "65to74", "75p"),
+                            ordered = TRUE
+                            )
+   
+  names(analyte)
+  analyte[1,]
+  table(analyte$city)
+  # do
+  study <- analyte[, c("city","date", "agecat", "cvd", "pop")]
+  subset(study, city == "tucs" & date == as.Date("1991-01-01"))
+  
+  nb <- dnearneigh(shp, d1 = 1, d2 = 1000)                      
+  head(nb)
+  head(shp@data)
+  adj <- adjacency_df(NB = nb, shp = shp, zone_id = 'city')
+  subset(adj, V1 == "tucs")
+  
+  neighbours <- merge(study, adj, by.x = "city", by.y = "V1")
+  subset(neighbours, city == "tucs" & date == as.Date("1991-01-01"))
+  
+  xvars <- c("V2", "date","agecat")
+  yvars <- c("city", "date", "agecat")
+  neighbours <- merge(neighbours[,c(xvars, "city")],
+                      analyte[,c(yvars, "cvd", "pop")],
+                      by.x = xvars,
+                      by.y = yvars)
+  names(neighbours)
+  subset(neighbours, city == "tucs" & date == as.Date("1991-01-01"))
+  
+  neighbours$asr  <- (neighbours$cvd / neighbours$pop) * 1000
+  
+  
+  neighbours2  <- ddply(neighbours, c("city", "date", "agecat"), summarise,
+                       NeighboursYij  = mean(asr)
+                       )
+  subset(neighbours2, city == "tucs" & date == as.Date("1991-01-01"))
+  table(neighbours2$city)
+  head(analyte)
+  
+  analyte  <- merge(analyte, neighbours2, by = c("city", "agecat", "date"))
+  analyte <- arrange(analyte, city, date, agecat)
+  head(analyte)
+  
+  
+#+end_src
+
+
+** Analysis
+*** Model with Spatial Lag
+#+begin_src R :session *R* :tangle no :exports reports :eval no
+  # func
+  require(splines)
+  
+  # load
+  # assumes the prior code chunks have been run
+  
+  # do
+  fit <- glm(cvd ~ ns(tmax, df = 3) + ns(dptp, df = 3) +
+             NeighboursYij + 
+             city + agecat +
+             ns(time, df = 7*numYears) +
+             offset(log(pop)),
+             data = analyte, family = poisson
+             )
+  
+  # plot of response functions
+  png("images/nmmaps-eg-sp-lag.png", width = 1000, height = 750, res = 150)
+  par(mfrow=c(2,3))
+  termplot(fit, terms = attr(terms(fit),'term.labels') [c(1:2,6)], se = TRUE, ylim =c(-.2,.2), col.term = 'black', col.se = 'black')
+  termplot(fit, terms = attr(terms(fit),'term.labels') [c(4,5)], se = TRUE, ylim =c(-3,1), col.term = 'black', col.se = 'black')
+  termplot(fit, terms = attr(terms(fit),'term.labels') [3], se = TRUE, ylim =c(-1,1), col.term = 'black', col.se = 'black')
+  dev.off()
+  
+  
+#+end_src
+*** Spatial Lag Model Plots
+[[file:NMMAPS-example/images/nmmaps-eg-sp-lag.png]]
+
