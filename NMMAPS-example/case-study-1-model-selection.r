@@ -59,9 +59,11 @@ dev.off()
  
 # plot prediction
 df$predictedCvd <- predict(fit2, df, 'response')
+plot(df$predictedCvd)
 # baseline is given by the intercept
 fit3 <- glm(cvd ~ 1, data = df, family = poisson)
 df$baseline <-  predict(fit3, df, 'response')
+
 with(subset(df, date>=as.Date('1995-01-01') & date <= as.Date('1995-07-31')),
  plot(date, cvd, type ='l', col = 'grey')
         )

@@ -3,12 +3,18 @@
 # name:core
 # func
 setwd("~/projects/spatiotemporal-regression-models/NMMAPS-example")
+rm(list= ls())
+graphics.off()
+
 require(mgcv)
 require(splines)
 
 # load
 analyte <- read.csv("analyte.csv")
+View(analyte)
+summary(analyte)
 
+      
 # clean
 analyte$yy <- substr(analyte$date,1,4)
 numYears<-length(names(table(analyte$yy)))
