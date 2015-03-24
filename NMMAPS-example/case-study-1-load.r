@@ -21,7 +21,7 @@ for(f_i in 1:length(flist))
         df <- df[,c("city","date", "agecat",
                     "cvd", "resp", "tmax",
                     "tmin", "dptp")]
-        #str(df)
+        # str(df)
         write.table(df,
                     "outcome.csv", sep = ",",
                     row.names = F, append = f_i > 1,
