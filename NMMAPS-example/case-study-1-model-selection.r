@@ -13,6 +13,7 @@ dir("data")
 city <- "Chicago"
 data <- read.csv(sprintf("data/%s.csv", city), header=T)
 str(data)
+View(data)
 data$yy <- substr(data$date,1,4)
 data$date <- as.Date(data$date)
 ######################################################
@@ -37,6 +38,33 @@ numYears<-length(names(table(data$yy)))
 df <- subset(data, agecat == '75p')
 df$time <- as.numeric(df$date)
 fit <- gam(cvd ~ s(pm10tmean) + s(tmax) + s(dptp) + s(time, k= 7*numYears, fx=T), data = df, family = poisson)
+summary(fit)
+str(df)
+View(df)
+# Family: poisson 
+# Link function: log 
+# 
+# Formula:
+#   cvd ~ s(pm10tmean) + s(tmax) + s(dptp) + s(time, k = 7 * numYears, 
+#                                              fx = T)
+# 
+# Parametric coefficients:
+#   Estimate Std. Error z value Pr(>|z|)    
+# (Intercept) 3.400536   0.002628    1294   <2e-16 ***
+#   ---
+#   Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+# 
+# Approximate significance of smooth terms:
+#   edf Ref.df  Chi.sq  p-value    
+# s(pm10tmean)  1.002  1.003   1.349    0.246    
+# s(tmax)       7.973  8.643  47.633 2.56e-07 ***
+#   s(dptp)       3.805  4.899   8.681    0.116    
+# s(time)      97.000 97.000 808.847  < 2e-16 ***
+#   ---
+#   Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+# 
+# R-sq.(adj) =   0.21   Deviance explained = 23.9%
+# UBRE score = 0.18294  Scale est. = 1         n = 4859
 # plot of response functions
 par(mfrow=c(2,2))
 plot(fit)

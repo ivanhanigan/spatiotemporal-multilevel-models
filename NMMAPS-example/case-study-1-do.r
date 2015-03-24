@@ -27,12 +27,21 @@ analyte$agecat <- factor(analyte$agecat,
                           )
 
 # do
-fit <- gam(cvd ~ s(tmax) + s(dptp) +
-           city + agecat +
-           s(time, k= 7*numYears, fx=T) +
-           offset(log(pop)),
-           data = analyte, family = poisson
-           )
+fit <- gam(cvd ~ s(tmax) + s(dptp) + city + agecat + s(time, k= 7*numYears, fx=T) +
+           offset(log(pop)), data = analyte, family = poisson )
+summary(fit)
+
+# Family: poisson 
+# Link function: log 
+# 
+# Formula:
+#   cvd ~ s(tmax) + s(dptp) + city + agecat + s(time, k = 7 * numYears, 
+#                                               fx = T) + offset(log(pop))
+# 
+# Estimated degrees of freedom:
+#   3.20  4.72 97.00  total = 111.92 
+# 
+# UBRE score: 1.102554
 
 # plot of response functions
 png("images/nmmaps-eg-core.png", width = 1000, height = 750, res = 150)
