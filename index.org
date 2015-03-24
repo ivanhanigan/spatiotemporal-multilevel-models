@@ -29,7 +29,7 @@ Ivan Hanigan
 
 
 
-* COMMENT Notes
+* COMMENT Notes for blog
 ** Update on reflections from Bob Haining's Lecture
 [[http://ivanhanigan.github.io/2013/04/reflections-bob-haining/][Earlier this year]] Prof Bob Haining from the Geography Department Cambridge visited and gave us a great lecture on spatial regression.
 
@@ -1122,6 +1122,283 @@ Where:<br/>
       # summary(fit)
   
 #+end_src
+** COMMENT 2013-10-16-spatially-structured-time-series-with-nmmaps
+#+name:spatially-structured-time-series-with-nmmaps-header
+#+begin_src markdown :tangle ~/projects/ivanhanigan.github.com.raw/_posts/2013-10-16-spatially-structured-time-series-with-nmmaps.md :exports none :eval no :padline no
+  ---
+  name: spatially-structured-time-series-with-nmmaps
+  layout: post
+  title: spatially-structured-time-series-with-nmmaps
+  date: 2013-10-16
+  categories:
+  - spatial dependence
+  ---
+  
+  I will use the NMMAPSlite datasets for a simple example of what I
+  describe as "Spatially Structured Timeseries" as opposed to
+  "Spatio-Temporal" which I think more explicitly includes spatial
+  structure in the model.  [See This Report](http://ivanhanigan.github.io/spatiotemporal-regression-models/) for all the gory details.
+  
+  # R Codes
+  
+  <!-- <?xml version="1.0" encoding="utf-8"?> -->
+  <!-- <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" -->
+  <!--                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"> -->
+  <!-- <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"> -->
+  <head>
+  <title>Spatiotemporal Regression Modelling</title>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+  <meta name="title" content="Spatiotemporal Regression Modelling"/>
+  <meta name="generator" content="Org-mode"/>
+  <meta name="generated" content="2013-10-16T15:17+1100"/>
+  <meta name="author" content="Ivan Hanigan"/>
+  <meta name="description" content=""/>
+  <meta name="keywords" content=""/>
+  <style type="text/css">
+   <!--/*--><![CDATA[/*><!--*/
+    html { font-family: Times, serif; font-size: 12pt; }
+    .title  { text-align: center; }
+    .todo   { color: red; }
+    .done   { color: green; }
+    .tag    { background-color: #add8e6; font-weight:normal }
+    .target { }
+    .timestamp { color: #bebebe; }
+    .timestamp-kwd { color: #5f9ea0; }
+    .right  {margin-left:auto; margin-right:0px;  text-align:right;}
+    .left   {margin-left:0px;  margin-right:auto; text-align:left;}
+    .center {margin-left:auto; margin-right:auto; text-align:center;}
+    p.verse { margin-left: 3% }
+    pre {
+      border: 1pt solid #AEBDCC;
+      background-color: #F3F5F7;
+      padding: 5pt;
+      font-family: courier, monospace;
+          font-size: 90%;
+          overflow:auto;
+    }
+    table { border-collapse: collapse; }
+    td, th { vertical-align: top;  }
+    th.right  { text-align:center;  }
+    th.left   { text-align:center;   }
+    th.center { text-align:center; }
+    td.right  { text-align:right;  }
+    td.left   { text-align:left;   }
+    td.center { text-align:center; }
+    dt { font-weight: bold; }
+    div.figure { padding: 0.5em; }
+    div.figure p { text-align: center; }
+    div.inlinetask {
+      padding:10px;
+      border:2px solid gray;
+      margin:10px;
+      background: #ffffcc;
+    }
+    textarea { overflow-x: auto; }
+    .linenr { font-size:smaller }
+    .code-highlighted {background-color:#ffff00;}
+    .org-info-js_info-navigation { border-style:none; }
+    #org-info-js_console-label { font-size:10px; font-weight:bold;
+                                 white-space:nowrap; }
+    .org-info-js_search-highlight {background-color:#ffff00; color:#000000;
+                                   font-weight:bold; }
+    /*]]>*/-->
+  </style>
+  <script type="text/javascript">
+  /*
+  @licstart  The following is the entire license notice for the
+  JavaScript code in this tag.
+  
+  Copyright (C) 2012-2013 Free Software Foundation, Inc.
+  
+  The JavaScript code in this tag is free software: you can
+  redistribute it and/or modify it under the terms of the GNU
+  General Public License (GNU GPL) as published by the Free Software
+  Foundation, either version 3 of the License, or (at your option)
+  any later version.  The code is distributed WITHOUT ANY WARRANTY;
+  without even the implied warranty of MERCHANTABILITY or FITNESS
+  FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+  
+  As additional permission under GNU GPL version 3 section 7, you
+  may distribute non-source (e.g., minimized or compacted) forms of
+  that code without the copy of the GNU GPL normally required by
+  section 4, provided you include this license notice and a URL
+  through which recipients can access the Corresponding Source.
+  
+  
+  @licend  The above is the entire license notice
+  for the JavaScript code in this tag.
+  ,*/
+  <!--/*--><![CDATA[/*><!--*/
+   function CodeHighlightOn(elem, id)
+   {
+     var target = document.getElementById(id);
+     if(null != target) {
+       elem.cacheClassElem = elem.className;
+       elem.cacheClassTarget = target.className;
+       target.className = "code-highlighted";
+       elem.className   = "code-highlighted";
+     }
+   }
+   function CodeHighlightOff(elem, id)
+   {
+     var target = document.getElementById(id);
+     if(elem.cacheClassElem)
+       elem.className = elem.cacheClassElem;
+     if(elem.cacheClassTarget)
+       target.className = elem.cacheClassTarget;
+   }
+  /*]]>*///-->
+  </script>
+  
+  </head>
+  <body>
+  
+  <div id="preamble">
+  
+  </div>
+  
+  <div id="content">
+  <h1 class="title">Spatiotemporal Regression Modelling</h1>
+  
+  
+  <div id="table-of-contents">
+  <h2>Table of Contents</h2>
+  <div id="text-table-of-contents">
+  <ul>
+  <li><a href="#sec-1">1 Core Model</a></li>
+  <li><a href="#sec-2">2 Core Model Plots</a></li>
+  </ul>
+  </div>
+  </div>
+  
+  <div id="outline-container-1" class="outline-4">
+  <h4 id="sec-1"><span class="section-number-4">1</span> Core Model</h4>
+  <div class="outline-text-4" id="text-1">
+  
+  
+  
+  
+  <pre class="src src-R"><span style="color: #5F7F5F;">################################################################</span>
+  <span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">name:core</span>
+  <span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">func</span>
+  setwd(<span style="color: #CC9393;">"~/projects/spatiotemporal-regression-models/NMMAPS-example"</span>)
+  <span style="color: #BFEBBF; font-weight: bold;">require</span>(mgcv)
+  <span style="color: #BFEBBF; font-weight: bold;">require</span>(splines)
+  
+  <span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">load</span>
+  analyte <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> read.csv(<span style="color: #CC9393;">"analyte.csv"</span>)
+  
+  <span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">clean</span>
+  analyte$yy <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> substr(analyte$date,1,4)
+  numYears<span style="color: #BFEBBF; font-weight: bold;">&lt;-</span>length(names(table(analyte$yy)))
+  analyte$date <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> as.Date(analyte$date)
+  analyte$time <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> as.numeric(analyte$date)
+  analyte$agecat <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> factor(analyte$agecat,
+                            levels = c(<span style="color: #CC9393;">"under65"</span>,
+                                <span style="color: #CC9393;">"65to74"</span>, <span style="color: #CC9393;">"75p"</span>),
+                            ordered = <span style="color: #7CB8BB;">TRUE</span>
+                            )
+  
+  <span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">do</span>
+  fit <span style="color: #BFEBBF; font-weight: bold;">&lt;-</span> gam(cvd ~ s(tmax) + s(dptp) +
+             city + agecat +
+             s(time, k= 7*numYears, fx=T) +
+             offset(log(pop)),
+             data = analyte, family = poisson
+             )
+  
+  <span style="color: #5F7F5F;"># </span><span style="color: #7F9F7F;">plot of response functions</span>
+  png(<span style="color: #CC9393;">"images/nmmaps-eg-core.png"</span>, width = 1000, height = 750, res = 150)
+  par(mfrow=c(2,3))
+  plot(fit, all.terms = <span style="color: #7CB8BB;">TRUE</span>)
+  dev.off()
+  
+  
+  </pre>
+  
+  </div>
+  
+  </div>
+  
+  <div id="outline-container-2" class="outline-4">
+  <h4 id="sec-2"><span class="section-number-4">2</span> Core Model Plots</h4>
+  <div class="outline-text-4" id="text-2">
+  
+  <p><img src="/images/nmmaps-eg-core.png"  alt="/images/nmmaps-eg-core.png" />
+  </p></div>
+  </div>
+  </div>
+  
+  </body>
+  </html>
+  
+  
+#+end_src
+# ![nmmaps-eg-core.png](/images/nmmaps-eg-core.png)
+** 2013-10-28-spatial-lag-and-timeseries-model-with-nmmaps
+#+name:spatial-lag-and-timeseries-model-with-nmmaps-header
+#+begin_src markdown :tangle ~/projects/ivanhanigan.github.com.raw/_posts/2013-10-28-spatial-lag-and-timeseries-model-with-nmmaps.md :exports none :eval no :padline no
+---
+name: spatial-lag-and-timeseries-model-with-nmmaps
+layout: post
+title: spatial-lag-and-timeseries-model-with-nmmaps
+date: 2013-10-28
+categories:
+- spatial dependence
+---
+
+- Today I chatted with Phil Kokic at CSIRO Mathematics, Informatics and Statistics about the way the spatially lagged neighbours variable absorbs any residual spatial correlation in the errors
+- We agreed that this is a pretty minimal attempt, not as good as a spatial error model but pretty easy to implement
+- I've hacked together some very very ugly code to construct the lagged variable
+- [http://ivanhanigan.github.io/spatiotemporal-regression-models/#sec-3](http://ivanhanigan.github.io/spatiotemporal-regression-models/#sec-3)
+- There may be errors, it's been a long day, but I won't have a chance to check back on this till next week so I thought I'd put it out there as is.
+
+#+end_src
+
+** 2013-10-31-notes-on-spatial-stats-meeting-with-sarunya-sujaritpong
+#+name:notes-on-meeting-with-sarunya-sujaritpong-header
+#+begin_src markdown :tangle ~/projects/ivanhanigan.github.com.raw/_posts/2013-10-31-notes-on-spatial-stats-meeting-with-sarunya-sujaritpong.md :exports none :eval no :padline no
+---
+name: notes-on-spatial-stats-meeting-with-sarunya-sujaritpong
+layout: post
+title: notes-on-spatial-stats-meeting-with-sarunya-sujaritpong
+date: 2013-10-31
+categories:
+- spatial dependence
+---
+
+- Yesterday I met with Sarunya Sujaritpong a PhD student working with [spatially structured time-series models as described previously](http://ivanhanigan.github.io/2013/10/spatially-structured-time-series-with-nmmaps/)
+- Her supervisor Keith Dear has given me a lot of good stats advice in the past and one bit I keep thinking about is that a time series model can be fit for multiple spatial areal units of the same city and residual spatial auto-correlation in the errors should not be too much of a concern
+- The problem would be if you get strong spatial autocorrelation of the residuals this indicates that the assumption of independent errors is violated and you will have tighter confidence intervals around the coefficients of interest than is really the case, inflating the signficance estimated for the relative risk  
+- The beta coefficient itself shouldn't be affected.
+- So long as biostatisticians like Keith are comfortable with not addressing this issue in spatially structured time-series that is great but I see people are [starting to include this in their models](http://www.plosone.org/article/info%3Adoi%2F10.1371%2Fjournal.pone.0043360) 
+- To date I've mostly seen it done in spatial (cross sectional) data analysis, not spatial times-series
+- I'm preparing for the day when I might need to address this for a reviewer and would like to know what to do about it in case that happens
+- So I asked Sarunya for a discussion about her research
+
+### Sarunya's model is essentially like this
+#### R Code:
+    fit <- glm(deaths ~ pollutant1 + pollutant2 + pollutant ... +
+           ns(temp, df) + ns(humidity, df) +
+           ns(time, df = 7*numYears) +
+           SLA * ns(time, df = 2),
+           data = analyte, family = poisson
+           )
+<p></p>
+- SLA is Statistical Local Area (now called SA2, like a suburb)
+- Sarunya explained that the research question was if the magnitude of the coeff on pollutant1 differed between this model and the old style of model where an entire city is used as the unit of analysis per day and exposure estimates are calculated as averages across several monitoring stations in the city
+- turns out that this comparison is still valid EVEN IF THE STANDARD ERROR IS BIASED DUE TO RESIDUAL SPATIAL AUTOCORRELATION
+- therefore this study avoids the issue by it's intentional design to compare betas not se
+- Interestingly Sarunya explained that the stats theory suggests that even if the exposure precision is increased (exposure misclassification bias is decreased) the se on the beta will not be affected.
+- this is fascinating in itself, but a separate issue for another post
+
+### Conclusions
+- So it looks like the extent a study might need to consider the issue of potential residual spatial autocorrelation depends alot on what questions are being asked and what inferences will be attempted from the results
+- if the aim of the study is to estimate the magnitude AND CONFIDENCE INTERVALS of an exposure's relative risk (especially some novel exposure such as interstellar space dust across the suburbs) then the issue might become important to address.
+
+THANKS Sarunya!
+#+end_src
+
 * Case Study 1: Spatially Structured Timeseries with NMMAPS
 I will use the NMMAPSlite datasets for a simple example of what I describe as "Spatially Structured Timeseries" as opposed to "Spatio-Temporal" which I think more explicitly includes spatial structure in the model.
 ** Outcome Data
@@ -1710,14 +1987,156 @@ The process for getting the population data from the websites is a bit of a pain
   
   # do
   analyte <- merge(outcome, population, by = c("city", "agecat"))
-  
+  analyte <- arrange(analyte, city, date, agecat)
   # check
   subset(analyte, date == as.Date("1990-01-01"))
-
+  
   # save
   write.csv(analyte, "analyte.csv", row.names = FALSE)
 #+end_src
 
+** Data Checking
+*** Check Assumption of Proportional Hazards
+#+begin_src R :session *R* :tangle NMMAPS-example/case-study-1-data-checking.r :exports reports :eval no
+  # Checking the proportional hazards assumption for Indirect Age Standardisation
+  
+  # Background
+  ## Indirect SMRs from different index/study populations are not strictly comparable
+  ## because they are calculated using different weighting schemes that
+  ## depend upon the age structures of the index/study populations
+  ## (see http://www.statsdirect.com/webhelp/#rates/smr.htm).
+  
+  ## Indirect SMRs can be compared if you make the assumption that the
+  ## ratio of rates between index and reference populations is constant;
+  ## this is similar to the assumption of proportional hazards in Cox
+  ## regression (Armitage and Berry, 1994).
+  
+  ## So we need to check if the rate ratio of the study population(s)
+  ## compared to the standard population varies substantially with age.
+  ## If not the proportional hazards assumption holds for the standard
+  ## rates compared with the observed rates and the Indirect SMRs are
+  ## comparable.  To do this check we calculate the Annualised Age Specific
+  ## Rates for our study areas and for our standard for several years at
+  ## periodic timepoints across the study period, and then calculate the
+  ## ratio of these at each timepoint we could reassure our selves that
+  ## this assumption holds.
+  
+  ## An additional issue arises when there are non-negligible differences
+  ## in the age distributions of the study population(s) and the standard
+  ## population. In this situation, indirect standardisation produces
+  ## biased results due to residual confounding by age
+  
+  ## Also see Australian Institute of Health and Welfare. (2011). Principles on
+  ## the use of direct age-standardisation in administrative data
+  ## collections For measuring the gap between Indigenous and
+  ## non-Indigenous Australians. Data linkage series. Cat. no. CSI 12.
+  ## Canberra: AIHW. Retrieved from
+  ## http://www.aihw.gov.au/publication-detail/?id=10737420133
+  
+  ################################################################
+  # func
+  setwd("~/projects/spatiotemporal-regression-models/NMMAPS-example")
+  require(plyr)
+  
+  # load
+  analyte <- read.csv("analyte.csv")
+  
+  # clean
+  head(analyte)
+  analyte$yy  <- substr(analyte$date, 1, 4)
+    
+  # do
+  ## first we want to see if the age specific rates vary across the
+  ## study sites
+  disease_colname <- "cvd"
+  pop_colname <- "pop"
+  by_cols  <- c("city", "agecat", "yy")
+  
+  stdysites  <- ddply(analyte, by_cols,
+                      function(df) return(
+                        c(observed = sum(df[,disease_colname]),
+                          pop = mean(df[,pop_colname]),
+                          crude.rate = sum(df[,disease_colname])/mean(df[,pop_colname])
+                          )
+                        )
+                      )
+  ## check
+  head(stdysites)
+  subset(stdysites, yy == 1987 & city == "batr")
+  
+  ## define the subset we will use just the deaths and pop in 2000
+  stdy <- subset(stdysites, yy == 2000)
+  stdy
+  
+  ## now define the standard population as the entire country
+  standard  <- ddply(stdy, c("agecat"),
+                       function(df) return(
+                         c(observed = sum(df[,"observed"]),
+                           pop = sum(df[,"pop"]),
+                           crude.rate = sum(df[,"observed"])/
+                             sum(df[,"pop"])
+                           )
+                         )
+                      )
+  standard
+  
+  ## Merge the studysites and the standard
+  stdyByStnd  <- merge(stdy, standard, by = "agecat")
+  stdyByStnd
+  
+  ## plot the rate ratios
+  png("images/ratio-stdy-by-stnd.png")
+  mp <- barplot(stdyByStnd$crude.rate.x/stdyByStnd$crude.rate.y)
+  text(mp, par("usr")[3],
+       labels = paste(stdyByStnd$agecat,stdyByStnd$city),
+       srt = 45, adj = c(1.1,1.1), xpd = TRUE
+       )
+  abline(1,0)
+  dev.off()
+  
+  ## we can see that LA has an issue with the 65to74 agecat
+  
+  ## Second we will check if ratio of the proportions in each population
+  ## agecat vary between study sites and the standard
+  totals <- ddply(stdyByStnd, c("city"), summarise,
+                  sum(pop.x)
+                  )
+  totals <- merge(stdyByStnd[,c("city","agecat","pop.x")], totals)
+  totals$pop.wt  <- totals[,3] / totals[,4]
+  totals <- arrange(totals, city, agecat)
+  totals
+  
+  totalsStnd <- ddply(stdyByStnd, c("agecat"), summarise,
+                  sum(pop.x)
+                  )
+  totalsStnd$totalPop <- sum(totalsStnd[,2])
+  totalsStnd$pop.wt.total <- totalsStnd[,2]/totalsStnd[,3]
+  totalsStnd
+  
+  ## merge these so we can look at the ratios
+  totals2 <- merge(totals, totalsStnd, by = "agecat")
+  totals2 <- arrange(totals2, agecat, city)
+  
+  ## now plot the ratios
+  png("images/ratio-stdy-by-stnd-pops.png")
+  mp <- barplot(totals2$pop.wt/totals2$pop.wt.total)
+  text(mp, par("usr")[3],
+       labels = paste(totals2$agecat,totals2$city),
+       srt = 45, adj = c(1.1,1.1), xpd = TRUE
+       )
+  abline(1,0)
+  dev.off()
+  
+  ## and we can see that there are far fewer 65to74 aged persons in LA
+  ## than expected.
+  
+  
+#+end_src
+
+*** Incidence Rate Ratios Plot
+[[file:NMMAPS-example/images/ratio-stdy-by-stnd.png]]
+*** Population Rate Ratios Plot
+[[file:NMMAPS-example/images/ratio-stdy-by-stnd-pops.png]]
     
 ** Exploratory Data Analyses
 *** Time-series Plots Code
@@ -2069,8 +2488,9 @@ cd ..
 * Case Study 2: Spatial Lag and Timeseries with NMMAPS
 I will use the same NMMAPSlite to show how I'd approach a simple "Spatio-Temporal" model.
 **** TODO The following is a stub of an idea.  For further development
-** Zones
-*** Spatial Neighbours Code
+** Data
+*** Zones
+**** Spatial Neighbours Code
 #+name:spatwat
 #+begin_src R :session *shell* :tangle NMMAPS-example/case-study-2-load.r :exports reports :eval no
   ################################################################
@@ -2109,5 +2529,103 @@ I will use the same NMMAPSlite to show how I'd approach a simple "Spatio-Tempora
   
 #+end_src
 
-*** Spatial Neighbours Output
+**** Spatial Neighbours Output
 [[file:NMMAPS-example/images/nmmaps-eg-neighbourhood.png]]
+*** Outcome
+#+name:load-suicide
+#+begin_src R :session *R* :tangle NMMAPS-example/case-study-2-load.r :exports reports :eval no
+  #### Now do the Neighbourhood autoregressive lagged variable  ####
+  # func
+  setwd("~/projects/spatiotemporal-regression-models/NMMAPS-example")
+  require(gisviz)
+  require(plyr)
+  
+  # load
+  analyte <- read.csv("analyte.csv")
+  shp <- readOGR("cities.shp", "cities")
+  
+  # clean
+  analyte$yy <- substr(analyte$date,1,4)
+  numYears<-length(names(table(analyte$yy)))
+  analyte$date <- as.Date(analyte$date)
+  analyte$time <- as.numeric(analyte$date)
+  analyte$agecat <- factor(analyte$agecat,
+                            levels = c("under65",
+                                "65to74", "75p"),
+                            ordered = TRUE
+                            )
+   
+  names(analyte)
+  analyte[1,]
+  table(analyte$city)
+  # do
+  study <- analyte[, c("city","date", "agecat", "cvd", "pop")]
+  subset(study, city == "tucs" & date == as.Date("1991-01-01"))
+  
+  nb <- dnearneigh(shp, d1 = 1, d2 = 1000)                      
+  head(nb)
+  head(shp@data)
+  adj <- adjacency_df(NB = nb, shp = shp, zone_id = 'city')
+  subset(adj, V1 == "tucs")
+  
+  neighbours <- merge(study, adj, by.x = "city", by.y = "V1")
+  subset(neighbours, city == "tucs" & date == as.Date("1991-01-01"))
+  
+  xvars <- c("V2", "date","agecat")
+  yvars <- c("city", "date", "agecat")
+  neighbours <- merge(neighbours[,c(xvars, "city")],
+                      analyte[,c(yvars, "cvd", "pop")],
+                      by.x = xvars,
+                      by.y = yvars)
+  names(neighbours)
+  subset(neighbours, city == "tucs" & date == as.Date("1991-01-01"))
+  
+  neighbours$asr  <- (neighbours$cvd / neighbours$pop) * 1000
+  
+  
+  neighbours2  <- ddply(neighbours, c("city", "date", "agecat"), summarise,
+                       NeighboursYij  = mean(asr)
+                       )
+  subset(neighbours2, city == "tucs" & date == as.Date("1991-01-01"))
+  table(neighbours2$city)
+  head(analyte)
+  
+  analyte  <- merge(analyte, neighbours2, by = c("city", "agecat", "date"))
+  analyte <- arrange(analyte, city, date, agecat)
+  head(analyte)
+  
+  
+#+end_src
+
+
+** Analysis
+*** Model with Spatial Lag
+#+begin_src R :session *R* :tangle NMMAPS-example/case-study-2-do.r :exports reports :eval no
+  # func
+  require(splines)
+  
+  # load
+  # assumes the prior code chunks have been run
+  
+  # do
+  fit <- glm(cvd ~ ns(tmax, df = 3) + ns(dptp, df = 3) +
+             NeighboursYij + 
+             city + agecat +
+             ns(time, df = 7*numYears) +
+             offset(log(pop)),
+             data = analyte, family = poisson
+             )
+  
+  # plot of response functions
+  png("images/nmmaps-eg-sp-lag.png", width = 1000, height = 750, res = 150)
+  par(mfrow=c(2,3))
+  termplot(fit, terms = attr(terms(fit),'term.labels') [c(1:2,6)], se = TRUE, ylim =c(-.2,.2), col.term = 'black', col.se = 'black')
+  termplot(fit, terms = attr(terms(fit),'term.labels') [c(4,5)], se = TRUE, ylim =c(-3,1), col.term = 'black', col.se = 'black')
+  termplot(fit, terms = attr(terms(fit),'term.labels') [3], se = TRUE, ylim =c(-1,1), col.term = 'black', col.se = 'black')
+  dev.off()
+  
+  
+#+end_src
+*** Spatial Lag Model Plots
+[[file:NMMAPS-example/images/nmmaps-eg-sp-lag.png]]
+
