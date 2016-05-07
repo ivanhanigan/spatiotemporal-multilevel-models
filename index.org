@@ -27,14 +27,15 @@ Ivan Hanigan
 #+end_src
 ** Version Statement
 #+begin_src R :session *R* :exports none
-  commit_msg <- "written R codes to scripts"
+  commit_msg <- "Add ML modelling"
   commit_msg <- as.data.frame(c(as.character(Sys.Date()), commit_msg))
   commit_msg
 #+end_src
 
+#+RESULTS:
+|       2016-05-07 |
+| Add ML modelling |
 
-|                 2013-10-16 |
-| written R codes to scripts |
 
 
 
@@ -2653,4 +2654,15 @@ I will use the same NMMAPSlite to show how I'd approach a simple "Spatio-Tempora
 #+end_src
 *** Spatial Lag Model Plots
 [[file:NMMAPS-example/images/nmmaps-eg-sp-lag.png]]
+
+* Multilevel modelling
+** Terminology
+In the introduction to Gelman and Hill (2007) they point out the problem of terminology when discussing multilevel modelling.  This concern also appears in the work of the rstanarm package developers and in the vignette 'Estimating Generalized Linear Models with Group-Specific Terms with rstanarm' they state:
+
+Models with this structure are refered to by many names: multilevel models, (generalized) linear mixed (effects) models (GLMM), hierarchical (generalized) linear models, etc. The terminology for the model parameters is equally diverse... [and commonly used terms] are not only misleading but also defined differently across the various fields in which these models are applied.
+
+So in this work we avoid using the names fixed effects and random effects, instead we use the more verbose phrase: intercepts/coefficients that are common across groups and intercepts/coefficients that vary by group.
+** COMMENT Notes
+*** Data structure
+I was interested to read in Gelman and Hill (Data analysis using regression and multilevel /hierarchical models), that they specify breaking multilevel data into tables that reflect the nested structure of variables in the study rather than a long format with repetition of the values of group variables (Fig 11.2-11.3 attached). I found it interesting because the text struck me as a recommendation for _housing_ data this way rather than as a pre-analysis, data manipulation step. The authors message was (whether you agree with it or not): two tables (reflecting the appropriate nested data) are easier for the user to: a) understand the structure of the data; and b) analyse the data.  
 

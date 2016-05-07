@@ -7,7 +7,7 @@
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <meta name="title" content="Spatiotemporal Regression and Multilevel Modelling"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2016-05-07T10:29+1000"/>
+<meta name="generated" content="2016-05-07T10:59+1000"/>
 <meta name="author" content="Ivan Hanigan"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -187,8 +187,12 @@ for the JavaScript code in this tag.
 <ul>
 <li><a href="#sec-3-2-1">3.2.1 Model with Spatial Lag</a></li>
 <li><a href="#sec-3-2-2">3.2.2 Spatial Lag Model Plots</a></li>
+</ul></li>
 </ul>
 </li>
+<li><a href="#sec-4">4 Multilevel modelling</a>
+<ul>
+<li><a href="#sec-4-1">4.1 Terminology</a></li>
 </ul>
 </li>
 </ul>
@@ -217,16 +221,6 @@ Ivan Hanigan
 <div class="outline-text-3" id="text-1-1">
 
 
-
-
-<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
-<colgroup><col class="left" />
-</colgroup>
-<tbody>
-<tr><td class="left">2013-10-16</td></tr>
-<tr><td class="left">written R codes to scripts</td></tr>
-</tbody>
-</table>
 
 
 
@@ -1754,6 +1748,31 @@ dev.off()
 <p><img src="NMMAPS-example/images/nmmaps-eg-sp-lag.png"  alt="NMMAPS-example/images/nmmaps-eg-sp-lag.png" />
 </p>
 </div>
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-4" class="outline-2">
+<h2 id="sec-4"><span class="section-number-2">4</span> Multilevel modelling</h2>
+<div class="outline-text-2" id="text-4">
+
+
+</div>
+
+<div id="outline-container-4-1" class="outline-3">
+<h3 id="sec-4-1"><span class="section-number-3">4.1</span> Terminology</h3>
+<div class="outline-text-3" id="text-4-1">
+
+<p>In the introduction to Gelman and Hill (2007) they point out the problem of terminology when discussing multilevel modelling.  This concern also appears in the work of the rstanarm package developers and in the vignette 'Estimating Generalized Linear Models with Group-Specific Terms with rstanarm' they state:
+</p>
+<p>
+Models with this structure are refered to by many names: multilevel models, (generalized) linear mixed (effects) models (GLMM), hierarchical (generalized) linear models, etc. The terminology for the model parameters is equally diverse&hellip; [and commonly used terms] are not only misleading but also defined differently across the various fields in which these models are applied.
+</p>
+<p>
+So in this work we avoid using the names fixed effects and random effects, instead we use the more verbose phrase: intercepts/coefficients that are common across groups and intercepts/coefficients that vary by group.
+</p>
+
 </div>
 </div>
 </div>
