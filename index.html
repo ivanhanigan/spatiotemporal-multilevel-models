@@ -3,11 +3,11 @@
                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<title>Spatiotemporal Regression Modelling</title>
+<title>Spatiotemporal Regression and Multilevel Modelling</title>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
-<meta name="title" content="Spatiotemporal Regression Modelling"/>
+<meta name="title" content="Spatiotemporal Regression and Multilevel Modelling"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2013-10-28T20:47+1100"/>
+<meta name="generated" content="2016-05-07T10:29+1000"/>
 <meta name="author" content="Ivan Hanigan"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -115,10 +115,11 @@ for the JavaScript code in this tag.
 </div>
 
 <div id="content">
-<h1 class="title">Spatiotemporal Regression Modelling</h1>
+<h1 class="title">Spatiotemporal Regression and Multilevel Modelling</h1>
 
 
 <hr/>
+
 
 
 <div id="table-of-contents">
@@ -142,7 +143,8 @@ for the JavaScript code in this tag.
 <li><a href="#sec-2-3">2.3 Zones</a>
 <ul>
 <li><a href="#sec-2-3-1">2.3.1 Map Shapefile Code</a></li>
-<li><a href="#sec-2-3-2">2.3.2 Map Shapefile Output</a></li>
+<li><a href="#sec-2-3-2">2.3.2 Map Shapefile 2</a></li>
+<li><a href="#sec-2-3-3">2.3.3 Map Shapefile Output</a></li>
 </ul>
 </li>
 <li><a href="#sec-2-4">2.4 Population Data</a>
@@ -200,7 +202,7 @@ for the JavaScript code in this tag.
 
 
 
-<pre class="src src-markdown"><span style="color: #268bd2; font-weight: bold;">#</span> <span style="color: #268bd2; font-weight: bold;">Spatiotemporal Regression Modelling</span>
+<pre class="src src-markdown"><span style="color: #268bd2; font-weight: bold;"># Spatiotemporal Regression Modelling</span>
 
 This is an Open Notebook for my work on Spatiotemporal Regression Modelling tips and tricks.
 
@@ -382,14 +384,14 @@ flist
 <pre class="src src-R"><span style="color: #586e75;">################################################################</span>
 <span style="color: #586e75;"># </span><span style="color: #586e75;">name:zones</span>
 <span style="color: #586e75;"># </span><span style="color: #586e75;">func</span>
-setwd(<span style="color: #2aa198;">"~/projects/spatiotemporal-regression-models/NMMAPS-example"</span>)
+setwd(<span style="color: #2aa198;">"~/Dropbox/projects/spatiotemporal-regression-models/NMMAPS-example"</span>)
 <span style="color: #586e75;">#</span><span style="color: #586e75;">require(devtools)</span>
 <span style="color: #586e75;">#</span><span style="color: #586e75;">install_github("gisviz", "ivanhanigan")</span>
 <span style="color: #268bd2; font-weight: bold;">require</span>(gisviz)
 
 <span style="color: #586e75;"># </span><span style="color: #586e75;">load</span>
 flist <span style="color: #268bd2; font-weight: bold;">&lt;-</span> dir(<span style="color: #2aa198;">"data"</span>)
-
+flist
 <span style="color: #586e75;"># </span><span style="color: #586e75;">do    </span>
 <span style="color: #586e75;">## </span><span style="color: #586e75;">geocode</span>
 flist <span style="color: #268bd2; font-weight: bold;">&lt;-</span> gsub(<span style="color: #2aa198;">".csv"</span>, <span style="color: #2aa198;">""</span>, flist)    
@@ -397,13 +399,13 @@ flist_geo <span style="color: #268bd2; font-weight: bold;">&lt;-</span> gGeoCode
 flist_geo
 
 <span style="color: #586e75;">## </span><span style="color: #586e75;">plot</span>
-png(<span style="color: #2aa198;">"images/nmmaps-eg-cities.png"</span>)
-plotMyMap(
-    flist_geo[,c(<span style="color: #2aa198;">"long"</span>,<span style="color: #2aa198;">"lat"</span>)],
-    xl = c(-130,-60), yl = c(25,50)
-    )
-text(flist_geo$long, flist_geo$lat, flist_geo$address, pos=3)
-dev.off()
+<span style="color: #586e75;">## </span><span style="color: #586e75;">png("images/nmmaps-eg-cities.png")</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">plotMyMap(</span>
+<span style="color: #586e75;">##     </span><span style="color: #586e75;">flist_geo[,c("long","lat")],</span>
+<span style="color: #586e75;">##     </span><span style="color: #586e75;">xl = c(-130,-60), yl = c(25,50)</span>
+<span style="color: #586e75;">##     </span><span style="color: #586e75;">)</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">text(flist_geo$long, flist_geo$lat, flist_geo$address, pos=3)</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">dev.off()</span>
    
 <span style="color: #586e75;"># </span><span style="color: #586e75;">load city names</span>
 flist2 <span style="color: #268bd2; font-weight: bold;">&lt;-</span> dir(<span style="color: #2aa198;">"data"</span>)
@@ -445,8 +447,18 @@ writeOGR(shp, <span style="color: #2aa198;">'cities.shp'</span>, <span style="co
 </div>
 
 <div id="outline-container-2-3-2" class="outline-4">
-<h4 id="sec-2-3-2"><span class="section-number-4">2.3.2</span> Map Shapefile Output</h4>
+<h4 id="sec-2-3-2"><span class="section-number-4">2.3.2</span> Map Shapefile 2</h4>
 <div class="outline-text-4" id="text-2-3-2">
+
+
+
+</div>
+
+</div>
+
+<div id="outline-container-2-3-3" class="outline-4">
+<h4 id="sec-2-3-3"><span class="section-number-4">2.3.3</span> Map Shapefile Output</h4>
+<div class="outline-text-4" id="text-2-3-3">
 
 <p><img src="NMMAPS-example/images/nmmaps-eg-cities.png"  alt="NMMAPS-example/images/nmmaps-eg-cities.png" />
 </p>
@@ -1621,7 +1633,8 @@ dev.off()
 
 
 
-<pre class="src src-R"><span style="color: #586e75;"># </span><span style="color: #586e75;">func</span>
+<pre class="src src-R"><span style="color: #586e75;">#### </span><span style="color: #586e75;">Now do the Neighbourhood autoregressive lagged variable  ####</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">func</span>
 setwd(<span style="color: #2aa198;">"~/projects/spatiotemporal-regression-models/NMMAPS-example"</span>)
 <span style="color: #268bd2; font-weight: bold;">require</span>(gisviz)
 <span style="color: #268bd2; font-weight: bold;">require</span>(plyr)
@@ -1723,7 +1736,7 @@ fit <span style="color: #268bd2; font-weight: bold;">&lt;-</span> glm(cvd ~ ns(t
 png(<span style="color: #2aa198;">"images/nmmaps-eg-sp-lag.png"</span>, width = 1000, height = 750, res = 150)
 par(mfrow=c(2,3))
 termplot(fit, terms = attr(terms(fit),<span style="color: #2aa198;">'term.labels'</span>) [c(1:2,6)], se = <span style="color: #b58900;">TRUE</span>, ylim =c(-.2,.2), col.term = <span style="color: #2aa198;">'black'</span>, col.se = <span style="color: #2aa198;">'black'</span>)
-termplot(fit, terms = attr(terms(fit),<span style="color: #2aa198;">'term.labels'</span>) [c(4,5)], se = <span style="color: #b58900;">TRUE</span>, ylim =c(-3,1), col.term = <span style="color: #2aa198;">'black'</span>, col.se = <span style="color: #2aa198;">'black'</span>)
+termplot(fit, terms = attr(terms(fit),<span style="color: #2aa198;">'term.labels'</span>) [c(4,5)], se = <span style="color: #b58900;">TRUE</span>, ylim =c(-3,3), col.term = <span style="color: #2aa198;">'black'</span>, col.se = <span style="color: #2aa198;">'black'</span>)
 termplot(fit, terms = attr(terms(fit),<span style="color: #2aa198;">'term.labels'</span>) [3], se = <span style="color: #b58900;">TRUE</span>, ylim =c(-1,1), col.term = <span style="color: #2aa198;">'black'</span>, col.se = <span style="color: #2aa198;">'black'</span>)
 dev.off()
 

@@ -1,10 +1,20 @@
-#+TITLE:Spatiotemporal Regression Modelling
+#+TITLE: Spatiotemporal Regression and Multilevel Modelling
 #+AUTHOR: Ivan Hanigan
 #+email: ivan.hanigan@anu.edu.au
 #+LaTeX_CLASS: article
 #+LaTeX_CLASS_OPTIONS: [a4paper]
 #+LATEX: \tableofcontents
 -----
+*** COMMENT showme
+#+name:showme
+#+begin_src R :session *R* :tangle no :exports none :eval yes
+#### name:showme ####
+setwd("~/Dropbox/projects/spatiotemporal-regression-models/")
+browseURL("index.html")
+#+end_src
+
+#+RESULTS: showme
+: 0
 
 * README
 #+name:README
@@ -1496,14 +1506,14 @@ That is such a shame, lucky I saved some of the data using the following code:
   ################################################################
   # name:zones
   # func
-  setwd("~/projects/spatiotemporal-regression-models/NMMAPS-example")
+  setwd("~/Dropbox/projects/spatiotemporal-regression-models/NMMAPS-example")
   #require(devtools)
   #install_github("gisviz", "ivanhanigan")
   require(gisviz)
   
   # load
   flist <- dir("data")
-  
+  flist
   # do    
   ## geocode
   flist <- gsub(".csv", "", flist)    
@@ -1511,13 +1521,13 @@ That is such a shame, lucky I saved some of the data using the following code:
   flist_geo
   
   ## plot
-  png("images/nmmaps-eg-cities.png")
-  plotMyMap(
-      flist_geo[,c("long","lat")],
-      xl = c(-130,-60), yl = c(25,50)
-      )
-  text(flist_geo$long, flist_geo$lat, flist_geo$address, pos=3)
-  dev.off()
+  ## png("images/nmmaps-eg-cities.png")
+  ## plotMyMap(
+  ##     flist_geo[,c("long","lat")],
+  ##     xl = c(-130,-60), yl = c(25,50)
+  ##     )
+  ## text(flist_geo$long, flist_geo$lat, flist_geo$address, pos=3)
+  ## dev.off()
      
   # load city names
   flist2 <- dir("data")
@@ -1551,8 +1561,23 @@ That is such a shame, lucky I saved some of the data using the following code:
                                     )
                                 )
   writeOGR(shp, 'cities.shp', 'cities', driver='ESRI Shapefile')
-
+  
 #+end_src
+*** Map Shapefile 2
+#+name:Map Shapefile 2
+#+begin_src R :session *R* :tangle Map Shapefile 2.R :exports none :eval no
+  #### name:Map Shapefile 2 ####
+  dir("data")
+  flist_geo <- readOGR("data", "cities")
+  png("images/nmmaps-eg-cities.png")
+  plotMyMap(flist_geo,
+      xl = c(-130,-60), yl = c(25,50)
+      )
+  text(flist_geo$long, flist_geo$lat, flist_geo$address, pos=3)
+  dev.off()
+  
+#+end_src
+
 *** Map Shapefile Output
 [[file:NMMAPS-example/images/nmmaps-eg-cities.png]]
 
