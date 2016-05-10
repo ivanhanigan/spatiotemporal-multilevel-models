@@ -32,14 +32,14 @@ for(f_i in 1:length(flist))
 ################################################################
 # name:zones
 # func
-setwd("~/projects/spatiotemporal-regression-models/NMMAPS-example")
+setwd("~/Dropbox/projects/spatiotemporal-regression-models/NMMAPS-example")
 #require(devtools)
 #install_github("gisviz", "ivanhanigan")
 require(gisviz)
 
 # load
 flist <- dir("data")
-
+flist
 # do    
 ## geocode
 flist <- gsub(".csv", "", flist)    
@@ -47,13 +47,13 @@ flist_geo <- gGeoCode2(flist)
 flist_geo
 
 ## plot
-png("images/nmmaps-eg-cities.png")
-plotMyMap(
-    flist_geo[,c("long","lat")],
-    xl = c(-130,-60), yl = c(25,50)
-    )
-text(flist_geo$long, flist_geo$lat, flist_geo$address, pos=3)
-dev.off()
+## png("images/nmmaps-eg-cities.png")
+## plotMyMap(
+##     flist_geo[,c("long","lat")],
+##     xl = c(-130,-60), yl = c(25,50)
+##     )
+## text(flist_geo$long, flist_geo$lat, flist_geo$address, pos=3)
+## dev.off()
    
 # load city names
 flist2 <- dir("data")
