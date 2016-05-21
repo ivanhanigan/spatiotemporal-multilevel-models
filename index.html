@@ -3,11 +3,11 @@
                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<title>Spatiotemporal Regression and Multilevel Modelling</title>
+<title>Spatiotemporal multilevel modelling</title>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
-<meta name="title" content="Spatiotemporal Regression and Multilevel Modelling"/>
+<meta name="title" content="Spatiotemporal multilevel modelling"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2016-05-07T10:59+1000"/>
+<meta name="generated" content="2016-05-22T09:43+1000"/>
 <meta name="author" content="Ivan Hanigan"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -115,7 +115,7 @@ for the JavaScript code in this tag.
 </div>
 
 <div id="content">
-<h1 class="title">Spatiotemporal Regression and Multilevel Modelling</h1>
+<h1 class="title">Spatiotemporal multilevel modelling</h1>
 
 
 <hr/>
@@ -131,7 +131,7 @@ for the JavaScript code in this tag.
 <li><a href="#sec-1-1">1.1 Version Statement</a></li>
 </ul>
 </li>
-<li><a href="#sec-2">2 Case Study 1: Spatially Structured Timeseries with NMMAPS</a>
+<li><a href="#sec-2">2 Spatially structured timeseries</a>
 <ul>
 <li><a href="#sec-2-1">2.1 Outcome Data</a>
 <ul>
@@ -175,7 +175,7 @@ for the JavaScript code in this tag.
 </ul></li>
 </ul>
 </li>
-<li><a href="#sec-3">3 Case Study 2: Spatial Lag and Timeseries with NMMAPS</a>
+<li><a href="#sec-3">3 Spatial lag and timeseries</a>
 <ul>
 <li><a href="#sec-3-1">3.1 Data</a>
 <ul>
@@ -190,9 +190,13 @@ for the JavaScript code in this tag.
 </ul></li>
 </ul>
 </li>
-<li><a href="#sec-4">4 Multilevel modelling</a>
+<li><a href="#sec-4">4 Compare basic regression with mixed-effects modelling</a>
 <ul>
 <li><a href="#sec-4-1">4.1 Terminology</a></li>
+<li><a href="#sec-4-2">4.2 Introduce the linear model and lmer</a></li>
+<li><a href="#sec-4-3">4.3 Case study of kids in schools</a></li>
+<li><a href="#sec-4-4">4.4 Ross River</a></li>
+<li><a href="#sec-4-5">4.5 Case study of theirs, or the GHS</a></li>
 </ul>
 </li>
 </ul>
@@ -206,9 +210,9 @@ for the JavaScript code in this tag.
 
 
 
-<pre class="src src-markdown"><span style="color: #268bd2; font-weight: bold;"># Spatiotemporal Regression Modelling</span>
+<pre class="src src-markdown"><span style="color: #268bd2; font-weight: bold;"># Spatiotemporal multilevel modelling</span>
 
-This is an Open Notebook for my work on Spatiotemporal Regression Modelling tips and tricks.
+This is an Open Notebook for my work on spatiotemporal multilevel modelling tips and tricks.
 
 Ivan Hanigan
 </pre>
@@ -234,7 +238,7 @@ Ivan Hanigan
 </div>
 
 <div id="outline-container-2" class="outline-2">
-<h2 id="sec-2"><span class="section-number-2">2</span> Case Study 1: Spatially Structured Timeseries with NMMAPS</h2>
+<h2 id="sec-2"><span class="section-number-2">2</span> Spatially structured timeseries</h2>
 <div class="outline-text-2" id="text-2">
 
 <p>I will use the NMMAPSlite datasets for a simple example of what I describe as "Spatially Structured Timeseries" as opposed to "Spatio-Temporal" which I think more explicitly includes spatial structure in the model.
@@ -1545,7 +1549,7 @@ QAICc.1
 </div>
 
 <div id="outline-container-3" class="outline-2">
-<h2 id="sec-3"><span class="section-number-2">3</span> Case Study 2: Spatial Lag and Timeseries with NMMAPS</h2>
+<h2 id="sec-3"><span class="section-number-2">3</span> Spatial lag and timeseries</h2>
 <div class="outline-text-2" id="text-3">
 
 <p>I will use the same NMMAPSlite to show how I'd approach a simple "Spatio-Temporal" model.
@@ -1754,7 +1758,7 @@ dev.off()
 </div>
 
 <div id="outline-container-4" class="outline-2">
-<h2 id="sec-4"><span class="section-number-2">4</span> Multilevel modelling</h2>
+<h2 id="sec-4"><span class="section-number-2">4</span> Compare basic regression with mixed-effects modelling</h2>
 <div class="outline-text-2" id="text-4">
 
 
@@ -1764,14 +1768,52 @@ dev.off()
 <h3 id="sec-4-1"><span class="section-number-3">4.1</span> Terminology</h3>
 <div class="outline-text-3" id="text-4-1">
 
-<p>In the introduction to Gelman and Hill (2007) they point out the problem of terminology when discussing multilevel modelling.  This concern also appears in the work of the rstanarm package developers and in the vignette 'Estimating Generalized Linear Models with Group-Specific Terms with rstanarm' they state:
+
+<p>
+When discussing multilevel modelling in this workshop we will avoid using the names 'fixed effects' and 'random effects'. Instead we use the more verbose phrase: intercepts/coefficients that are common across groups and intercepts/coefficients that vary by group.  This is because, as noted in the introduction to Gelman and Hill 2007 (recommended reading) it is very problematic that these terms are used in imprecise and confusing ways that vary across disciplines. This concern also appears in the work of the rstanarm package developers and in the vignette 'Estimating Generalized Linear Models with Group-Specific Terms with rstanarm' who state:
 </p>
 <p>
-Models with this structure are refered to by many names: multilevel models, (generalized) linear mixed (effects) models (GLMM), hierarchical (generalized) linear models, etc. The terminology for the model parameters is equally diverse&hellip; [and commonly used terms] are not only misleading but also defined differently across the various fields in which these models are applied.
+'Models with this structure are referred to by many names: multilevel models, (generalized) linear mixed (effects) models (GLMM), hierarchical (generalized) linear models, etc. The terminology for the model parameters is equally diverse&hellip; [and commonly used terms] are not only misleading but also defined differently across the various fields in which these models are applied.'
 </p>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-4-2" class="outline-3">
+<h3 id="sec-4-2"><span class="section-number-3">4.2</span> Introduce the linear model and lmer</h3>
+<div class="outline-text-3" id="text-4-2">
+
+
+</div>
+
+</div>
+
+<div id="outline-container-4-3" class="outline-3">
+<h3 id="sec-4-3"><span class="section-number-3">4.3</span> Case study of kids in schools</h3>
+<div class="outline-text-3" id="text-4-3">
+
+</div>
+
+</div>
+
+<div id="outline-container-4-4" class="outline-3">
+<h3 id="sec-4-4"><span class="section-number-3">4.4</span> Ross River</h3>
+<div class="outline-text-3" id="text-4-4">
+
+<p>See do<sub>model</sub><sub>checking</sub><sub>glmer</sub>
+</p>
+
 <p>
-So in this work we avoid using the names fixed effects and random effects, instead we use the more verbose phrase: intercepts/coefficients that are common across groups and intercepts/coefficients that vary by group.
-</p>
+#########################
+</p></div>
+
+</div>
+
+<div id="outline-container-4-5" class="outline-3">
+<h3 id="sec-4-5"><span class="section-number-3">4.5</span> Case study of theirs, or the GHS</h3>
+<div class="outline-text-3" id="text-4-5">
 
 </div>
 </div>

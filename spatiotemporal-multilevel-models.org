@@ -1,4 +1,4 @@
-#+TITLE: Spatiotemporal Regression and Multilevel Modelling
+#+TITLE: Spatiotemporal multilevel modelling
 #+AUTHOR: Ivan Hanigan
 #+email: ivan.hanigan@anu.edu.au
 #+LaTeX_CLASS: article
@@ -19,9 +19,9 @@ browseURL("index.html")
 * README
 #+name:README
 #+begin_src markdown :tangle README.md :exports reports :eval no
-# Spatiotemporal Regression Modelling
+# Spatiotemporal multilevel modelling
 
-This is an Open Notebook for my work on Spatiotemporal Regression Modelling tips and tricks.
+This is an Open Notebook for my work on spatiotemporal multilevel modelling tips and tricks.
 
 Ivan Hanigan
 #+end_src
@@ -1410,7 +1410,7 @@ categories:
 THANKS Sarunya!
 #+end_src
 
-* Case Study 1: Spatially Structured Timeseries with NMMAPS
+* Spatially structured timeseries 
 I will use the NMMAPSlite datasets for a simple example of what I describe as "Spatially Structured Timeseries" as opposed to "Spatio-Temporal" which I think more explicitly includes spatial structure in the model.
 ** Outcome Data
 *** Original Data
@@ -2511,7 +2511,7 @@ cd NMMAPS-example
 scp ivan_hanigan@130.56.102.53:projects/spatiotemporal-regression-models/NMMAPS-example/analyte.csv analyte.csv
 cd ..
 #+end_src
-* Case Study 2: Spatial Lag and Timeseries with NMMAPS
+* Spatial lag and timeseries 
 I will use the same NMMAPSlite to show how I'd approach a simple "Spatio-Temporal" model.
 **** TODO The following is a stub of an idea.  For further development
 ** Data
@@ -2655,7 +2655,7 @@ I will use the same NMMAPSlite to show how I'd approach a simple "Spatio-Tempora
 *** Spatial Lag Model Plots
 [[file:NMMAPS-example/images/nmmaps-eg-sp-lag.png]]
 
-* Multilevel modelling
+* Compare basic regression with mixed-effects modelling
 ** Terminology
 
 When discussing multilevel modelling in this workshop we will avoid using the names 'fixed effects' and 'random effects'. Instead we use the more verbose phrase: intercepts/coefficients that are common across groups and intercepts/coefficients that vary by group.  This is because, as noted in the introduction to Gelman and Hill 2007 (recommended reading) it is very problematic that these terms are used in imprecise and confusing ways that vary across disciplines. This concern also appears in the work of the rstanarm package developers and in the vignette 'Estimating Generalized Linear Models with Group-Specific Terms with rstanarm' who state:
@@ -2669,6 +2669,25 @@ I was interested to read in Gelman and Hill (Data analysis using regression and 
 ** Introduce the linear model and lmer
 ** COMMENT Code
 THis is made originally in index2.org, statistical modelling, ** 2015-09-12-effect-modification-and-mediation, after brambor2006
+*** COMMENT make_simulated_data
+#+name:make_simulated_data
+#+begin_src R :session *R* :tangle make_simulated_data.R :exports none :eval no
+#### name:make_simulated_data ####
+x  <- seq(0, 6, by = 0.05)
+set.seed(42)
+y <- -0.5 + sample(rnorm(length(x),0,0.05))
+set.seed(123)
+y2 <- (-0.33 + 0.1*x) + sample(rnorm(length(x),0,0.05))
+set.seed(1)
+y3 <- (-0.5 + 0.1*x) + sample(rnorm(length(x),0,0.05))
+
+dat <- data.frame(y = y, x, z = 'group1')
+dat <- rbind(dat, data.frame(y = y2, x, z = 'group2'))
+dat <- rbind(dat, data.frame(y = y3, x, z = 'group3'))
+str(dat)
+write.csv(dat, "data/simulated_data.csv", row.names = F)
+
+#+end_src
 
 *** COMMENT brambor
 #+name: brambor
@@ -2896,11 +2915,12 @@ THis is made originally in index2.org, statistical modelling, ** 2015-09-12-effe
   abline(gamma3, beta_x3, col = 'red', lty = 'dashed')
   
 #+end_src
-** Case study of kids in schools
-** Ross River 
+** COMMENT Case study of kids in schools
+* Intercepts and coefficients that vary by group
+** Ross River virus and urban vs rural mosquito habitat 
 See do_model_checking_glmer
 
 
 #########################
 # model 4 is multilevel
-** Case study of theirs, or the GHS
+
