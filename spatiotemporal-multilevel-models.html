@@ -1,0 +1,1818 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+               "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>Spatiotemporal multilevel modelling</title>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+<meta name="title" content="Spatiotemporal multilevel modelling"/>
+<meta name="generator" content="Org-mode"/>
+<meta name="generated" content="2016-05-22T12:11+1000"/>
+<meta name="author" content="Ivan Hanigan"/>
+<meta name="description" content=""/>
+<meta name="keywords" content=""/>
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  html { font-family: Times, serif; font-size: 12pt; }
+  .title  { text-align: center; }
+  .todo   { color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #add8e6; font-weight:normal }
+  .target { }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .right  {margin-left:auto; margin-right:0px;  text-align:right;}
+  .left   {margin-left:0px;  margin-right:auto; text-align:left;}
+  .center {margin-left:auto; margin-right:auto; text-align:center;}
+  p.verse { margin-left: 3% }
+  pre {
+	border: 1pt solid #AEBDCC;
+	background-color: #F3F5F7;
+	padding: 5pt;
+	font-family: courier, monospace;
+        font-size: 90%;
+        overflow:auto;
+  }
+  table { border-collapse: collapse; }
+  td, th { vertical-align: top;  }
+  th.right  { text-align:center;  }
+  th.left   { text-align:center;   }
+  th.center { text-align:center; }
+  td.right  { text-align:right;  }
+  td.left   { text-align:left;   }
+  td.center { text-align:center; }
+  dt { font-weight: bold; }
+  div.figure { padding: 0.5em; }
+  div.figure p { text-align: center; }
+  div.inlinetask {
+    padding:10px;
+    border:2px solid gray;
+    margin:10px;
+    background: #ffffcc;
+  }
+  textarea { overflow-x: auto; }
+  .linenr { font-size:smaller }
+  .code-highlighted {background-color:#ffff00;}
+  .org-info-js_info-navigation { border-style:none; }
+  #org-info-js_console-label { font-size:10px; font-weight:bold;
+                               white-space:nowrap; }
+  .org-info-js_search-highlight {background-color:#ffff00; color:#000000;
+                                 font-weight:bold; }
+  /*]]>*/-->
+</style>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+
+</head>
+<body>
+
+<div id="preamble">
+
+</div>
+
+<div id="content">
+<h1 class="title">Spatiotemporal multilevel modelling</h1>
+
+
+<hr/>
+
+
+
+
+
+
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1 Introduction</a>
+<ul>
+<li><a href="#sec-1-1">1.1 Overview</a></li>
+</ul>
+</li>
+<li><a href="#sec-2">2 Compare basic regression with mixed-effects modelling</a>
+<ul>
+<li><a href="#sec-2-1">2.1 Terminology</a></li>
+<li><a href="#sec-2-2">2.2 Introduce the linear model and lmer</a></li>
+</ul>
+</li>
+<li><a href="#sec-3">3 Intercepts and coefficients that vary by group</a>
+<ul>
+<li><a href="#sec-3-1">3.1 Ross River virus and urban vs rural mosquito habitat</a></li>
+</ul>
+</li>
+<li><a href="#sec-4">4 Spatially structured timeseries</a>
+<ul>
+<li><a href="#sec-4-1">4.1 Outcome Data</a>
+<ul>
+<li><a href="#sec-4-1-1">4.1.1 Original Data</a></li>
+<li><a href="#sec-4-1-2">4.1.2 Pooled Dataset</a></li>
+</ul>
+</li>
+<li><a href="#sec-4-2">4.2 Exposure Data</a></li>
+<li><a href="#sec-4-3">4.3 Zones</a>
+<ul>
+<li><a href="#sec-4-3-1">4.3.1 Map Shapefile Code</a></li>
+<li><a href="#sec-4-3-2">4.3.2 Map Shapefile 2</a></li>
+<li><a href="#sec-4-3-3">4.3.3 Map Shapefile Output</a></li>
+</ul>
+</li>
+<li><a href="#sec-4-4">4.4 Population Data</a>
+<ul>
+<li><a href="#sec-4-4-1">4.4.1 Population data</a></li>
+<li><a href="#sec-4-4-2">4.4.2 Population Summary</a></li>
+</ul>
+</li>
+<li><a href="#sec-4-5">4.5 Merge</a></li>
+<li><a href="#sec-4-6">4.6 Data Checking</a>
+<ul>
+<li><a href="#sec-4-6-1">4.6.1 Check Assumption of Proportional Hazards</a></li>
+<li><a href="#sec-4-6-2">4.6.2 Incidence Rate Ratios Plot</a></li>
+<li><a href="#sec-4-6-3">4.6.3 Population Rate Ratios Plot</a></li>
+</ul>
+</li>
+<li><a href="#sec-4-7">4.7 Exploratory Data Analyses</a>
+<ul>
+<li><a href="#sec-4-7-1">4.7.1 Time-series Plots Code</a></li>
+<li><a href="#sec-4-7-2">4.7.2 Time-series Plots Output</a></li>
+</ul>
+</li>
+<li><a href="#sec-4-8">4.8 Main Analyses</a>
+<ul>
+<li><a href="#sec-4-8-1">4.8.1 Core Model</a></li>
+<li><a href="#sec-4-8-2">4.8.2 Core Model Plots</a></li>
+<li><a href="#sec-4-8-3">4.8.3 Model Selection</a></li>
+</ul></li>
+</ul>
+</li>
+<li><a href="#sec-5">5 Spatial lag and timeseries</a>
+<ul>
+<li><a href="#sec-5-1">5.1 Data</a>
+<ul>
+<li><a href="#sec-5-1-1">5.1.1 Zones</a></li>
+<li><a href="#sec-5-1-2">5.1.2 Outcome</a></li>
+</ul>
+</li>
+<li><a href="#sec-5-2">5.2 Analysis</a>
+<ul>
+<li><a href="#sec-5-2-1">5.2.1 Model with Spatial Lag</a></li>
+<li><a href="#sec-5-2-2">5.2.2 Spatial Lag Model Plots</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> Introduction</h2>
+<div class="outline-text-2" id="text-1">
+
+
+</div>
+
+<div id="outline-container-1-1" class="outline-3">
+<h3 id="sec-1-1"><span class="section-number-3">1.1</span> Overview</h3>
+<div class="outline-text-3" id="text-1-1">
+
+<p>In this notebook we will introduce what multi-level data and models are and why they are useful in epidemiology contexts. We begin with the general linear model framework GLM and then move to mixed-effects models. It is important to realise that these models are called different things in different disciplines: (generalized) linear mixed (effects) models (GLMM), hierarchical (generalized) linear models, etc. The terminology for the model parameters is equally diverse, usually including the terms random effects and fixed effects. So we focus on the key concepts.
+</p>
+<p>
+We will cover what is a Random Effect and how it differs from a Fixed effect. Some example syntax in R (on a secure website portal we have configured) and Stata will show how to get a handle on models that have random intercepts and additionally, random slopes.
+</p>
+<p>
+We will spend a little time talking about how to partition variation and get estimates of the random and fixed effects. An important element will be our discussion of similarities between mixed-effects models with basic regression. There will also be brief discussion of extending the regression to non-gaussian responses (GLMERs).
+</p>
+<p>
+We will discuss how to interpret these results in a population health context.
+</p>
+<p>
+An online analysis server (Rstudio in a web browser) and data repository (geoserver) are also provided
+</p></div>
+</div>
+
+</div>
+
+<div id="outline-container-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> Compare basic regression with mixed-effects modelling</h2>
+<div class="outline-text-2" id="text-2">
+
+
+</div>
+
+<div id="outline-container-2-1" class="outline-3">
+<h3 id="sec-2-1"><span class="section-number-3">2.1</span> Terminology</h3>
+<div class="outline-text-3" id="text-2-1">
+
+
+<p>
+When discussing multilevel modelling in this workshop we will avoid using the names 'fixed effects' and 'random effects'. Instead we use the more verbose phrase: intercepts/coefficients that are common across groups and intercepts/coefficients that vary by group.  This is because, as noted in the introduction to Gelman and Hill 2007 (recommended reading) it is very problematic that these terms are used in imprecise and confusing ways that vary across disciplines. This concern also appears in the work of the rstanarm package developers and in the vignette 'Estimating Generalized Linear Models with Group-Specific Terms with rstanarm' who state:
+</p>
+<p>
+'Models with this structure are referred to by many names: multilevel models, (generalized) linear mixed (effects) models (GLMM), hierarchical (generalized) linear models, etc. The terminology for the model parameters is equally diverse&hellip; [and commonly used terms] are not only misleading but also defined differently across the various fields in which these models are applied.'
+</p>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-2-2" class="outline-3">
+<h3 id="sec-2-2"><span class="section-number-3">2.2</span> Introduce the linear model and lmer</h3>
+<div class="outline-text-3" id="text-2-2">
+
+
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> Intercepts and coefficients that vary by group</h2>
+<div class="outline-text-2" id="text-3">
+
+
+</div>
+
+<div id="outline-container-3-1" class="outline-3">
+<h3 id="sec-3-1"><span class="section-number-3">3.1</span> Ross River virus and urban vs rural mosquito habitat</h3>
+<div class="outline-text-3" id="text-3-1">
+
+<p>See do<sub>model</sub><sub>checking</sub><sub>glmer</sub>
+</p>
+
+<p>
+#########################
+</p></div>
+</div>
+
+</div>
+
+<div id="outline-container-4" class="outline-2">
+<h2 id="sec-4"><span class="section-number-2">4</span> Spatially structured timeseries</h2>
+<div class="outline-text-2" id="text-4">
+
+<p>I will use the NMMAPSlite datasets for a simple example of what I describe as "Spatially Structured Timeseries" as opposed to "Spatio-Temporal" which I think more explicitly includes spatial structure in the model.
+</p>
+</div>
+
+<div id="outline-container-4-1" class="outline-3">
+<h3 id="sec-4-1"><span class="section-number-3">4.1</span> Outcome Data</h3>
+<div class="outline-text-3" id="text-4-1">
+
+
+</div>
+
+<div id="outline-container-4-1-1" class="outline-4">
+<h4 id="sec-4-1-1"><span class="section-number-4">4.1.1</span> Original Data</h4>
+<div class="outline-text-4" id="text-4-1-1">
+
+
+
+
+<pre class="src src-R"><span style="color: #2aa198;">"</span>
+<span style="color: #2aa198;">http://cran.r-project.org/web/packages/NMMAPSlite/index.html</span>
+<span style="color: #2aa198;">Package &#8216;NMMAPSlite&#8217; was removed from the CRAN repository.</span>
+<span style="color: #2aa198;">Formerly available versions can be obtained from the archive.</span>
+<span style="color: #2aa198;">Archived on 2013-05-11 at the request of the maintainer.</span>
+
+<span style="color: #2aa198;">The Archived versions do not seem to work either.</span>
+
+<span style="color: #2aa198;">That is such a shame, lucky I saved some of the data using the following code:</span>
+<span style="color: #2aa198;">"</span>
+</pre>
+
+
+
+
+
+
+<pre class="src src-R">   
+<span style="color: #586e75;">#### </span><span style="color: #586e75;">Code: get nmmaps data</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">func</span>
+<span style="color: #859900; font-weight: bold;">if</span>(!<span style="color: #268bd2; font-weight: bold;">require</span>(NMMAPSlite)) install.packages(<span style="color: #2aa198;">'NMMAPSlite'</span>);<span style="color: #268bd2; font-weight: bold;">require</span>(NMMAPSlite)
+
+<span style="color: #586e75;">######################################################</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">load  </span>
+setwd(<span style="color: #2aa198;">'data'</span>)
+initDB(<span style="color: #2aa198;">'data/NMMAPS'</span>) <span style="color: #586e75;"># </span><span style="color: #586e75;">this requires that we connect to the web,</span>
+                      <span style="color: #586e75;"># </span><span style="color: #586e75;">so lets get local copies</span>
+setwd(<span style="color: #2aa198;">'..'</span>)
+cities <span style="color: #268bd2; font-weight: bold;">&lt;-</span> getMetaData(<span style="color: #2aa198;">'cities'</span>)
+head(cities)
+citieslist <span style="color: #268bd2; font-weight: bold;">&lt;-</span> cities$cityname
+<span style="color: #586e75;"># </span><span style="color: #586e75;">write out a few cities for access later</span>
+<span style="color: #859900; font-weight: bold;">for</span>(city_i <span style="color: #859900; font-weight: bold;">in</span> citieslist[sample(1:nrow(cities), 9)])
+{
+ city <span style="color: #268bd2; font-weight: bold;">&lt;-</span> subset(cities, cityname == city_i)$city
+ data <span style="color: #268bd2; font-weight: bold;">&lt;-</span> readCity(city)
+ write.table(data, file.path(<span style="color: #2aa198;">'data'</span>, paste(city_i, <span style="color: #2aa198;">'.csv'</span>,sep=<span style="color: #2aa198;">''</span>)),
+ row.names = F, sep = <span style="color: #2aa198;">','</span>)
+}
+<span style="color: #586e75;"># </span><span style="color: #586e75;">these are all tiny, go some big ones</span>
+<span style="color: #859900; font-weight: bold;">for</span>(city_i <span style="color: #859900; font-weight: bold;">in</span> c(<span style="color: #2aa198;">'New York'</span>, <span style="color: #2aa198;">'Los Angeles'</span>, <span style="color: #2aa198;">'Madison'</span>, <span style="color: #2aa198;">'Boston'</span>))
+{
+ city <span style="color: #268bd2; font-weight: bold;">&lt;-</span> subset(cities, cityname == city_i)$city
+ data <span style="color: #268bd2; font-weight: bold;">&lt;-</span> readCity(city)
+ write.table(data, file.path(<span style="color: #2aa198;">'data'</span>, paste(city_i, <span style="color: #2aa198;">'.csv'</span>,sep=<span style="color: #2aa198;">''</span>)),
+ row.names = F, sep = <span style="color: #2aa198;">','</span>)
+}
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-4-1-2" class="outline-4">
+<h4 id="sec-4-1-2"><span class="section-number-4">4.1.2</span> Pooled Dataset</h4>
+<div class="outline-text-4" id="text-4-1-2">
+
+
+
+
+<pre class="src src-R"><span style="color: #586e75;">################################################################</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">name:Pooled Dataset</span>
+setwd(<span style="color: #2aa198;">"~/projects/spatiotemporal-regression-models/NMMAPS-example"</span>)
+
+flist <span style="color: #268bd2; font-weight: bold;">&lt;-</span> dir(<span style="color: #2aa198;">"data"</span>, full.names=T)
+
+flist <span style="color: #268bd2; font-weight: bold;">&lt;-</span>    flist[which(basename(flist) %<span style="color: #859900; font-weight: bold;">in</span>%
+                        c(<span style="color: #2aa198;">"Baton Rouge.csv"</span>,
+                          <span style="color: #2aa198;">"Los Angeles.csv"</span>,
+                          <span style="color: #2aa198;">"Tucson.csv"</span>,
+                          <span style="color: #2aa198;">"Denver.csv"</span>)
+                        )
+                  ]
+flist
+<span style="color: #859900; font-weight: bold;">for</span>(f_i <span style="color: #859900; font-weight: bold;">in</span> 1:length(flist))
+    {
+        <span style="color: #586e75;">#</span><span style="color: #586e75;">f_i &lt;- 2</span>
+        fi <span style="color: #268bd2; font-weight: bold;">&lt;-</span> flist[f_i]
+        df <span style="color: #268bd2; font-weight: bold;">&lt;-</span> read.csv(fi)
+        df <span style="color: #268bd2; font-weight: bold;">&lt;-</span> df[,c(<span style="color: #2aa198;">"city"</span>,<span style="color: #2aa198;">"date"</span>, <span style="color: #2aa198;">"agecat"</span>,
+                    <span style="color: #2aa198;">"cvd"</span>, <span style="color: #2aa198;">"resp"</span>, <span style="color: #2aa198;">"tmax"</span>,
+                    <span style="color: #2aa198;">"tmin"</span>, <span style="color: #2aa198;">"dptp"</span>)]
+        <span style="color: #586e75;"># </span><span style="color: #586e75;">str(df)</span>
+        write.table(df,
+                    <span style="color: #2aa198;">"outcome.csv"</span>, sep = <span style="color: #2aa198;">","</span>,
+                    row.names = F, append = f_i &gt; 1,
+                    col.names = f_i ==1
+                    )
+    }
+
+</pre>
+
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-4-2" class="outline-3">
+<h3 id="sec-4-2"><span class="section-number-3">4.2</span> Exposure Data</h3>
+<div class="outline-text-3" id="text-4-2">
+
+</div>
+
+</div>
+
+<div id="outline-container-4-3" class="outline-3">
+<h3 id="sec-4-3"><span class="section-number-3">4.3</span> Zones</h3>
+<div class="outline-text-3" id="text-4-3">
+
+
+</div>
+
+<div id="outline-container-4-3-1" class="outline-4">
+<h4 id="sec-4-3-1"><span class="section-number-4">4.3.1</span> Map Shapefile Code</h4>
+<div class="outline-text-4" id="text-4-3-1">
+
+
+
+
+<pre class="src src-R"><span style="color: #586e75;">################################################################</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">name:zones</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">func</span>
+setwd(<span style="color: #2aa198;">"~/Dropbox/projects/spatiotemporal-regression-models/NMMAPS-example"</span>)
+<span style="color: #586e75;">#</span><span style="color: #586e75;">require(devtools)</span>
+<span style="color: #586e75;">#</span><span style="color: #586e75;">install_github("gisviz", "ivanhanigan")</span>
+<span style="color: #268bd2; font-weight: bold;">require</span>(gisviz)
+
+<span style="color: #586e75;"># </span><span style="color: #586e75;">load</span>
+flist <span style="color: #268bd2; font-weight: bold;">&lt;-</span> dir(<span style="color: #2aa198;">"data"</span>)
+flist
+<span style="color: #586e75;"># </span><span style="color: #586e75;">do    </span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">geocode</span>
+flist <span style="color: #268bd2; font-weight: bold;">&lt;-</span> gsub(<span style="color: #2aa198;">".csv"</span>, <span style="color: #2aa198;">""</span>, flist)    
+flist_geo <span style="color: #268bd2; font-weight: bold;">&lt;-</span> gGeoCode2(flist)
+flist_geo
+
+<span style="color: #586e75;">## </span><span style="color: #586e75;">plot</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">png("images/nmmaps-eg-cities.png")</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">plotMyMap(</span>
+<span style="color: #586e75;">##     </span><span style="color: #586e75;">flist_geo[,c("long","lat")],</span>
+<span style="color: #586e75;">##     </span><span style="color: #586e75;">xl = c(-130,-60), yl = c(25,50)</span>
+<span style="color: #586e75;">##     </span><span style="color: #586e75;">)</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">text(flist_geo$long, flist_geo$lat, flist_geo$address, pos=3)</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">dev.off()</span>
+   
+<span style="color: #586e75;"># </span><span style="color: #586e75;">load city names</span>
+flist2 <span style="color: #268bd2; font-weight: bold;">&lt;-</span> dir(<span style="color: #2aa198;">"data"</span>)
+flist2
+city_codes <span style="color: #268bd2; font-weight: bold;">&lt;-</span> matrix(<span style="color: #b58900;">NA</span>, nrow = 0, ncol = 2)
+<span style="color: #859900; font-weight: bold;">for</span>(fi <span style="color: #859900; font-weight: bold;">in</span> 1:length(flist2))
+    {
+        <span style="color: #586e75;"># </span><span style="color: #586e75;">fi &lt;- 1</span>
+        fname <span style="color: #268bd2; font-weight: bold;">&lt;-</span> flist2[fi]
+        print(fi); print(fname);
+        df <span style="color: #268bd2; font-weight: bold;">&lt;-</span> read.csv(
+            file.path(<span style="color: #2aa198;">"data"</span>, fname),
+            stringsAsFactors = F, nrow = 1)
+        city_codes <span style="color: #268bd2; font-weight: bold;">&lt;-</span> rbind(city_codes,
+            c(gsub(<span style="color: #2aa198;">".csv"</span>,<span style="color: #2aa198;">""</span>,fname), df$city)
+            )
+    }
+city_codes <span style="color: #268bd2; font-weight: bold;">&lt;-</span> as.data.frame(city_codes)
+names(city_codes) <span style="color: #268bd2; font-weight: bold;">&lt;-</span> c(<span style="color: #2aa198;">"address"</span>,<span style="color: #2aa198;">"city"</span>)
+city_codes 
+flist_geo2 <span style="color: #268bd2; font-weight: bold;">&lt;-</span> merge(flist_geo, city_codes, by = <span style="color: #2aa198;">"address"</span>)
+flist_geo2
+
+<span style="color: #586e75;">## </span><span style="color: #586e75;">make shapefile</span>
+epsg <span style="color: #268bd2; font-weight: bold;">&lt;-</span> make_EPSG()
+prj_code <span style="color: #268bd2; font-weight: bold;">&lt;-</span> epsg[grep(<span style="color: #2aa198;">"WGS 84$"</span>, epsg$note),]
+prj_code
+shp <span style="color: #268bd2; font-weight: bold;">&lt;-</span> SpatialPointsDataFrame(cbind(flist_geo2$long,flist_geo2$lat),flist_geo2,
+                              proj4string = CRS(
+                                  epsg$prj4[which(epsg$code ==prj_code$code)]
+                                  )
+                              )
+writeOGR(shp, <span style="color: #2aa198;">'cities.shp'</span>, <span style="color: #2aa198;">'cities'</span>, driver=<span style="color: #2aa198;">'ESRI Shapefile'</span>)
+
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-4-3-2" class="outline-4">
+<h4 id="sec-4-3-2"><span class="section-number-4">4.3.2</span> Map Shapefile 2</h4>
+<div class="outline-text-4" id="text-4-3-2">
+
+
+
+</div>
+
+</div>
+
+<div id="outline-container-4-3-3" class="outline-4">
+<h4 id="sec-4-3-3"><span class="section-number-4">4.3.3</span> Map Shapefile Output</h4>
+<div class="outline-text-4" id="text-4-3-3">
+
+<p><img src="NMMAPS-example/images/nmmaps-eg-cities.png"  alt="NMMAPS-example/images/nmmaps-eg-cities.png" />
+</p>
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-4-4" class="outline-3">
+<h3 id="sec-4-4"><span class="section-number-3">4.4</span> Population Data</h3>
+<div class="outline-text-3" id="text-4-4">
+
+
+</div>
+
+<div id="outline-container-4-4-1" class="outline-4">
+<h4 id="sec-4-4-1"><span class="section-number-4">4.4.1</span> Population data</h4>
+<div class="outline-text-4" id="text-4-4-1">
+
+<ul>
+<li id="sec-4-4-1-1">A Code Skeleton<br/>
+The process for getting the population data from the websites is a bit of a pain, with repeated copy and paste operations.  To make sure this is recorded I set up a skeleton to paste into.
+</li>
+</ul>
+<ul>
+<li id="sec-4-4-1-2"><span class="todo TODO">TODO</span> better to use gsub() to remove the ","<br/>
+
+
+
+<pre class="src src-R"><span style="color: #586e75;">################################################################</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">name:population-data</span>
+
+<span style="color: #586e75;"># </span><span style="color: #586e75;">func</span>
+setwd(<span style="color: #2aa198;">"~/projects/spatiotemporal-regression-models"</span>)
+<span style="color: #268bd2; font-weight: bold;">require</span>(gisviz)
+
+<span style="color: #586e75;"># </span><span style="color: #586e75;">load</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">citycodes</span>
+shp <span style="color: #268bd2; font-weight: bold;">&lt;-</span> readOGR(<span style="color: #2aa198;">"cities.shp"</span>, <span style="color: #2aa198;">"cities"</span>)
+shp@data
+cityname <span style="color: #268bd2; font-weight: bold;">&lt;-</span> <span style="color: #2aa198;">"SELECTED CITY"</span>
+
+<span style="color: #586e75;"># </span><span style="color: #586e75;">do</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">save url</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">xxx</span>
+population_input <span style="color: #268bd2; font-weight: bold;">&lt;-</span> read.table(textConnection(
+<span style="color: #2aa198;">"age: population</span>
+<span style="color: #2aa198;">xxx</span>
+<span style="color: #2aa198;">"</span>), sep = <span style="color: #2aa198;">":"</span>, header = <span style="color: #b58900;">TRUE</span>)
+
+<span style="color: #586e75;">## </span><span style="color: #586e75;">agecats</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">65to74     75p under65  </span>
+population_input$agecat <span style="color: #268bd2; font-weight: bold;">&lt;-</span> c(rep(<span style="color: #2aa198;">"under65"</span>, 10),
+                             rep(<span style="color: #2aa198;">"65to74"</span>),
+                             rep(<span style="color: #2aa198;">"75p"</span>,2)
+                             )
+
+citycode <span style="color: #268bd2; font-weight: bold;">&lt;-</span> subset(shp@data, address == cityname,
+                   select = city)
+
+population_input$city <span style="color: #268bd2; font-weight: bold;">&lt;-</span> rep(
+    as.character(citycode[1,1])        
+    , 13
+    )
+
+population_input
+<span style="color: #859900; font-weight: bold;">if</span>(exists(<span style="color: #2aa198;">"population"</span>))
+    {
+        population <span style="color: #268bd2; font-weight: bold;">&lt;-</span> rbind(population,
+                            population_input
+                            )        
+    } <span style="color: #859900; font-weight: bold;">else</span> {
+        population <span style="color: #268bd2; font-weight: bold;">&lt;-</span> population_input
+    }
+
+</pre>
+
+
+
+</li>
+</ul>
+<ul>
+<li id="sec-4-4-1-3">Baton Rouge<br/>
+
+
+
+<pre class="src src-R"><span style="color: #586e75;">################################################################</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">name:population-data</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">first city, remove population data.frame</span>
+rm(population)
+
+<span style="color: #586e75;"># </span><span style="color: #586e75;">func</span>
+setwd(<span style="color: #2aa198;">"~/projects/spatiotemporal-regression-models"</span>)
+<span style="color: #268bd2; font-weight: bold;">require</span>(gisviz)
+
+<span style="color: #586e75;"># </span><span style="color: #586e75;">load</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">citycodes</span>
+shp <span style="color: #268bd2; font-weight: bold;">&lt;-</span> readOGR(<span style="color: #2aa198;">"cities.shp"</span>, <span style="color: #2aa198;">"cities"</span>)
+shp@data
+cityname <span style="color: #268bd2; font-weight: bold;">&lt;-</span> <span style="color: #2aa198;">"Baton Rouge"</span>
+
+<span style="color: #586e75;"># </span><span style="color: #586e75;">do</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">save url</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">http://www.city-data.com/us-cities/The-South/Baton-Rouge-Population-Profile.html</span>
+population_input <span style="color: #268bd2; font-weight: bold;">&lt;-</span> read.table(textConnection(
+<span style="color: #2aa198;">"age: population</span>
+<span style="color: #2aa198;">Population Under 5 years: 15502</span>
+<span style="color: #2aa198;">Population 5 to 9 years: 15609</span>
+<span style="color: #2aa198;">Population 10 to 14 years: 15248</span>
+<span style="color: #2aa198;">Population 15 to 19 years: 21954</span>
+<span style="color: #2aa198;">Population 20 to 24 years: 27230</span>
+<span style="color: #2aa198;">Population 25 to 34 years: 31719</span>
+<span style="color: #2aa198;">Population 35 to 44 years: 30343</span>
+<span style="color: #2aa198;">Population 45 to 54 years: 27166</span>
+<span style="color: #2aa198;">Population 55 to 59 years: 9495</span>
+<span style="color: #2aa198;">Population 60 to 64 years: 7490</span>
+<span style="color: #2aa198;">Population 65 to 74 years: 13312</span>
+<span style="color: #2aa198;">Population 75 to 84 years: 9611</span>
+<span style="color: #2aa198;">Population 85 years and over: 3139</span>
+<span style="color: #2aa198;">"</span>), sep = <span style="color: #2aa198;">":"</span>, header = <span style="color: #b58900;">TRUE</span>)
+
+<span style="color: #586e75;">## </span><span style="color: #586e75;">agecats</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">65to74     75p under65  </span>
+population_input$agecat <span style="color: #268bd2; font-weight: bold;">&lt;-</span> c(rep(<span style="color: #2aa198;">"under65"</span>, 10),
+                             rep(<span style="color: #2aa198;">"65to74"</span>),
+                             rep(<span style="color: #2aa198;">"75p"</span>,2)
+                             )
+
+citycode <span style="color: #268bd2; font-weight: bold;">&lt;-</span> subset(shp@data, address == cityname,
+                   select = city)
+
+population_input$city <span style="color: #268bd2; font-weight: bold;">&lt;-</span> rep(
+    as.character(citycode[1,1])        
+    , 13
+    )
+
+population_input
+<span style="color: #859900; font-weight: bold;">if</span>(exists(<span style="color: #2aa198;">"population"</span>))
+    {
+        population <span style="color: #268bd2; font-weight: bold;">&lt;-</span> rbind(population,
+                            population_input
+                            )        
+    } <span style="color: #859900; font-weight: bold;">else</span> {
+        population <span style="color: #268bd2; font-weight: bold;">&lt;-</span> population_input
+    }
+
+</pre>
+
+
+</li>
+</ul>
+<ul>
+<li id="sec-4-4-1-4">Los Angeles<br/>
+
+
+
+<pre class="src src-R"><span style="color: #586e75;">################################################################</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">name:population-data</span>
+
+<span style="color: #586e75;"># </span><span style="color: #586e75;">func</span>
+<span style="color: #586e75;">#</span><span style="color: #586e75;">setwd("~/projects/spatiotemporal-regression-models")</span>
+<span style="color: #586e75;">#</span><span style="color: #586e75;">require(gisviz)</span>
+
+<span style="color: #586e75;"># </span><span style="color: #586e75;">load</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">citycodes</span>
+shp <span style="color: #268bd2; font-weight: bold;">&lt;-</span> readOGR(<span style="color: #2aa198;">"cities.shp"</span>, <span style="color: #2aa198;">"cities"</span>)
+shp@data
+cityname <span style="color: #268bd2; font-weight: bold;">&lt;-</span> <span style="color: #2aa198;">"Los Angeles"</span>
+
+<span style="color: #586e75;"># </span><span style="color: #586e75;">do</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">save url</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">http://www.city-data.com/us-cities/The-West/Los-Angeles-Population-Profile.html</span>
+population_input <span style="color: #268bd2; font-weight: bold;">&lt;-</span> read.table(textConnection(
+<span style="color: #2aa198;">"age: population</span>
+<span style="color: #2aa198;">Population under 5 years old: 285976</span>
+<span style="color: #2aa198;">Population 5 to 9 years old: 297837</span>
+<span style="color: #2aa198;">Population 10 to 14 years old: 255604</span>
+<span style="color: #2aa198;">Population 15 to 19 years old: 251632</span>
+<span style="color: #2aa198;">Population 20 to 24 years old: 299906</span>
+<span style="color: #2aa198;">Population 25 to 34 years old: 674098</span>
+<span style="color: #2aa198;">Population 35 to 44 years old: 584036</span>
+<span style="color: #2aa198;">Population 45 to 54 years old: 428974</span>
+<span style="color: #2aa198;">Population 55 to 59 years old: 143965</span>
+<span style="color: #2aa198;">Population 60 to 64 years old: 115663</span>
+<span style="color: #2aa198;">Population 65 to 74 years old: 18711</span>
+<span style="color: #2aa198;">Population 75 to 84 years old: 125829</span>
+<span style="color: #2aa198;">Population 85 years and over: 44189</span>
+<span style="color: #2aa198;">"</span>), sep = <span style="color: #2aa198;">":"</span>, header = <span style="color: #b58900;">TRUE</span>)
+
+<span style="color: #586e75;">## </span><span style="color: #586e75;">agecats</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">65to74     75p under65  </span>
+population_input$agecat <span style="color: #268bd2; font-weight: bold;">&lt;-</span> c(rep(<span style="color: #2aa198;">"under65"</span>, 10),
+                             rep(<span style="color: #2aa198;">"65to74"</span>),
+                             rep(<span style="color: #2aa198;">"75p"</span>,2)
+                             )
+
+citycode <span style="color: #268bd2; font-weight: bold;">&lt;-</span> subset(shp@data, address == cityname,
+                   select = city)
+
+population_input$city <span style="color: #268bd2; font-weight: bold;">&lt;-</span> rep(
+    as.character(citycode[1,1])        
+    , 13
+    )
+
+population_input
+<span style="color: #859900; font-weight: bold;">if</span>(exists(<span style="color: #2aa198;">"population"</span>))
+    {
+        population <span style="color: #268bd2; font-weight: bold;">&lt;-</span> rbind(population,
+                            population_input
+                            )        
+    } <span style="color: #859900; font-weight: bold;">else</span> {
+        population <span style="color: #268bd2; font-weight: bold;">&lt;-</span> population_input
+    }
+
+</pre>
+
+
+
+</li>
+</ul>
+<ul>
+<li id="sec-4-4-1-5">Tucson<br/>
+
+
+
+<pre class="src src-R"><span style="color: #586e75;">################################################################</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">name:population-data</span>
+
+<span style="color: #586e75;"># </span><span style="color: #586e75;">func</span>
+<span style="color: #586e75;">#</span><span style="color: #586e75;">setwd("~/projects/spatiotemporal-regression-models")</span>
+<span style="color: #586e75;">#</span><span style="color: #586e75;">require(gisviz)</span>
+
+<span style="color: #586e75;"># </span><span style="color: #586e75;">load</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">citycodes</span>
+shp <span style="color: #268bd2; font-weight: bold;">&lt;-</span> readOGR(<span style="color: #2aa198;">"cities.shp"</span>, <span style="color: #2aa198;">"cities"</span>)
+shp@data
+cityname <span style="color: #268bd2; font-weight: bold;">&lt;-</span> <span style="color: #2aa198;">"Tucson"</span>
+
+<span style="color: #586e75;"># </span><span style="color: #586e75;">do</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">save url</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">http://www.city-data.com/us-cities/The-West/Tucson-Population-Profile.html</span>
+population_input <span style="color: #268bd2; font-weight: bold;">&lt;-</span> read.table(textConnection(
+<span style="color: #2aa198;">"age: population</span>
+<span style="color: #2aa198;">Population under 5 years old: 35201</span>
+<span style="color: #2aa198;">Population 5 to 9 years old: 34189</span>
+<span style="color: #2aa198;">Population 10 to 14 years old: 31939</span>
+<span style="color: #2aa198;">Population 15 to 19 years old: 38170</span>
+<span style="color: #2aa198;">Population 20 to 24 years old: 47428</span>
+<span style="color: #2aa198;">Population 25 to 34 years old: 76394</span>
+<span style="color: #2aa198;">Population 35 to 44 years old: 72289</span>
+<span style="color: #2aa198;">Population 45 to 54 years old: 57608</span>
+<span style="color: #2aa198;">Population 55 to 59 years old: 19597</span>
+<span style="color: #2aa198;">Population 60 to 64 years old: 16056</span>
+<span style="color: #2aa198;">Population 65 to 74 years old: 29117</span>
+<span style="color: #2aa198;">Population 75 to 84 years old: 21394</span>
+<span style="color: #2aa198;">Population 85 years and older: 7317</span>
+<span style="color: #2aa198;">"</span>), sep = <span style="color: #2aa198;">":"</span>, header = <span style="color: #b58900;">TRUE</span>)
+
+<span style="color: #586e75;">## </span><span style="color: #586e75;">agecats</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">65to74     75p under65  </span>
+population_input$agecat <span style="color: #268bd2; font-weight: bold;">&lt;-</span> c(rep(<span style="color: #2aa198;">"under65"</span>, 10),
+                             rep(<span style="color: #2aa198;">"65to74"</span>),
+                             rep(<span style="color: #2aa198;">"75p"</span>,2)
+                             )
+
+citycode <span style="color: #268bd2; font-weight: bold;">&lt;-</span> subset(shp@data, address == cityname,
+                   select = city)
+
+population_input$city <span style="color: #268bd2; font-weight: bold;">&lt;-</span> rep(
+    as.character(citycode[1,1])        
+    , 13
+    )
+
+population_input
+<span style="color: #859900; font-weight: bold;">if</span>(exists(<span style="color: #2aa198;">"population"</span>))
+    {
+        population <span style="color: #268bd2; font-weight: bold;">&lt;-</span> rbind(population,
+                            population_input
+                            )        
+    } <span style="color: #859900; font-weight: bold;">else</span> {
+        population <span style="color: #268bd2; font-weight: bold;">&lt;-</span> population_input
+    }
+
+</pre>
+
+
+</li>
+</ul>
+<ul>
+<li id="sec-4-4-1-6">Denver<br/>
+
+
+
+<pre class="src src-R"><span style="color: #586e75;">################################################################</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">name:population-data</span>
+
+<span style="color: #586e75;"># </span><span style="color: #586e75;">func</span>
+<span style="color: #586e75;">#</span><span style="color: #586e75;">setwd("~/projects/spatiotemporal-regression-models")</span>
+<span style="color: #586e75;">#</span><span style="color: #586e75;">require(gisviz)</span>
+
+<span style="color: #586e75;"># </span><span style="color: #586e75;">load</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">citycodes</span>
+shp <span style="color: #268bd2; font-weight: bold;">&lt;-</span> readOGR(<span style="color: #2aa198;">"cities.shp"</span>, <span style="color: #2aa198;">"cities"</span>)
+shp@data
+cityname <span style="color: #268bd2; font-weight: bold;">&lt;-</span> <span style="color: #2aa198;">"Denver"</span>
+
+<span style="color: #586e75;"># </span><span style="color: #586e75;">do</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">save url</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">http://www.city-data.com/us-cities/The-West/Denver-Population-Profile.html</span>
+
+population_input <span style="color: #268bd2; font-weight: bold;">&lt;-</span> read.table(textConnection(
+<span style="color: #2aa198;">"age: population</span>
+<span style="color: #2aa198;">Population under 5 years old: 37769</span>
+<span style="color: #2aa198;">Population 5 to 9 years old: 34473</span>
+<span style="color: #2aa198;">Population 10 to 14 years old: 31315</span>
+<span style="color: #2aa198;">Population 15 to 19 years old: 32259</span>
+<span style="color: #2aa198;">Population 20 to 24 years old: 45534</span>
+<span style="color: #2aa198;">Population 25 to 34 years old: 113676</span>
+<span style="color: #2aa198;">Population 35 to 44 years old: 86420</span>
+<span style="color: #2aa198;">Population 45 to 54 years old: 71000</span>
+<span style="color: #2aa198;">Population 55 to 59 years old: 22573</span>
+<span style="color: #2aa198;">Population 60 to 64 years old: 17191</span>
+<span style="color: #2aa198;">Population 65 to 74 years old: 30643</span>
+<span style="color: #2aa198;">Population 75 to 84 years old: 23369</span>
+<span style="color: #2aa198;">Population 85 years and over: 8414</span>
+<span style="color: #2aa198;">"</span>), sep = <span style="color: #2aa198;">":"</span>, header = <span style="color: #b58900;">TRUE</span>)
+
+<span style="color: #586e75;">## </span><span style="color: #586e75;">agecats</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">65to74     75p under65  </span>
+population_input$agecat <span style="color: #268bd2; font-weight: bold;">&lt;-</span> c(rep(<span style="color: #2aa198;">"under65"</span>, 10),
+                             rep(<span style="color: #2aa198;">"65to74"</span>),
+                             rep(<span style="color: #2aa198;">"75p"</span>,2)
+                             )
+
+citycode <span style="color: #268bd2; font-weight: bold;">&lt;-</span> subset(shp@data, address == cityname,
+                   select = city)
+
+population_input$city <span style="color: #268bd2; font-weight: bold;">&lt;-</span> rep(
+    as.character(citycode[1,1])        
+    , 13
+    )
+
+population_input
+<span style="color: #859900; font-weight: bold;">if</span>(exists(<span style="color: #2aa198;">"population"</span>))
+    {
+        population <span style="color: #268bd2; font-weight: bold;">&lt;-</span> rbind(population,
+                            population_input
+                            )        
+    } <span style="color: #859900; font-weight: bold;">else</span> {
+        population <span style="color: #268bd2; font-weight: bold;">&lt;-</span> population_input
+    }
+
+</pre>
+
+</li>
+</ul>
+<ul>
+<li id="sec-4-4-1-7">Louisville<br/>
+
+
+
+<pre class="src src-R"><span style="color: #586e75;">################################################################</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">name:population-data</span>
+
+<span style="color: #586e75;"># </span><span style="color: #586e75;">func</span>
+setwd(<span style="color: #2aa198;">"~/projects/spatiotemporal-regression-models"</span>)
+<span style="color: #268bd2; font-weight: bold;">require</span>(gisviz)
+
+<span style="color: #586e75;"># </span><span style="color: #586e75;">load</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">citycodes</span>
+shp <span style="color: #268bd2; font-weight: bold;">&lt;-</span> readOGR(<span style="color: #2aa198;">"cities.shp"</span>, <span style="color: #2aa198;">"cities"</span>)
+shp@data
+
+cityname <span style="color: #268bd2; font-weight: bold;">&lt;-</span> <span style="color: #2aa198;">"Louisville"</span>
+
+<span style="color: #586e75;"># </span><span style="color: #586e75;">do</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">save url</span>
+<span style="color: #586e75;">#</span><span style="color: #586e75;">http://www.city-data.com/us-cities/The-South/Louisville-Population-Profile.html</span>
+
+<span style="color: #586e75;">## </span><span style="color: #586e75;">NB error in table, 75-84 was missing.  used same from baton rouge</span>
+population_input <span style="color: #268bd2; font-weight: bold;">&lt;-</span> read.table(textConnection(
+  <span style="color: #2aa198;">"age: population</span>
+<span style="color: #2aa198;">  Population under 5 years old: 16926</span>
+<span style="color: #2aa198;">  Population 5 to 9 years old: 17359</span>
+<span style="color: #2aa198;">  Population 10 to 14 years old: 16627</span>
+<span style="color: #2aa198;">  Population 15 to 19 years old: 17362</span>
+<span style="color: #2aa198;">  Population 20 to 24 years old: 18923</span>
+<span style="color: #2aa198;">  Population 25 to 34 years old: 37541</span>
+<span style="color: #2aa198;">  Population 35 to 44 years old: 40354</span>
+<span style="color: #2aa198;">  Population 45 to 54 years old: 33755</span>
+<span style="color: #2aa198;">  Population 55 to 59 years old: 10716</span>
+<span style="color: #2aa198;">  Population 60 to 64 years old: 9211</span>
+<span style="color: #2aa198;">  Population 65 to 74 years old: 18577</span>
+<span style="color: #2aa198;">  Population 75 to 84 years: 9611</span>
+<span style="color: #2aa198;">  Population 85 years and older: 5075</span>
+<span style="color: #2aa198;">  "</span>), sep = <span style="color: #2aa198;">":"</span>, header = <span style="color: #b58900;">TRUE</span>)
+
+<span style="color: #586e75;">## </span><span style="color: #586e75;">agecats</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">65to74     75p under65  </span>
+population_input$agecat <span style="color: #268bd2; font-weight: bold;">&lt;-</span> c(rep(<span style="color: #2aa198;">"under65"</span>, 10),
+                             rep(<span style="color: #2aa198;">"65to74"</span>),
+                             rep(<span style="color: #2aa198;">"75p"</span>,2)
+                             )
+
+citycode <span style="color: #268bd2; font-weight: bold;">&lt;-</span> subset(shp@data, address == cityname,
+                   select = city)
+
+population_input$city <span style="color: #268bd2; font-weight: bold;">&lt;-</span> rep(
+    as.character(citycode[1,1])        
+    , 13
+    )
+
+population_input
+<span style="color: #859900; font-weight: bold;">if</span>(exists(<span style="color: #2aa198;">"population"</span>))
+    {
+        population <span style="color: #268bd2; font-weight: bold;">&lt;-</span> rbind(population,
+                            population_input
+                            )        
+    } <span style="color: #859900; font-weight: bold;">else</span> {
+        population <span style="color: #268bd2; font-weight: bold;">&lt;-</span> population_input
+    }
+
+</pre>
+
+
+
+</li>
+</ul>
+<ul>
+<li id="sec-4-4-1-8">Save Population Dataset<br/>
+
+
+
+<pre class="src src-R"><span style="color: #586e75;">################################################################</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">name:save-population</span>
+write.csv(population, <span style="color: #2aa198;">"population.csv"</span>,
+          row.names = <span style="color: #b58900;">FALSE</span>
+          )
+</pre>
+
+
+</li>
+</ul>
+</div>
+
+</div>
+
+<div id="outline-container-4-4-2" class="outline-4">
+<h4 id="sec-4-4-2"><span class="section-number-4">4.4.2</span> Population Summary</h4>
+<div class="outline-text-4" id="text-4-4-2">
+
+
+
+
+<pre class="src src-R"><span style="color: #586e75;">################################################################</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">name:Population Summary</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">func</span>
+<span style="color: #268bd2; font-weight: bold;">require</span>(plyr)
+
+<span style="color: #586e75;"># </span><span style="color: #586e75;">load</span>
+population <span style="color: #268bd2; font-weight: bold;">&lt;-</span> read.csv(<span style="color: #2aa198;">"population.csv"</span>)
+str(population)
+population <span style="color: #268bd2; font-weight: bold;">&lt;-</span> population[,c(<span style="color: #2aa198;">"city"</span>, <span style="color: #2aa198;">"agecat"</span>, <span style="color: #2aa198;">"population"</span>)]
+<span style="color: #586e75;"># </span><span style="color: #586e75;">do</span>
+population_summary <span style="color: #268bd2; font-weight: bold;">&lt;-</span> ddply(population,
+                           .variables = c(<span style="color: #2aa198;">"city"</span>,
+                               <span style="color: #2aa198;">"agecat"</span>),
+                           .fun = summarise,
+                           sum(population)
+                           )
+
+names(population_summary) <span style="color: #268bd2; font-weight: bold;">&lt;-</span> c(<span style="color: #2aa198;">"city"</span>,<span style="color: #2aa198;">"agecat"</span>,<span style="color: #2aa198;">"pop"</span>)
+
+write.csv(population_summary,
+          <span style="color: #2aa198;">"population_summary.csv"</span>,
+          row.names = <span style="color: #b58900;">FALSE</span>
+          )
+</pre>
+
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-4-5" class="outline-3">
+<h3 id="sec-4-5"><span class="section-number-3">4.5</span> Merge</h3>
+<div class="outline-text-3" id="text-4-5">
+
+
+
+
+
+<pre class="src src-R"><span style="color: #586e75;">################################################################</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">name:merge</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">func</span>
+setwd(<span style="color: #2aa198;">"~/projects/spatiotemporal-regression-models/NMMAPS-example"</span>)
+
+<span style="color: #586e75;"># </span><span style="color: #586e75;">load</span>
+outcome <span style="color: #268bd2; font-weight: bold;">&lt;-</span> read.csv(<span style="color: #2aa198;">"outcome.csv"</span>)
+str(outcome)
+outcome$date <span style="color: #268bd2; font-weight: bold;">&lt;-</span> as.Date(outcome$date)
+
+population <span style="color: #268bd2; font-weight: bold;">&lt;-</span> read.csv(<span style="color: #2aa198;">"population_summary.csv"</span>)
+str(population)
+population
+
+<span style="color: #586e75;"># </span><span style="color: #586e75;">do</span>
+analyte <span style="color: #268bd2; font-weight: bold;">&lt;-</span> merge(outcome, population, by = c(<span style="color: #2aa198;">"city"</span>, <span style="color: #2aa198;">"agecat"</span>))
+analyte <span style="color: #268bd2; font-weight: bold;">&lt;-</span> arrange(analyte, city, date, agecat)
+<span style="color: #586e75;"># </span><span style="color: #586e75;">check</span>
+subset(analyte, date == as.Date(<span style="color: #2aa198;">"1990-01-01"</span>))
+
+<span style="color: #586e75;"># </span><span style="color: #586e75;">save</span>
+write.csv(analyte, <span style="color: #2aa198;">"analyte.csv"</span>, row.names = <span style="color: #b58900;">FALSE</span>)
+</pre>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-4-6" class="outline-3">
+<h3 id="sec-4-6"><span class="section-number-3">4.6</span> Data Checking</h3>
+<div class="outline-text-3" id="text-4-6">
+
+
+</div>
+
+<div id="outline-container-4-6-1" class="outline-4">
+<h4 id="sec-4-6-1"><span class="section-number-4">4.6.1</span> Check Assumption of Proportional Hazards</h4>
+<div class="outline-text-4" id="text-4-6-1">
+
+
+
+
+<pre class="src src-R"><span style="color: #586e75;"># </span><span style="color: #586e75;">Checking the proportional hazards assumption for Indirect Age Standardisation</span>
+
+<span style="color: #586e75;"># </span><span style="color: #586e75;">Background</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">Indirect SMRs from different index/study populations are not strictly comparable</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">because they are calculated using different weighting schemes that</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">depend upon the age structures of the index/study populations</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">(see http://www.statsdirect.com/webhelp/#rates/smr.htm).</span>
+
+<span style="color: #586e75;">## </span><span style="color: #586e75;">Indirect SMRs can be compared if you make the assumption that the</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">ratio of rates between index and reference populations is constant;</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">this is similar to the assumption of proportional hazards in Cox</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">regression (Armitage and Berry, 1994).</span>
+
+<span style="color: #586e75;">## </span><span style="color: #586e75;">So we need to check if the rate ratio of the study population(s)</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">compared to the standard population varies substantially with age.</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">If not the proportional hazards assumption holds for the standard</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">rates compared with the observed rates and the Indirect SMRs are</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">comparable.  To do this check we calculate the Annualised Age Specific</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">Rates for our study areas and for our standard for several years at</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">periodic timepoints across the study period, and then calculate the</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">ratio of these at each timepoint we could reassure our selves that</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">this assumption holds.</span>
+
+<span style="color: #586e75;">## </span><span style="color: #586e75;">An additional issue arises when there are non-negligible differences</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">in the age distributions of the study population(s) and the standard</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">population. In this situation, indirect standardisation produces</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">biased results due to residual confounding by age</span>
+
+<span style="color: #586e75;">## </span><span style="color: #586e75;">Also see Australian Institute of Health and Welfare. (2011). Principles on</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">the use of direct age-standardisation in administrative data</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">collections For measuring the gap between Indigenous and</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">non-Indigenous Australians. Data linkage series. Cat. no. CSI 12.</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">Canberra: AIHW. Retrieved from</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">http://www.aihw.gov.au/publication-detail/?id=10737420133</span>
+
+<span style="color: #586e75;">################################################################</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">func</span>
+setwd(<span style="color: #2aa198;">"~/projects/spatiotemporal-regression-models/NMMAPS-example"</span>)
+<span style="color: #268bd2; font-weight: bold;">require</span>(plyr)
+
+<span style="color: #586e75;"># </span><span style="color: #586e75;">load</span>
+analyte <span style="color: #268bd2; font-weight: bold;">&lt;-</span> read.csv(<span style="color: #2aa198;">"analyte.csv"</span>)
+
+<span style="color: #586e75;"># </span><span style="color: #586e75;">clean</span>
+head(analyte)
+analyte$yy  <span style="color: #268bd2; font-weight: bold;">&lt;-</span> substr(analyte$date, 1, 4)
+  
+<span style="color: #586e75;"># </span><span style="color: #586e75;">do</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">first we want to see if the age specific rates vary across the</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">study sites</span>
+disease_colname <span style="color: #268bd2; font-weight: bold;">&lt;-</span> <span style="color: #2aa198;">"cvd"</span>
+pop_colname <span style="color: #268bd2; font-weight: bold;">&lt;-</span> <span style="color: #2aa198;">"pop"</span>
+by_cols  <span style="color: #268bd2; font-weight: bold;">&lt;-</span> c(<span style="color: #2aa198;">"city"</span>, <span style="color: #2aa198;">"agecat"</span>, <span style="color: #2aa198;">"yy"</span>)
+
+stdysites  <span style="color: #268bd2; font-weight: bold;">&lt;-</span> ddply(analyte, by_cols,
+                    <span style="color: #859900; font-weight: bold;">function</span>(df) <span style="color: #859900; font-weight: bold;">return</span>(
+                      c(observed = sum(df[,disease_colname]),
+                        pop = mean(df[,pop_colname]),
+                        crude.rate = sum(df[,disease_colname])/mean(df[,pop_colname])
+                        )
+                      )
+                    )
+<span style="color: #586e75;">## </span><span style="color: #586e75;">check</span>
+head(stdysites)
+subset(stdysites, yy == 1987 &amp; city == <span style="color: #2aa198;">"batr"</span>)
+
+<span style="color: #586e75;">## </span><span style="color: #586e75;">define the subset we will use just the deaths and pop in 2000</span>
+stdy <span style="color: #268bd2; font-weight: bold;">&lt;-</span> subset(stdysites, yy == 2000)
+stdy
+
+<span style="color: #586e75;">## </span><span style="color: #586e75;">now define the standard population as the entire country</span>
+standard  <span style="color: #268bd2; font-weight: bold;">&lt;-</span> ddply(stdy, c(<span style="color: #2aa198;">"agecat"</span>),
+                     <span style="color: #859900; font-weight: bold;">function</span>(df) <span style="color: #859900; font-weight: bold;">return</span>(
+                       c(observed = sum(df[,<span style="color: #2aa198;">"observed"</span>]),
+                         pop = sum(df[,<span style="color: #2aa198;">"pop"</span>]),
+                         crude.rate = sum(df[,<span style="color: #2aa198;">"observed"</span>])/
+                           sum(df[,<span style="color: #2aa198;">"pop"</span>])
+                         )
+                       )
+                    )
+standard
+
+<span style="color: #586e75;">## </span><span style="color: #586e75;">Merge the studysites and the standard</span>
+stdyByStnd  <span style="color: #268bd2; font-weight: bold;">&lt;-</span> merge(stdy, standard, by = <span style="color: #2aa198;">"agecat"</span>)
+stdyByStnd
+
+<span style="color: #586e75;">## </span><span style="color: #586e75;">plot the rate ratios</span>
+png(<span style="color: #2aa198;">"images/ratio-stdy-by-stnd.png"</span>)
+mp <span style="color: #268bd2; font-weight: bold;">&lt;-</span> barplot(stdyByStnd$crude.rate.x/stdyByStnd$crude.rate.y)
+text(mp, par(<span style="color: #2aa198;">"usr"</span>)[3],
+     labels = paste(stdyByStnd$agecat,stdyByStnd$city),
+     srt = 45, adj = c(1.1,1.1), xpd = <span style="color: #b58900;">TRUE</span>
+     )
+abline(1,0)
+dev.off()
+
+<span style="color: #586e75;">## </span><span style="color: #586e75;">we can see that LA has an issue with the 65to74 agecat</span>
+
+<span style="color: #586e75;">## </span><span style="color: #586e75;">Second we will check if ratio of the proportions in each population</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">agecat vary between study sites and the standard</span>
+totals <span style="color: #268bd2; font-weight: bold;">&lt;-</span> ddply(stdyByStnd, c(<span style="color: #2aa198;">"city"</span>), summarise,
+                sum(pop.x)
+                )
+totals <span style="color: #268bd2; font-weight: bold;">&lt;-</span> merge(stdyByStnd[,c(<span style="color: #2aa198;">"city"</span>,<span style="color: #2aa198;">"agecat"</span>,<span style="color: #2aa198;">"pop.x"</span>)], totals)
+totals$pop.wt  <span style="color: #268bd2; font-weight: bold;">&lt;-</span> totals[,3] / totals[,4]
+totals <span style="color: #268bd2; font-weight: bold;">&lt;-</span> arrange(totals, city, agecat)
+totals
+
+totalsStnd <span style="color: #268bd2; font-weight: bold;">&lt;-</span> ddply(stdyByStnd, c(<span style="color: #2aa198;">"agecat"</span>), summarise,
+                sum(pop.x)
+                )
+totalsStnd$totalPop <span style="color: #268bd2; font-weight: bold;">&lt;-</span> sum(totalsStnd[,2])
+totalsStnd$pop.wt.total <span style="color: #268bd2; font-weight: bold;">&lt;-</span> totalsStnd[,2]/totalsStnd[,3]
+totalsStnd
+
+<span style="color: #586e75;">## </span><span style="color: #586e75;">merge these so we can look at the ratios</span>
+totals2 <span style="color: #268bd2; font-weight: bold;">&lt;-</span> merge(totals, totalsStnd, by = <span style="color: #2aa198;">"agecat"</span>)
+totals2 <span style="color: #268bd2; font-weight: bold;">&lt;-</span> arrange(totals2, agecat, city)
+
+<span style="color: #586e75;">## </span><span style="color: #586e75;">now plot the ratios</span>
+png(<span style="color: #2aa198;">"images/ratio-stdy-by-stnd-pops.png"</span>)
+mp <span style="color: #268bd2; font-weight: bold;">&lt;-</span> barplot(totals2$pop.wt/totals2$pop.wt.total)
+text(mp, par(<span style="color: #2aa198;">"usr"</span>)[3],
+     labels = paste(totals2$agecat,totals2$city),
+     srt = 45, adj = c(1.1,1.1), xpd = <span style="color: #b58900;">TRUE</span>
+     )
+abline(1,0)
+dev.off()
+
+<span style="color: #586e75;">## </span><span style="color: #586e75;">and we can see that there are far fewer 65to74 aged persons in LA</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">than expected.</span>
+
+
+</pre>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-4-6-2" class="outline-4">
+<h4 id="sec-4-6-2"><span class="section-number-4">4.6.2</span> Incidence Rate Ratios Plot</h4>
+<div class="outline-text-4" id="text-4-6-2">
+
+<p><img src="NMMAPS-example/images/ratio-stdy-by-stnd.png"  alt="NMMAPS-example/images/ratio-stdy-by-stnd.png" />
+</p></div>
+
+</div>
+
+<div id="outline-container-4-6-3" class="outline-4">
+<h4 id="sec-4-6-3"><span class="section-number-4">4.6.3</span> Population Rate Ratios Plot</h4>
+<div class="outline-text-4" id="text-4-6-3">
+
+<p><img src="NMMAPS-example/images/ratio-stdy-by-stnd-pops.png"  alt="NMMAPS-example/images/ratio-stdy-by-stnd-pops.png" />
+</p>
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-4-7" class="outline-3">
+<h3 id="sec-4-7"><span class="section-number-3">4.7</span> Exploratory Data Analyses</h3>
+<div class="outline-text-3" id="text-4-7">
+
+
+</div>
+
+<div id="outline-container-4-7-1" class="outline-4">
+<h4 id="sec-4-7-1"><span class="section-number-4">4.7.1</span> Time-series Plots Code</h4>
+<div class="outline-text-4" id="text-4-7-1">
+
+
+
+
+<pre class="src src-R"><span style="color: #586e75;">################################################################</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">name:eda-tsplots</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">func</span>
+setwd(<span style="color: #2aa198;">"~/projects/spatiotemporal-regression-models/NMMAPS-example"</span>)
+  
+<span style="color: #586e75;"># </span><span style="color: #586e75;">load</span>
+flist <span style="color: #268bd2; font-weight: bold;">&lt;-</span> dir(<span style="color: #2aa198;">"data"</span>)
+fname <span style="color: #268bd2; font-weight: bold;">&lt;-</span> flist[7]; print(fname)
+df <span style="color: #268bd2; font-weight: bold;">&lt;-</span> read.csv(file.path(<span style="color: #2aa198;">"data"</span>, fname))
+
+<span style="color: #586e75;"># </span><span style="color: #586e75;">clean</span>
+str(df)
+summary(df$tmax); summary(df$dptp)
+
+<span style="color: #586e75;"># </span><span style="color: #586e75;">do</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">we will only consider cities with long periods temp and humidity observed</span>
+png(<span style="color: #2aa198;">"images/nmmaps-eg-dateranges.png"</span>, width = 1000, height=500, res = 150)
+par(mfrow=c(6,5), mar=c(0,3,3,0), cex=.25)
+<span style="color: #859900; font-weight: bold;">for</span>(fi <span style="color: #859900; font-weight: bold;">in</span> 1:length(flist))
+    {
+        <span style="color: #586e75;">#</span><span style="color: #586e75;">fi &lt;- 4</span>
+        fname <span style="color: #268bd2; font-weight: bold;">&lt;-</span> flist[fi]
+        df <span style="color: #268bd2; font-weight: bold;">&lt;-</span> read.csv(file.path(<span style="color: #2aa198;">"data"</span>, fname))
+        print(fi); print(fname);
+        with(df, plot(as.Date(date), tmax, type = <span style="color: #2aa198;">"l"</span>))
+        title(paste(fname, <span style="color: #2aa198;">"tmax"</span>))
+        with(df, plot(as.Date(date), dptp, type = <span style="color: #2aa198;">"l"</span>))
+        title(paste(fname, <span style="color: #2aa198;">"dptp"</span>))
+    }
+dev.off()
+
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-4-7-2" class="outline-4">
+<h4 id="sec-4-7-2"><span class="section-number-4">4.7.2</span> Time-series Plots Output</h4>
+<div class="outline-text-4" id="text-4-7-2">
+
+<p><img src="NMMAPS-example/images/nmmaps-eg-dateranges.png"  alt="NMMAPS-example/images/nmmaps-eg-dateranges.png" />
+</p>
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-4-8" class="outline-3">
+<h3 id="sec-4-8"><span class="section-number-3">4.8</span> Main Analyses</h3>
+<div class="outline-text-3" id="text-4-8">
+
+
+</div>
+
+<div id="outline-container-4-8-1" class="outline-4">
+<h4 id="sec-4-8-1"><span class="section-number-4">4.8.1</span> Core Model</h4>
+<div class="outline-text-4" id="text-4-8-1">
+
+
+
+
+<pre class="src src-R"><span style="color: #586e75;">################################################################</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">name:core</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">func</span>
+setwd(<span style="color: #2aa198;">"~/projects/spatiotemporal-regression-models/NMMAPS-example"</span>)
+<span style="color: #268bd2; font-weight: bold;">require</span>(mgcv)
+<span style="color: #268bd2; font-weight: bold;">require</span>(splines)
+
+<span style="color: #586e75;"># </span><span style="color: #586e75;">load</span>
+analyte <span style="color: #268bd2; font-weight: bold;">&lt;-</span> read.csv(<span style="color: #2aa198;">"analyte.csv"</span>)
+
+<span style="color: #586e75;"># </span><span style="color: #586e75;">clean</span>
+analyte$yy <span style="color: #268bd2; font-weight: bold;">&lt;-</span> substr(analyte$date,1,4)
+numYears<span style="color: #268bd2; font-weight: bold;">&lt;-</span>length(names(table(analyte$yy)))
+analyte$date <span style="color: #268bd2; font-weight: bold;">&lt;-</span> as.Date(analyte$date)
+analyte$time <span style="color: #268bd2; font-weight: bold;">&lt;-</span> as.numeric(analyte$date)
+analyte$agecat <span style="color: #268bd2; font-weight: bold;">&lt;-</span> factor(analyte$agecat,
+                          levels = c(<span style="color: #2aa198;">"under65"</span>,
+                              <span style="color: #2aa198;">"65to74"</span>, <span style="color: #2aa198;">"75p"</span>),
+                          ordered = <span style="color: #b58900;">TRUE</span>
+                          )
+
+<span style="color: #586e75;"># </span><span style="color: #586e75;">do</span>
+fit <span style="color: #268bd2; font-weight: bold;">&lt;-</span> gam(cvd ~ s(tmax) + s(dptp) +
+           city + agecat +
+           s(time, k= 7*numYears, fx=T) +
+           offset(log(pop)),
+           data = analyte, family = poisson
+           )
+
+<span style="color: #586e75;"># </span><span style="color: #586e75;">plot of response functions</span>
+png(<span style="color: #2aa198;">"images/nmmaps-eg-core.png"</span>, width = 1000, height = 750, res = 150)
+par(mfrow=c(2,3))
+plot(fit, all.terms = <span style="color: #b58900;">TRUE</span>)
+dev.off()
+
+
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-4-8-2" class="outline-4">
+<h4 id="sec-4-8-2"><span class="section-number-4">4.8.2</span> Core Model Plots</h4>
+<div class="outline-text-4" id="text-4-8-2">
+
+<p><img src="NMMAPS-example/images/nmmaps-eg-core.png"  alt="NMMAPS-example/images/nmmaps-eg-core.png" />
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-4-8-3" class="outline-4">
+<h4 id="sec-4-8-3"><span class="section-number-4">4.8.3</span> Model Selection</h4>
+<div class="outline-text-4" id="text-4-8-3">
+
+
+
+
+<pre class="src src-R">   
+<span style="color: #586e75;"># </span><span style="color: #586e75;">The following codes are just a dump of stuff I've found useful in the past.</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">This is all time-series methods.</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">TODO replace the city-specific model with a pooled analysis with city specific trend.</span>
+
+<span style="color: #586e75;"># </span><span style="color: #586e75;">func</span>
+<span style="color: #268bd2; font-weight: bold;">require</span>(mgcv)
+<span style="color: #268bd2; font-weight: bold;">require</span>(splines)
+  
+<span style="color: #586e75;">######################################################</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">load  </span>
+dir(<span style="color: #2aa198;">"data"</span>)
+city <span style="color: #268bd2; font-weight: bold;">&lt;-</span> <span style="color: #2aa198;">"Chicago"</span>
+data <span style="color: #268bd2; font-weight: bold;">&lt;-</span> read.csv(sprintf(<span style="color: #2aa198;">"data/%s.csv"</span>, city), header=T)
+str(data)
+data$yy <span style="color: #268bd2; font-weight: bold;">&lt;-</span> substr(data$date,1,4)
+data$date <span style="color: #268bd2; font-weight: bold;">&lt;-</span> as.Date(data$date)
+<span style="color: #586e75;">######################################################</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">check</span>
+par(mfrow=c(2,1), mar=c(4,4,3,1))
+with(subset(data[,c(1,15:25)], agecat == <span style="color: #2aa198;">'75p'</span>),
+  plot(date, tmax)
+ )
+with(subset(data[,c(1,4,15:25)], agecat == <span style="color: #2aa198;">'75p'</span>),
+        plot(date, cvd, type =<span style="color: #2aa198;">'l'</span>, col = <span style="color: #2aa198;">'grey'</span>)
+        )
+with(subset(data[,c(1,4,15:25)], agecat == <span style="color: #2aa198;">'75p'</span>),
+        lines(lowess(date, cvd, f = 0.015))
+        )
+<span style="color: #586e75;"># </span><span style="color: #586e75;">I am worried about that outlier</span>
+data$date[which(data$cvd &gt; 100)]
+<span style="color: #586e75;"># </span><span style="color: #586e75;">[1] "1995-07-15" "1995-07-16"</span>
+ 
+<span style="color: #586e75;">######################################################</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">do standard NMMAPS timeseries poisson GAM model</span>
+numYears<span style="color: #268bd2; font-weight: bold;">&lt;-</span>length(names(table(data$yy)))
+df <span style="color: #268bd2; font-weight: bold;">&lt;-</span> subset(data, agecat == <span style="color: #2aa198;">'75p'</span>)
+df$time <span style="color: #268bd2; font-weight: bold;">&lt;-</span> as.numeric(df$date)
+fit <span style="color: #268bd2; font-weight: bold;">&lt;-</span> gam(cvd ~ s(pm10tmean) + s(tmax) + s(dptp) + s(time, k= 7*numYears, fx=T), data = df, family = poisson)
+<span style="color: #586e75;"># </span><span style="color: #586e75;">plot of response functions</span>
+par(mfrow=c(2,2))
+plot(fit)
+dev.off()
+ 
+<span style="color: #586e75;">######################################################</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">some diagnostics</span>
+summary(fit)
+<span style="color: #586e75;"># </span><span style="color: #586e75;">note the R-sq.(adj) =   0.21</span>
+gam.check(fit)
+<span style="color: #586e75;"># </span><span style="color: #586e75;">note the lack of a leverage plot.  for that we need glm</span>
+ 
+<span style="color: #586e75;">######################################################</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">do same model as glm</span>
+fit2 <span style="color: #268bd2; font-weight: bold;">&lt;-</span> glm(cvd ~ pm10tmean + ns(tmax, df = 8) + ns(dptp, df = 4) + ns(time, df = 7*numYears), data = df, family = poisson)
+<span style="color: #586e75;"># </span><span style="color: #586e75;">plot responses</span>
+par(mfrow=c(2,2))
+termplot(fit2, se =T)
+dev.off()
+ 
+<span style="color: #586e75;"># </span><span style="color: #586e75;">plot prediction</span>
+df$predictedCvd <span style="color: #268bd2; font-weight: bold;">&lt;-</span> predict(fit2, df, <span style="color: #2aa198;">'response'</span>)
+<span style="color: #586e75;"># </span><span style="color: #586e75;">baseline is given by the intercept</span>
+fit3 <span style="color: #268bd2; font-weight: bold;">&lt;-</span> glm(cvd ~ 1, data = df, family = poisson)
+df$baseline <span style="color: #268bd2; font-weight: bold;">&lt;-</span>  predict(fit3, df, <span style="color: #2aa198;">'response'</span>)
+with(subset(df, date&gt;=as.Date(<span style="color: #2aa198;">'1995-01-01'</span>) &amp; date &lt;= as.Date(<span style="color: #2aa198;">'1995-07-31'</span>)),
+ plot(date, cvd, type =<span style="color: #2aa198;">'l'</span>, col = <span style="color: #2aa198;">'grey'</span>)
+        )
+with(subset(df, date&gt;=as.Date(<span style="color: #2aa198;">'1995-01-01'</span>) &amp; date &lt;= as.Date(<span style="color: #2aa198;">'1995-07-31'</span>)),
+        lines(date,predictedCvd)
+        )
+with(subset(df, date&gt;=as.Date(<span style="color: #2aa198;">'1995-01-01'</span>) &amp; date &lt;= as.Date(<span style="color: #2aa198;">'1995-07-31'</span>)),
+ lines(date,baseline)
+        )
+<span style="color: #586e75;">######################################################</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">some diagnostics</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">need to load a function to calculate poisson adjusted R squared</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">original S code from</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">The formula for pseudo-R^2 is taken from G. S. Maddalla,</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">Limited-dependent and Qualitative Variables in Econometrics, Cambridge:Cambridge Univ. Press, 1983. page 40, equation 2.50.</span>
+<span style="color: #268bd2;">RsquaredGlm</span> <span style="color: #268bd2; font-weight: bold;">&lt;-</span> <span style="color: #859900; font-weight: bold;">function</span>(o) {
+ n <span style="color: #268bd2; font-weight: bold;">&lt;-</span> length(o$residuals)
+ ll <span style="color: #268bd2; font-weight: bold;">&lt;-</span> logLik(o)[1]
+ ll_0 <span style="color: #268bd2; font-weight: bold;">&lt;-</span> logLik(update(o,~1))[1]
+ R2 <span style="color: #268bd2; font-weight: bold;">&lt;-</span> (1 - exp(((-2*ll) - (-2*ll_0))/n))/(1 - exp( - (-2*ll_0)/n))
+ names(R2) <span style="color: #268bd2; font-weight: bold;">&lt;-</span> <span style="color: #2aa198;">'pseudo.Rsquared'</span>
+ R2
+ }
+RsquaredGlm(fit2)
+<span style="color: #586e75;"># </span><span style="color: #586e75;">0.51</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">the difference is presumably due to the arguments about how to account for unexplainable variance in the poisson distribution?</span>
+ 
+<span style="color: #586e75;"># </span><span style="color: #586e75;">significance of spline terms</span>
+drop1(fit2, test=<span style="color: #2aa198;">'Chisq'</span>)
+<span style="color: #586e75;"># </span><span style="color: #586e75;">also note AIC. best model includes all of these terms</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">BIC can be computed instead (but still labelled AIC) using</span>
+drop1(fit2, test=<span style="color: #2aa198;">'Chisq'</span>, k = log(nrow(data)))
+ 
+<span style="color: #586e75;"># </span><span style="color: #586e75;">diagnostic plots</span>
+par(mfrow=c(2,2))
+plot(fit2)
+dev.off()
+<span style="color: #586e75;"># </span><span style="color: #586e75;">note high leverage plus residuals points are labelled</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">leverage doesn't seem to be too high though which is good</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">NB the numbers refer to the row.names attribute which still refer to the original dataset, not this subset</span>
+df[row.names(df) %<span style="color: #859900; font-weight: bold;">in</span>% c(9354,9356),]$date
+<span style="color: #586e75;"># </span><span style="color: #586e75;">as suspected [1] "1995-07-15" "1995-07-16"</span>
+ 
+<span style="color: #586e75;">######################################################</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">so lets re run without these obs</span>
+df2 <span style="color: #268bd2; font-weight: bold;">&lt;-</span> df[!row.names(df) %<span style="color: #859900; font-weight: bold;">in</span>% c(9354,9356),]
+<span style="color: #586e75;"># </span><span style="color: #586e75;">to avoid duplicating code just re run fit2, replacing data=df with df2</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">tmax still significant but not so extreme</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">check diagnostic plots again</span>
+par(mfrow=c(2,2))
+plot(fit2)
+dev.off()
+<span style="color: #586e75;"># </span><span style="color: #586e75;">looks like a well behaved model now.</span>
+ 
+<span style="color: #586e75;"># </span><span style="color: #586e75;">if we were still worried about any high leverage values we could identify these with</span>
+df3 <span style="color: #268bd2; font-weight: bold;">&lt;-</span> na.omit(df2[,c(<span style="color: #2aa198;">'cvd'</span>,<span style="color: #2aa198;">'pm10tmean'</span>,<span style="color: #2aa198;">'tmax'</span>,<span style="color: #2aa198;">'dptp'</span>,<span style="color: #2aa198;">'time'</span>)])
+df3$hatvalue <span style="color: #268bd2; font-weight: bold;">&lt;-</span> hatvalues(fit2)
+df3$res <span style="color: #268bd2; font-weight: bold;">&lt;-</span> residuals(fit2, <span style="color: #2aa198;">'pearson'</span>)
+with(df3, plot(hatvalue, res))
+<span style="color: #586e75;"># </span><span style="color: #586e75;">this is the same as the fourth default glm diagnostic plot, which they label x-axis as leverage</span>
+summary(df3$hatvalue)
+<span style="color: #586e75;"># </span><span style="color: #586e75;">gives us an idea of the distribution of hat values</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">decide on a threshold and look at it</span>
+hatThreshold <span style="color: #268bd2; font-weight: bold;">&lt;-</span> 0.1
+with(subset(df3, hatvalue &gt; hatThreshold), points(hatvalue, res, col = <span style="color: #2aa198;">'red'</span>, pch = 16))
+abline(0,0)
+segments(hatThreshold,-2,hatThreshold,15)
+dev.off()
+ 
+fit3 <span style="color: #268bd2; font-weight: bold;">&lt;-</span> glm(cvd ~ pm10tmean + ns(tmax, df = 8) + ns(dptp, df = 4) + ns(time, df = 7*numYears), data = subset(df3, hatvalue &lt; hatThreshold), family = poisson)
+par(mfrow=c(2,2))
+termplot(fit3, se = T)
+<span style="color: #586e75;"># </span><span style="color: #586e75;">same same</span>
+plot(fit3)
+<span style="color: #586e75;"># </span><span style="color: #586e75;">no better</span>
+ 
+<span style="color: #586e75;"># </span><span style="color: #586e75;">or we could go nuts with a whole number of ways of estimating influence</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">check all influential observations</span>
+infl <span style="color: #268bd2; font-weight: bold;">&lt;-</span> influence.measures(fit2)
+<span style="color: #586e75;"># </span><span style="color: #586e75;">which observations 'are' influential</span>
+inflk <span style="color: #268bd2; font-weight: bold;">&lt;-</span> which(apply(infl$is.inf, 1, any))
+length(inflk)
+ 
+ 
+<span style="color: #586e75;">######################################################</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">now what about serial autocorrelation in the residuals?</span>
+ 
+par(mfrow = c(2,1))
+with(df3, acf(res))
+with(df3, pacf(res))
+dev.off()
+ 
+ 
+ 
+<span style="color: #586e75;">######################################################</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">just check for overdispersion</span>
+fit <span style="color: #268bd2; font-weight: bold;">&lt;-</span> gam(cvd ~ s(pm10tmean) + s(tmax) + s(dptp) + s(time, k= 7*numYears, fx=T), data = df, family = quasipoisson)
+summary(fit)
+<span style="color: #586e75;"># </span><span style="color: #586e75;">note the Scale est. = 1.1627</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">alternatively check the glm</span>
+fit2 <span style="color: #268bd2; font-weight: bold;">&lt;-</span> glm(cvd ~ pm10tmean + ns(tmax, df = 8) + ns(dptp, df = 4) + ns(time, df = 7*numYears), data = df, family = quasipoisson)
+summary(fit2)
+<span style="color: #586e75;"># </span><span style="color: #586e75;">(Dispersion parameter for quasipoisson family taken to be 1.222640)</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">this is probably near enough to support a standard poisson model...</span>
+ 
+<span style="color: #586e75;"># </span><span style="color: #586e75;">if we have overdispersion we can use QAIC (A quasi- mode does not have a likelihood and so does not have an AIC,  by definition)</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">we can use the poisson model and calculate the overdispersion</span>
+fit2 <span style="color: #268bd2; font-weight: bold;">&lt;-</span> glm(cvd ~ pm10tmean + ns(tmax, df = 8) + ns(dptp, df = 4) + ns(time, df = 7*numYears), data = df, family = poisson)
+1- pchisq(deviance(fit2), df.residual(fit2))
+ 
+<span style="color: #586e75;"># </span><span style="color: #586e75;">QAIC, c is the variance inflation factor, the ratio of the residual deviance of the global (most complicated) model to the residual degrees of freedom</span>
+c=deviance(fit2)/df.residual(fit2)
+QAIC.1=-2*logLik(fit2)/c + 2*(length(coef(fit2)) + 1)
+QAIC.1
+ 
+<span style="color: #586e75;"># </span><span style="color: #586e75;">Actually lets use QAICc which is more conservative about parameters,</span>
+QAICc.1=-2*logLik(fit2)/c + 2*(length(coef(fit2)) + 1) + 2*(length(coef(fit2)) + 1)*(length(coef(fit2)) + 1 + 1)/(nrow(na.omit(df[,c(<span style="color: #2aa198;">'cvd'</span>,<span style="color: #2aa198;">'pm10tmean'</span>,<span style="color: #2aa198;">'tmax'</span>,<span style="color: #2aa198;">'dptp'</span>,<span style="color: #2aa198;">'time'</span>)]))- (length(coef(fit2))+1)-1)
+QAICc.1
+ 
+ 
+<span style="color: #586e75;">######################################################</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">the following is old work, some may be interesting</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">such as the use of sinusoidal wave instead of smooth function of time</span>
+ 
+ 
+<span style="color: #586e75;"># </span><span style="color: #586e75;"># sine wave</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">timevar &lt;- as.data.frame(names(table(df$date)))</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">index &lt;- 1:length(names(table(df$date)))</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">timevar$time2 &lt;- index / (length(index) / (length(index)/365.25))</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">names(timevar) &lt;- c('date','timevar')</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">timevar$date &lt;- as.Date(timevar$date)</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">df &lt;- merge(df,timevar)</span>
+ 
+<span style="color: #586e75;"># </span><span style="color: #586e75;">fit &lt;- gam(cvd ~ s(tmax) + s(dptp) + sin(timevar * 2 * pi) + cos(timevar * 2 * pi) + ns(time, df = numYears), data = df, family = poisson)</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">summary(fit)</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">par(mfrow=c(3,2))</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">plot(fit, all.terms = T)</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">dev.off()</span>
+ 
+<span style="color: #586e75;"># </span><span style="color: #586e75;"># now just explore the season fit</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">fit &lt;- gam(cvd ~ sin(timevar * 2 * pi) + cos(timevar * 2 * pi) + ns(time, df = numYears), data = df, family = poisson)</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">yhat &lt;- predict(fit)</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">head(yhat)</span>
+ 
+<span style="color: #586e75;"># </span><span style="color: #586e75;">with(df, plot(date,cvd,type = 'l',col='grey', ylim = c(15,55)))</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">lines(df[,'date'],exp(yhat),col='red')</span>
+ 
+ 
+<span style="color: #586e75;"># </span><span style="color: #586e75;"># drop1(fit, test= 'Chisq')</span>
+ 
+<span style="color: #586e75;"># </span><span style="color: #586e75;"># drop1 only works in glm?</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;"># fit with weather variables, use degrees of freedom estimated by gam</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">fit &lt;- glm(cvd ~ ns(tmax,8) + ns(dptp,2) + sin(timevar * 2 * pi) + cos(timevar * 2 * pi) + ns(time, df = numYears), data = df, family = poisson)</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">drop1(fit, test= 'Chisq')</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;"># use plot.glm for diagnostics</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">par(mfrow=c(2,2))</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">plot(fit)</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">par(mfrow=c(3,2))</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">termplot(fit, se=T)</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">dev.off()</span>
+ 
+<span style="color: #586e75;"># </span><span style="color: #586e75;"># cyclic spline, overlay on prior sinusoidal</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">with(df, plot(date,cvd,type = 'l',col='grey', ylim = c(0,55)))</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">lines(df[,'date'],exp(yhat),col='red')</span>
+ 
+<span style="color: #586e75;"># </span><span style="color: #586e75;">df$daynum &lt;- as.numeric(format(df$date, "%j"))</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">df[360:370,c('date','daynum')]</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">fit &lt;- gam(cvd ~ s(daynum, k=3, fx=T, bs = 'cp') +  s(time, k = numYears, fx = T), data = df, family = poisson)</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">yhat2 &lt;- predict(fit)</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">head(yhat2)</span>
+ 
+<span style="color: #586e75;"># </span><span style="color: #586e75;">lines(df[,'date'],exp(yhat2),col='blue')</span>
+ 
+ 
+<span style="color: #586e75;"># </span><span style="color: #586e75;">par(mfrow=c(1,2))</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">plot(fit)</span>
+ 
+ 
+<span style="color: #586e75;"># </span><span style="color: #586e75;"># fit weather with season</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">fit &lt;- gam(cvd ~ s(tmax) + s(dptp) +</span>
+  <span style="color: #586e75;"># </span><span style="color: #586e75;">s(daynum, k=3, fx=T, bs = 'cp') +  s(time, k = numYears, fx = T), data = df, family = poisson)</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">par(mfrow=c(2,2))</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">plot(fit)</span>
+ 
+<span style="color: #586e75;"># </span><span style="color: #586e75;">summary(fit)</span>
+  
+</pre>
+
+
+
+</div>
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-5" class="outline-2">
+<h2 id="sec-5"><span class="section-number-2">5</span> Spatial lag and timeseries</h2>
+<div class="outline-text-2" id="text-5">
+
+<p>I will use the same NMMAPSlite to show how I'd approach a simple "Spatio-Temporal" model.
+</p><ul>
+<li id="sec-5-1"><span class="todo TODO">TODO</span> The following is a stub of an idea.  For further development<br/>
+</li>
+</ul>
+
+</div>
+
+<div id="outline-container-5-1" class="outline-3">
+<h3 id="sec-5-1"><span class="section-number-3">5.1</span> Data</h3>
+<div class="outline-text-3" id="text-5-1">
+
+
+</div>
+
+<div id="outline-container-5-1-1" class="outline-4">
+<h4 id="sec-5-1-1"><span class="section-number-4">5.1.1</span> Zones</h4>
+<div class="outline-text-4" id="text-5-1-1">
+
+<ul>
+<li id="sec-5-1-1-1">Spatial Neighbours Code<br/>
+
+
+
+<pre class="src src-R"><span style="color: #586e75;">################################################################</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">name:spatwat</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">func</span>
+setwd(<span style="color: #2aa198;">"~/projects/spatiotemporal-regression-models/NMMAPS-example"</span>)
+<span style="color: #268bd2; font-weight: bold;">require</span>(gisviz)
+
+<span style="color: #586e75;"># </span><span style="color: #586e75;">load</span>
+dir()
+shp <span style="color: #268bd2; font-weight: bold;">&lt;-</span> readOGR(<span style="color: #2aa198;">"cities.shp"</span>, <span style="color: #2aa198;">"cities"</span>)
+
+<span style="color: #586e75;"># </span><span style="color: #586e75;">clean</span>
+head(shp@data)
+
+<span style="color: #586e75;"># </span><span style="color: #586e75;">do</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">I will use nearest neighbour within a distance threshold, but</span>
+<span style="color: #586e75;">## </span><span style="color: #586e75;">usually polygon datasets would use poly2nb</span>
+nb <span style="color: #268bd2; font-weight: bold;">&lt;-</span> dnearneigh(shp, d1 = 1, d2 = 1000)                      
+head(nb)
+shp[[1]][1]
+shp[[1]][nb[[1]]]
+<span style="color: #586e75;"># </span><span style="color: #586e75;">map</span>
+nudge <span style="color: #268bd2; font-weight: bold;">&lt;-</span> 10
+png(<span style="color: #2aa198;">"images/nmmaps-eg-neighbourhood.png"</span>)
+plotMyMap(
+    shp@coords, xl = c(min(shp@coords[,1])-nudge, max(shp@coords[,1])+nudge),
+    yl = c(min(shp@coords[,2])-nudge, max(shp@coords[,2])+nudge)
+    )
+plot(nb, shp@coords, add=<span style="color: #b58900;">TRUE</span>)
+text(shp@data$long, shp@data$lat, shp@data$address, pos=3)
+points(shp@coords[nb[[1]],], col = <span style="color: #2aa198;">'green'</span>, pch = 16)
+points(shp@data[1,c(<span style="color: #2aa198;">"long"</span>,<span style="color: #2aa198;">"lat"</span>)],col = <span style="color: #2aa198;">'blue'</span>, pch = 16)
+dev.off()
+
+
+</pre>
+
+
+</li>
+</ul>
+<ul>
+<li id="sec-5-1-1-2">Spatial Neighbours Output<br/>
+<img src="NMMAPS-example/images/nmmaps-eg-neighbourhood.png"  alt="NMMAPS-example/images/nmmaps-eg-neighbourhood.png" />
+</li>
+</ul>
+</div>
+
+</div>
+
+<div id="outline-container-5-1-2" class="outline-4">
+<h4 id="sec-5-1-2"><span class="section-number-4">5.1.2</span> Outcome</h4>
+<div class="outline-text-4" id="text-5-1-2">
+
+
+
+
+<pre class="src src-R"><span style="color: #586e75;">#### </span><span style="color: #586e75;">Now do the Neighbourhood autoregressive lagged variable  ####</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">func</span>
+setwd(<span style="color: #2aa198;">"~/projects/spatiotemporal-regression-models/NMMAPS-example"</span>)
+<span style="color: #268bd2; font-weight: bold;">require</span>(gisviz)
+<span style="color: #268bd2; font-weight: bold;">require</span>(plyr)
+
+<span style="color: #586e75;"># </span><span style="color: #586e75;">load</span>
+analyte <span style="color: #268bd2; font-weight: bold;">&lt;-</span> read.csv(<span style="color: #2aa198;">"analyte.csv"</span>)
+shp <span style="color: #268bd2; font-weight: bold;">&lt;-</span> readOGR(<span style="color: #2aa198;">"cities.shp"</span>, <span style="color: #2aa198;">"cities"</span>)
+
+<span style="color: #586e75;"># </span><span style="color: #586e75;">clean</span>
+analyte$yy <span style="color: #268bd2; font-weight: bold;">&lt;-</span> substr(analyte$date,1,4)
+numYears<span style="color: #268bd2; font-weight: bold;">&lt;-</span>length(names(table(analyte$yy)))
+analyte$date <span style="color: #268bd2; font-weight: bold;">&lt;-</span> as.Date(analyte$date)
+analyte$time <span style="color: #268bd2; font-weight: bold;">&lt;-</span> as.numeric(analyte$date)
+analyte$agecat <span style="color: #268bd2; font-weight: bold;">&lt;-</span> factor(analyte$agecat,
+                          levels = c(<span style="color: #2aa198;">"under65"</span>,
+                              <span style="color: #2aa198;">"65to74"</span>, <span style="color: #2aa198;">"75p"</span>),
+                          ordered = <span style="color: #b58900;">TRUE</span>
+                          )
+ 
+names(analyte)
+analyte[1,]
+table(analyte$city)
+<span style="color: #586e75;"># </span><span style="color: #586e75;">do</span>
+study <span style="color: #268bd2; font-weight: bold;">&lt;-</span> analyte[, c(<span style="color: #2aa198;">"city"</span>,<span style="color: #2aa198;">"date"</span>, <span style="color: #2aa198;">"agecat"</span>, <span style="color: #2aa198;">"cvd"</span>, <span style="color: #2aa198;">"pop"</span>)]
+subset(study, city == <span style="color: #2aa198;">"tucs"</span> &amp; date == as.Date(<span style="color: #2aa198;">"1991-01-01"</span>))
+
+nb <span style="color: #268bd2; font-weight: bold;">&lt;-</span> dnearneigh(shp, d1 = 1, d2 = 1000)                      
+head(nb)
+head(shp@data)
+adj <span style="color: #268bd2; font-weight: bold;">&lt;-</span> adjacency_df(NB = nb, shp = shp, zone_id = <span style="color: #2aa198;">'city'</span>)
+subset(adj, V1 == <span style="color: #2aa198;">"tucs"</span>)
+
+neighbours <span style="color: #268bd2; font-weight: bold;">&lt;-</span> merge(study, adj, by.x = <span style="color: #2aa198;">"city"</span>, by.y = <span style="color: #2aa198;">"V1"</span>)
+subset(neighbours, city == <span style="color: #2aa198;">"tucs"</span> &amp; date == as.Date(<span style="color: #2aa198;">"1991-01-01"</span>))
+
+xvars <span style="color: #268bd2; font-weight: bold;">&lt;-</span> c(<span style="color: #2aa198;">"V2"</span>, <span style="color: #2aa198;">"date"</span>,<span style="color: #2aa198;">"agecat"</span>)
+yvars <span style="color: #268bd2; font-weight: bold;">&lt;-</span> c(<span style="color: #2aa198;">"city"</span>, <span style="color: #2aa198;">"date"</span>, <span style="color: #2aa198;">"agecat"</span>)
+neighbours <span style="color: #268bd2; font-weight: bold;">&lt;-</span> merge(neighbours[,c(xvars, <span style="color: #2aa198;">"city"</span>)],
+                    analyte[,c(yvars, <span style="color: #2aa198;">"cvd"</span>, <span style="color: #2aa198;">"pop"</span>)],
+                    by.x = xvars,
+                    by.y = yvars)
+names(neighbours)
+subset(neighbours, city == <span style="color: #2aa198;">"tucs"</span> &amp; date == as.Date(<span style="color: #2aa198;">"1991-01-01"</span>))
+
+neighbours$asr  <span style="color: #268bd2; font-weight: bold;">&lt;-</span> (neighbours$cvd / neighbours$pop) * 1000
+
+
+neighbours2  <span style="color: #268bd2; font-weight: bold;">&lt;-</span> ddply(neighbours, c(<span style="color: #2aa198;">"city"</span>, <span style="color: #2aa198;">"date"</span>, <span style="color: #2aa198;">"agecat"</span>), summarise,
+                     NeighboursYij  = mean(asr)
+                     )
+subset(neighbours2, city == <span style="color: #2aa198;">"tucs"</span> &amp; date == as.Date(<span style="color: #2aa198;">"1991-01-01"</span>))
+table(neighbours2$city)
+head(analyte)
+
+analyte  <span style="color: #268bd2; font-weight: bold;">&lt;-</span> merge(analyte, neighbours2, by = c(<span style="color: #2aa198;">"city"</span>, <span style="color: #2aa198;">"agecat"</span>, <span style="color: #2aa198;">"date"</span>))
+analyte <span style="color: #268bd2; font-weight: bold;">&lt;-</span> arrange(analyte, city, date, agecat)
+head(analyte)
+
+
+</pre>
+
+
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-5-2" class="outline-3">
+<h3 id="sec-5-2"><span class="section-number-3">5.2</span> Analysis</h3>
+<div class="outline-text-3" id="text-5-2">
+
+
+</div>
+
+<div id="outline-container-5-2-1" class="outline-4">
+<h4 id="sec-5-2-1"><span class="section-number-4">5.2.1</span> Model with Spatial Lag</h4>
+<div class="outline-text-4" id="text-5-2-1">
+
+
+
+
+<pre class="src src-R"><span style="color: #586e75;"># </span><span style="color: #586e75;">func</span>
+<span style="color: #268bd2; font-weight: bold;">require</span>(splines)
+
+<span style="color: #586e75;"># </span><span style="color: #586e75;">load</span>
+<span style="color: #586e75;"># </span><span style="color: #586e75;">assumes the prior code chunks have been run</span>
+
+<span style="color: #586e75;"># </span><span style="color: #586e75;">do</span>
+fit <span style="color: #268bd2; font-weight: bold;">&lt;-</span> glm(cvd ~ ns(tmax, df = 3) + ns(dptp, df = 3) +
+           NeighboursYij + 
+           city + agecat +
+           ns(time, df = 7*numYears) +
+           offset(log(pop)),
+           data = analyte, family = poisson
+           )
+
+<span style="color: #586e75;"># </span><span style="color: #586e75;">plot of response functions</span>
+png(<span style="color: #2aa198;">"images/nmmaps-eg-sp-lag.png"</span>, width = 1000, height = 750, res = 150)
+par(mfrow=c(2,3))
+termplot(fit, terms = attr(terms(fit),<span style="color: #2aa198;">'term.labels'</span>) [c(1:2,6)], se = <span style="color: #b58900;">TRUE</span>, ylim =c(-.2,.2), col.term = <span style="color: #2aa198;">'black'</span>, col.se = <span style="color: #2aa198;">'black'</span>)
+termplot(fit, terms = attr(terms(fit),<span style="color: #2aa198;">'term.labels'</span>) [c(4,5)], se = <span style="color: #b58900;">TRUE</span>, ylim =c(-3,3), col.term = <span style="color: #2aa198;">'black'</span>, col.se = <span style="color: #2aa198;">'black'</span>)
+termplot(fit, terms = attr(terms(fit),<span style="color: #2aa198;">'term.labels'</span>) [3], se = <span style="color: #b58900;">TRUE</span>, ylim =c(-1,1), col.term = <span style="color: #2aa198;">'black'</span>, col.se = <span style="color: #2aa198;">'black'</span>)
+dev.off()
+
+
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-5-2-2" class="outline-4">
+<h4 id="sec-5-2-2"><span class="section-number-4">5.2.2</span> Spatial Lag Model Plots</h4>
+<div class="outline-text-4" id="text-5-2-2">
+
+<p><img src="NMMAPS-example/images/nmmaps-eg-sp-lag.png"  alt="NMMAPS-example/images/nmmaps-eg-sp-lag.png" />
+</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+</body>
+</html>

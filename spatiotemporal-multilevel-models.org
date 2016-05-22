@@ -1358,6 +1358,12 @@ categories:
 - spatial dependence
 ---
 
+### UPDATE
+
+- I have renamed the repo.  See [/2016/05/spatial-lag-and-timeseries-model-with-nmmaps-UPDATE](/2016/05/spatial-lag-and-timeseries-model-with-nmmaps-UPDATE)
+
+### OLD POST
+
 - Today I chatted with Phil Kokic at CSIRO Mathematics, Informatics and Statistics about the way the spatially lagged neighbours variable absorbs any residual spatial correlation in the errors
 - We agreed that this is a pretty minimal attempt, not as good as a spatial error model but pretty easy to implement
 - I've hacked together some very very ugly code to construct the lagged variable
@@ -1409,6 +1415,26 @@ categories:
 
 THANKS Sarunya!
 #+end_src
+** 2016-05-22-spatial-lag-and-timeseries-model-with-nmmaps-UPDATE
+
+#+begin_src markdown :tangle ~/projects/ivanhanigan.github.com.raw/_posts/2016-05-22-spatial-lag-and-timeseries-model-with-nmmaps-UPDATE.md :exports none :eval no :padline no
+---
+name: spatial-lag-and-timeseries-model-with-nmmaps-UPDATE
+layout: post
+title: spatial-lag-and-timeseries-model-with-nmmaps-UPDATE
+date: 2016-05-22
+categories:
+- spatial dependence
+---
+
+- Re my old post: [/2013/10/spatial-lag-and-timeseries-model-with-nmmaps](/2013/10/spatial-lag-and-timeseries-model-with-nmmaps)
+- Today I updated my repo from just looking at spatiotemporal regression to now also look at multilevel (aka mixed-effects/random-effects) models
+-  The new site is based on the minimal theme by orderedlist: [http://ivanhanigan.github.io/spatiotemporal-multilevel-models](http://ivanhanigan.github.io/spatiotemporal-multilevel-models)
+- That also means I've had to move some of my old codes to the now location
+- [http://ivanhanigan.github.io/spatiotemporal-multilevel-models/spatiotemporal-multilevel-models.html](http://ivanhanigan.github.io/spatiotemporal-multilevel-models/spatiotemporal-multilevel-models.html)
+
+#+end_src
+
 * Introduction
 ** About
 #+begin_src R :session *R* :tangle about.md :exports none :eval no :padline no
@@ -2827,7 +2853,8 @@ cd ..
 #+end_src
 * Spatial lag and timeseries 
 I will use the same NMMAPSlite to show how I'd approach a simple "Spatio-Temporal" model.
-**** TODO The following is a stub of an idea.  For further development
+
+** TODO The following is a stub of an idea.  For further development
 ** Data
 *** Zones
 **** Spatial Neighbours Code
