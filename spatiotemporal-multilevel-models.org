@@ -1410,7 +1410,14 @@ categories:
 THANKS Sarunya!
 #+end_src
 * Introduction
-** Overview
+** About
+#+begin_src R :session *R* :tangle about.md :exports none :eval no :padline no
+---
+layout: default
+title: About
+---
+
+
 In this notebook we will introduce what multi-level data and models are and why they are useful in epidemiology contexts. We begin with the general linear model framework GLM and then move to mixed-effects models. It is important to realise that these models are called different things in different disciplines: (generalized) linear mixed (effects) models (GLMM), hierarchical (generalized) linear models, etc. The terminology for the model parameters is equally diverse, usually including the terms random effects and fixed effects. So we focus on the key concepts.
 
 We will cover what is a Random Effect and how it differs from a Fixed effect. Some example syntax in R (on a secure website portal we have configured) and Stata will show how to get a handle on models that have random intercepts and additionally, random slopes.
@@ -1420,7 +1427,23 @@ We will spend a little time talking about how to partition variation and get est
 We will discuss how to interpret these results in a population health context.
 
 An online analysis server (Rstudio in a web browser) and data repository (geoserver) are also provided
+#+end_src
 * Compare basic regression with mixed-effects modelling
+** COMMENT compare-basic-regression-and-me
+#+name:compare-basic-regression-and-me
+#+begin_src R :session *R* :tangle compare-basic-regression-and-me.md :exports none :eval no :padline no
+---
+layout: default
+title: Compare basic regression with mixed-effects modelling
+---
+
+We will cover what is a Random Effect and how it differs from a Fixed effect. Some example syntax in R (on a secure website portal we have configured) and Stata will show how to get a handle on models that have random intercepts and additionally, random slopes.
+
+We will spend a little time talking about how to partition variation and get estimates of the random and fixed effects. An important element will be our discussion of similarities between mixed-effects models with basic regression. There will also be brief discussion of extending the regression to non-gaussian responses (GLMERs).
+
+
+#+end_src
+
 ** Terminology
 
 When discussing multilevel modelling in this workshop we will avoid using the names 'fixed effects' and 'random effects'. Instead we use the more verbose phrase: intercepts/coefficients that are common across groups and intercepts/coefficients that vary by group.  This is because, as noted in the introduction to Gelman and Hill 2007 (recommended reading) it is very problematic that these terms are used in imprecise and confusing ways that vary across disciplines. This concern also appears in the work of the rstanarm package developers and in the vignette 'Estimating Generalized Linear Models with Group-Specific Terms with rstanarm' who state:
@@ -1682,6 +1705,18 @@ write.csv(dat, "data/simulated_data.csv", row.names = F)
 #+end_src
 
 * Intercepts and coefficients that vary by group
+** COMMENT 
+#+begin_src R :session *R* :tangle intercepts-and-coefficients-that-vary.md :exports none :eval no :padline no
+---
+layout: default
+title: Intercepts and coefficients that vary by group
+---
+
+In this example we explore the Ross River virus infections from Western Australia
+
+#+end_src
+
+
 ** Ross River virus and urban vs rural mosquito habitat 
 *** COMMENT Notes made after hacking in the origi vally repo
 See do_model_checking_glmer
