@@ -16,7 +16,7 @@ browseURL("index.html")
 #+RESULTS: showme
 : 0
 
-* README
+* COMMENT README
 #+name:README
 #+begin_src markdown :tangle README.md :exports reports :eval no
 # Spatiotemporal multilevel modelling
@@ -1409,7 +1409,285 @@ categories:
 
 THANKS Sarunya!
 #+end_src
+* Introduction
+** Overview
+In this notebook we will introduce what multi-level data and models are and why they are useful in epidemiology contexts. We begin with the general linear model framework GLM and then move to mixed-effects models. It is important to realise that these models are called different things in different disciplines: (generalized) linear mixed (effects) models (GLMM), hierarchical (generalized) linear models, etc. The terminology for the model parameters is equally diverse, usually including the terms random effects and fixed effects. So we focus on the key concepts.
 
+We will cover what is a Random Effect and how it differs from a Fixed effect. Some example syntax in R (on a secure website portal we have configured) and Stata will show how to get a handle on models that have random intercepts and additionally, random slopes.
+
+We will spend a little time talking about how to partition variation and get estimates of the random and fixed effects. An important element will be our discussion of similarities between mixed-effects models with basic regression. There will also be brief discussion of extending the regression to non-gaussian responses (GLMERs).
+
+We will discuss how to interpret these results in a population health context.
+
+An online analysis server (Rstudio in a web browser) and data repository (geoserver) are also provided
+* Compare basic regression with mixed-effects modelling
+** Terminology
+
+When discussing multilevel modelling in this workshop we will avoid using the names 'fixed effects' and 'random effects'. Instead we use the more verbose phrase: intercepts/coefficients that are common across groups and intercepts/coefficients that vary by group.  This is because, as noted in the introduction to Gelman and Hill 2007 (recommended reading) it is very problematic that these terms are used in imprecise and confusing ways that vary across disciplines. This concern also appears in the work of the rstanarm package developers and in the vignette 'Estimating Generalized Linear Models with Group-Specific Terms with rstanarm' who state:
+
+'Models with this structure are referred to by many names: multilevel models, (generalized) linear mixed (effects) models (GLMM), hierarchical (generalized) linear models, etc. The terminology for the model parameters is equally diverse... [and commonly used terms] are not only misleading but also defined differently across the various fields in which these models are applied.'
+
+** COMMENT Notes
+*** Data structure
+I was interested to read in Gelman and Hill (Data analysis using regression and multilevel /hierarchical models), that they specify breaking multilevel data into tables that reflect the nested structure of variables in the study rather than a long format with repetition of the values of group variables (Fig 11.2-11.3 attached). I found it interesting because the text struck me as a recommendation for _housing_ data this way rather than as a pre-analysis, data manipulation step. The authors message was (whether you agree with it or not): two tables (reflecting the appropriate nested data) are easier for the user to: a) understand the structure of the data; and b) analyse the data.  
+
+** Introduce the linear model and lmer
+** COMMENT Code
+THis is made originally in index2.org, statistical modelling, ** 2015-09-12-effect-modification-and-mediation, after brambor2006
+*** COMMENT make_simulated_data
+#+name:make_simulated_data
+#+begin_src R :session *R* :tangle make_simulated_data.R :exports none :eval no
+#### name:make_simulated_data ####
+x  <- seq(0, 6, by = 0.05)
+set.seed(42)
+y <- -0.5 + sample(rnorm(length(x),0,0.05))
+set.seed(123)
+y2 <- (-0.33 + 0.1*x) + sample(rnorm(length(x),0,0.05))
+set.seed(1)
+y3 <- (-0.5 + 0.1*x) + sample(rnorm(length(x),0,0.05))
+
+dat <- data.frame(y = y, x, z = 'group1')
+dat <- rbind(dat, data.frame(y = y2, x, z = 'group2'))
+dat <- rbind(dat, data.frame(y = y3, x, z = 'group3'))
+str(dat)
+write.csv(dat, "data/simulated_data.csv", row.names = F)
+
+#+end_src
+
+*** COMMENT brambor
+#+name: brambor
+#+begin_src R :session *R* :tangle brambor.R :exports none :eval yes
+  #### name:after_brambor ####
+  
+  x  <- seq(0, 6, by = 0.05)
+  
+  set.seed(42)
+  y <- -0.5 + sample(rnorm(length(x),0,0.05))
+  set.seed(42)
+  y2 <- (-0.33 + 0.1*x) + sample(rnorm(length(x),0,0.05))
+  
+  
+  #pdf("effect_modification.pdf")#,  width = 1000, height = 550)
+  par(mar = c(3,3,2,1))
+  plot(1, type="n", xlim=c(-0.3,6), ylim=c(-1,0.5), xlab="", ylab="", axes = F)
+  axis(1, labels = F); axis(2, labels = F)
+  mtext("Y", 2, 1 , at = 0, las = 2)
+  mtext("X", 1, 1 , at = 3)
+  title(expression(paste("Regression model Y = ", beta[0] + beta[1],"X + ", beta[2], "Z + ", beta[3], "XZ + ", epsilon )))
+  #, 3, 0, at = 1, cex = .85)
+  #segments(-3, -0.5, 3, -0.5, lwd=2)    
+  points(x,y, pch = 1, cex = .5)
+  fit <- lm(y~x)
+  summary(fit)
+  abline(fit)
+  
+  
+  #curve(exp=-.008*x + .137*2  + .100*2*x,  from=-3, to=3, lwd=2, add=TRUE)
+  points(x, y2, pch = 3, cex = .5)
+  fit2  <- lm(y2~x)
+  summary(fit2)
+  abline(fit2)
+  
+  text(x = 2.8, y = 0.2, expression(paste("Y = (", beta[0] + beta[2],") + (", beta[1] + beta [3],")X when Z = 1")))
+  text(x = 1.9, y = 0.1, expression(paste("Slope = ", beta[1] + beta[3])))
+  
+  #text(x = -3.4, y = -0.4, '{', srt = 0, cex = 3)
+  text(x = -0.3, y = -.75, expression(beta[0]))
+  text(x = -0.3, y = -0.4, expression(beta[2]))
+  b0 <- coefficients(fit)[1]
+  b2 <- coefficients(fit2)[1]
+  text(x = 3.57, y = -0.7,  expression(paste("Y = ", beta[0] + beta[1] ,"X when Z = 0")))
+  text(x = 3, y = -0.8, expression(paste("Slope = ", beta[1])))
+  
+  segments(0, b0, 0, b2, lty = 1, col = 'grey', lwd = 6)
+  segments(-.9, b2, 0, b2, lty = 3)
+  segments(-.9, b0, 0, b0, lty = 3)
+  #mtext(expression(beta[2]),2,2, at = -0.4, las = 2)
+  #text(x = -3.4, y = -.75, '{', srt = 0, cex = 3)
+  
+  segments(0, b2, 0, -1, lty = 3)
+  #mtext(expression(beta[0]),2,2, at = -0.75, las = 2)
+  #dev.off()
+  #browseURL("effect_modification.pdf")
+#+end_src
+
+#+RESULTS: after_brambor
+
+*** COMMENT after_brambor
+#+name: after_brambor
+#+begin_src R :session *R* :tangle after_brambor.R :exports none :eval yes
+  #### name: multilevel model with varying intercepts and varying slopes ####
+  library(lme4)
+  dat <- read.csv("simulated_data.csv")
+  # step one: exploratory work
+  str(dat)
+  summary(dat)
+  plot(dat$x, dat$y)
+  plot(dat$z, dat$y)
+  plot(density(dat$y))
+  
+  fit0 <- lm(y ~ x, data = dat)
+  summary(fit0)
+  fit0cf <- coefficients(fit0)
+  with(dat, plot(x, y, col = z))
+  
+  abline(fit0cf[1], fit0cf[2])
+  
+  # step 2: we suspect a group level effect! begin to build multilevel model(s)
+  # first lets set up a nice plot
+  my_plot <- function(dat){
+  
+    par(mar = c(3,3,2,1))
+    plot(1, type="n", xlim=c(-0.3,6), ylim=c(-1,0.5), xlab="", ylab="", axes = F)
+    axis(1, labels = F); axis(2, labels = F)
+    mtext("Y", 2, 1 , at = 0, las = 2)
+    mtext("X", 1, 1 , at = 3)
+  
+    with(subset(dat, z == "group1"), points(x, y,  pch = 1, cex = .5))
+    with(subset(dat, z == "group2"), points(x, y, pch = 3, cex = .5))
+    with(subset(dat, z == "group3"), points(x, y, pch = 4, cex = 1.5, col = 'darkgreen'))
+  
+  }
+  
+  my_plot(dat)
+  #dev.off()
+  
+  #  model 1: OLS with unvarying intercept and slope (fixed)
+  fit <- lm(y~x, data = dat)
+  summary(fit)
+  abline(fit, lwd = 2, lty = 2)
+  
+  # model 2: varying intercept (random) and unvarying slope (fixed)
+  my_plot(dat)
+  fit2  <- lm(y ~ x + z, data = dat)
+  summary(fit2)
+  # we know this is put together in a linear equation thus:
+  title(expression(paste("Regression model Y = ", beta[0] + beta[1],"X + ", beta[2], "Z + ", epsilon )))
+  
+  # so create a coeffs object
+  fit2cf <- coefficients(fit2)
+  
+  # now we can extract the betas
+  b0   <- fit2cf[1]
+  b1   <- fit2cf[2]
+  b2.1 <- fit2cf[3]
+  b2.2 <- fit2cf[4]
+  
+  # and show the linear fits
+  abline(b0, b1)
+  abline(b0+b2.1, b1)
+  abline(b0+b2.2, b1)
+  
+  # TODO maybe stop to talk about the tests of 'if group makes a difference?' here, which justify going the next
+  
+  #######################################################################################
+  #### model 3: LM approach to varying intercept (random) and varying slope (random) ####
+  #######################################################################################
+  # clear out the plot
+  my_plot(dat)
+  fit3  <- lm(y ~ x * z, data = dat)
+  summary(fit3)
+  
+  # this is a different equation
+  title(expression(paste("Regression model Y = ", beta[0] + beta[1],"X + ", beta[2], "Z + ", beta[3], "XZ + ", epsilon )))
+  
+  # there is a trick to make this less work with getting se around multiplicative interaction terms... for lesson 3!
+  # x1 <- ifelse(dat$z == 'group1', x, 0)
+  # x2 <- ifelse(dat$z == 'group2', x, 0)
+  # x3 <- ifelse(dat$z == 'group3', x, 0)
+  #
+  # fit3 <- lm(y ~ z + x1 + x2 + x3, data = dat)
+  # summary(fit3)
+  fit3cf <- coefficients(fit3)
+  b0   <- fit3cf[1]
+  b1   <- fit3cf[2]
+  b2.1 <- fit3cf[3]
+  b2.2 <- fit3cf[4]
+  b3.1 <- fit3cf[5]
+  b3.2 <- fit3cf[6]
+  
+  abline(b0, b1)
+  abline(b0+b2.1, b1+b3.1)
+  abline(b0+b2.2, b1+b3.2, col = 'darkgreen')
+  
+  # at this point may expect a question about change in X = estimated change in Y for each
+  
+  ######################################################################################################
+  #### model 5 is linear mixed effects regression (lmer) with varying intercept and unvarying slope ####
+  ######################################################################################################
+  my_plot(dat)
+  # all the tutes I read said to start with a 'null' random intercepts model
+  fitnull <- lmer(y ~ (1|z), data = dat)
+  summary(fitnull)
+  random <- ranef(fitnull)
+  fixed <- fixef(fitnull)
+  gamma1 <- fixed[1] + random[[1]][1,1]  # this is beta0 + mu0 where Z = group1
+  gamma2 <- fixed[1] + random[[1]][2,1]  # this is beta0 + mu0 where Z = group2
+  gamma3 <- fixed[1] + random[[1]][3,1]  # this is beta0 + mu0 where Z = group3
+  
+  abline(gamma1, 0, col = 'red', lty = 'dashed')
+  abline(gamma2, 0, col = 'red', lty = 'dashed')
+  abline(gamma3, 0, col = 'red', lty = 'dashed')
+  
+  # versus the LM version
+  fitnull1 <- lm(y ~ 1 + z, data = dat)
+  summary(fitnull1)
+  
+  
+  # but we know we have slopes so lets get going
+  my_plot(dat)
+  fit5 <- lmer(y ~ x + (1|z), data = dat)
+  summary(fit5)
+  
+  title(expression(paste("Regression model Y = ", beta[0] + beta[1],"X + (", mu[0], "Z + ", epsilon, ")")))
+  
+  # we can extract the components thus
+  random <- ranef(fit5)
+  random
+  fixed <- fixef(fit5)
+  fixed
+  
+  gamma1 <- fixed[1] + random[[1]][1,1]  # this is beta0 + mu0 where Z = group1
+  gamma2 <- fixed[1] + random[[1]][2,1]  # this is beta0 + mu0 where Z = group2
+  gamma3 <- fixed[1] + random[[1]][3,1]  # this is beta0 + mu0 where Z = group3
+  beta_x <- unlist(fixed)[2]
+  
+  abline(gamma1, beta_x, col = 'red', lty = 'dashed')
+  abline(gamma2, beta_x, col = 'red', lty = 'dashed')
+  abline(gamma3, beta_x, col = 'red', lty = 'dashed')
+  
+  # model 6  is lmer with varying intercept and varying slope
+  my_plot(dat)
+  fit6 <- lmer(y ~ x + (1 + x |z), data = dat)
+  summary(fit6)
+  
+  title(expression(paste("Regression model Y = ", beta[0] + beta[1],"X + (", mu[0], "Z + ", mu[1], "X + ", epsilon, ")")))
+  
+  random <- ranef(fit6)
+  random
+  fixed <- fixef(fit6)
+  fixed
+  
+  gamma1 <- fixed[1] + random[[1]][1,1]
+  gamma2 <- fixed[1] + random[[1]][2,1]
+  gamma3 <- fixed[1] + random[[1]][3,1]
+  beta_x1 <- fixed[2] + random[[1]][1,2]
+  beta_x2 <- fixed[2] + random[[1]][2,2]
+  beta_x3 <- fixed[2] + random[[1]][2,2]
+  
+  abline(gamma1, beta_x1, col = 'red', lty = 'dashed')
+  abline(gamma2, beta_x2, col = 'red', lty = 'dashed')
+  abline(gamma3, beta_x3, col = 'red', lty = 'dashed')
+  
+#+end_src
+** COMMENT Case study of kids in schools
+* Intercepts and coefficients that vary by group
+** Ross River virus and urban vs rural mosquito habitat 
+See do_model_checking_glmer
+
+
+#########################
+# model 4 is multilevel
 * Spatially structured timeseries 
 I will use the NMMAPSlite datasets for a simple example of what I describe as "Spatially Structured Timeseries" as opposed to "Spatio-Temporal" which I think more explicitly includes spatial structure in the model.
 ** Outcome Data
@@ -2654,273 +2932,4 @@ I will use the same NMMAPSlite to show how I'd approach a simple "Spatio-Tempora
 #+end_src
 *** Spatial Lag Model Plots
 [[file:NMMAPS-example/images/nmmaps-eg-sp-lag.png]]
-
-* Compare basic regression with mixed-effects modelling
-** Terminology
-
-When discussing multilevel modelling in this workshop we will avoid using the names 'fixed effects' and 'random effects'. Instead we use the more verbose phrase: intercepts/coefficients that are common across groups and intercepts/coefficients that vary by group.  This is because, as noted in the introduction to Gelman and Hill 2007 (recommended reading) it is very problematic that these terms are used in imprecise and confusing ways that vary across disciplines. This concern also appears in the work of the rstanarm package developers and in the vignette 'Estimating Generalized Linear Models with Group-Specific Terms with rstanarm' who state:
-
-'Models with this structure are referred to by many names: multilevel models, (generalized) linear mixed (effects) models (GLMM), hierarchical (generalized) linear models, etc. The terminology for the model parameters is equally diverse... [and commonly used terms] are not only misleading but also defined differently across the various fields in which these models are applied.'
-
-** COMMENT Notes
-*** Data structure
-I was interested to read in Gelman and Hill (Data analysis using regression and multilevel /hierarchical models), that they specify breaking multilevel data into tables that reflect the nested structure of variables in the study rather than a long format with repetition of the values of group variables (Fig 11.2-11.3 attached). I found it interesting because the text struck me as a recommendation for _housing_ data this way rather than as a pre-analysis, data manipulation step. The authors message was (whether you agree with it or not): two tables (reflecting the appropriate nested data) are easier for the user to: a) understand the structure of the data; and b) analyse the data.  
-
-** Introduce the linear model and lmer
-** COMMENT Code
-THis is made originally in index2.org, statistical modelling, ** 2015-09-12-effect-modification-and-mediation, after brambor2006
-*** COMMENT make_simulated_data
-#+name:make_simulated_data
-#+begin_src R :session *R* :tangle make_simulated_data.R :exports none :eval no
-#### name:make_simulated_data ####
-x  <- seq(0, 6, by = 0.05)
-set.seed(42)
-y <- -0.5 + sample(rnorm(length(x),0,0.05))
-set.seed(123)
-y2 <- (-0.33 + 0.1*x) + sample(rnorm(length(x),0,0.05))
-set.seed(1)
-y3 <- (-0.5 + 0.1*x) + sample(rnorm(length(x),0,0.05))
-
-dat <- data.frame(y = y, x, z = 'group1')
-dat <- rbind(dat, data.frame(y = y2, x, z = 'group2'))
-dat <- rbind(dat, data.frame(y = y3, x, z = 'group3'))
-str(dat)
-write.csv(dat, "data/simulated_data.csv", row.names = F)
-
-#+end_src
-
-*** COMMENT brambor
-#+name: brambor
-#+begin_src R :session *R* :tangle brambor.R :exports none :eval yes
-  #### name:after_brambor ####
-  
-  x  <- seq(0, 6, by = 0.05)
-  
-  set.seed(42)
-  y <- -0.5 + sample(rnorm(length(x),0,0.05))
-  set.seed(42)
-  y2 <- (-0.33 + 0.1*x) + sample(rnorm(length(x),0,0.05))
-  
-  
-  #pdf("effect_modification.pdf")#,  width = 1000, height = 550)
-  par(mar = c(3,3,2,1))
-  plot(1, type="n", xlim=c(-0.3,6), ylim=c(-1,0.5), xlab="", ylab="", axes = F)
-  axis(1, labels = F); axis(2, labels = F)
-  mtext("Y", 2, 1 , at = 0, las = 2)
-  mtext("X", 1, 1 , at = 3)
-  title(expression(paste("Regression model Y = ", beta[0] + beta[1],"X + ", beta[2], "Z + ", beta[3], "XZ + ", epsilon )))
-  #, 3, 0, at = 1, cex = .85)
-  #segments(-3, -0.5, 3, -0.5, lwd=2)    
-  points(x,y, pch = 1, cex = .5)
-  fit <- lm(y~x)
-  summary(fit)
-  abline(fit)
-  
-  
-  #curve(exp=-.008*x + .137*2  + .100*2*x,  from=-3, to=3, lwd=2, add=TRUE)
-  points(x, y2, pch = 3, cex = .5)
-  fit2  <- lm(y2~x)
-  summary(fit2)
-  abline(fit2)
-  
-  text(x = 2.8, y = 0.2, expression(paste("Y = (", beta[0] + beta[2],") + (", beta[1] + beta [3],")X when Z = 1")))
-  text(x = 1.9, y = 0.1, expression(paste("Slope = ", beta[1] + beta[3])))
-  
-  #text(x = -3.4, y = -0.4, '{', srt = 0, cex = 3)
-  text(x = -0.3, y = -.75, expression(beta[0]))
-  text(x = -0.3, y = -0.4, expression(beta[2]))
-  b0 <- coefficients(fit)[1]
-  b2 <- coefficients(fit2)[1]
-  text(x = 3.57, y = -0.7,  expression(paste("Y = ", beta[0] + beta[1] ,"X when Z = 0")))
-  text(x = 3, y = -0.8, expression(paste("Slope = ", beta[1])))
-  
-  segments(0, b0, 0, b2, lty = 1, col = 'grey', lwd = 6)
-  segments(-.9, b2, 0, b2, lty = 3)
-  segments(-.9, b0, 0, b0, lty = 3)
-  #mtext(expression(beta[2]),2,2, at = -0.4, las = 2)
-  #text(x = -3.4, y = -.75, '{', srt = 0, cex = 3)
-  
-  segments(0, b2, 0, -1, lty = 3)
-  #mtext(expression(beta[0]),2,2, at = -0.75, las = 2)
-  #dev.off()
-  #browseURL("effect_modification.pdf")
-#+end_src
-
-#+RESULTS: after_brambor
-
-*** COMMENT after_brambor
-#+name: after_brambor
-#+begin_src R :session *R* :tangle after_brambor.R :exports none :eval yes
-  #### name: multilevel model with varying intercepts and varying slopes ####
-  library(lme4)
-  dat <- read.csv("simulated_data.csv")
-  # step one: exploratory work
-  str(dat)
-  summary(dat)
-  plot(dat$x, dat$y)
-  plot(dat$z, dat$y)
-  plot(density(dat$y))
-  
-  fit0 <- lm(y ~ x, data = dat)
-  summary(fit0)
-  fit0cf <- coefficients(fit0)
-  with(dat, plot(x, y, col = z))
-  
-  abline(fit0cf[1], fit0cf[2])
-  
-  # step 2: we suspect a group level effect! begin to build multilevel model(s)
-  # first lets set up a nice plot
-  my_plot <- function(dat){
-  
-    par(mar = c(3,3,2,1))
-    plot(1, type="n", xlim=c(-0.3,6), ylim=c(-1,0.5), xlab="", ylab="", axes = F)
-    axis(1, labels = F); axis(2, labels = F)
-    mtext("Y", 2, 1 , at = 0, las = 2)
-    mtext("X", 1, 1 , at = 3)
-  
-    with(subset(dat, z == "group1"), points(x, y,  pch = 1, cex = .5))
-    with(subset(dat, z == "group2"), points(x, y, pch = 3, cex = .5))
-    with(subset(dat, z == "group3"), points(x, y, pch = 4, cex = 1.5, col = 'darkgreen'))
-  
-  }
-  
-  my_plot(dat)
-  #dev.off()
-  
-  #  model 1: OLS with unvarying intercept and slope (fixed)
-  fit <- lm(y~x, data = dat)
-  summary(fit)
-  abline(fit, lwd = 2, lty = 2)
-  
-  # model 2: varying intercept (random) and unvarying slope (fixed)
-  my_plot(dat)
-  fit2  <- lm(y ~ x + z, data = dat)
-  summary(fit2)
-  # we know this is put together in a linear equation thus:
-  title(expression(paste("Regression model Y = ", beta[0] + beta[1],"X + ", beta[2], "Z + ", epsilon )))
-  
-  # so create a coeffs object
-  fit2cf <- coefficients(fit2)
-  
-  # now we can extract the betas
-  b0   <- fit2cf[1]
-  b1   <- fit2cf[2]
-  b2.1 <- fit2cf[3]
-  b2.2 <- fit2cf[4]
-  
-  # and show the linear fits
-  abline(b0, b1)
-  abline(b0+b2.1, b1)
-  abline(b0+b2.2, b1)
-  
-  # TODO maybe stop to talk about the tests of 'if group makes a difference?' here, which justify going the next
-  
-  #######################################################################################
-  #### model 3: LM approach to varying intercept (random) and varying slope (random) ####
-  #######################################################################################
-  # clear out the plot
-  my_plot(dat)
-  fit3  <- lm(y ~ x * z, data = dat)
-  summary(fit3)
-  
-  # this is a different equation
-  title(expression(paste("Regression model Y = ", beta[0] + beta[1],"X + ", beta[2], "Z + ", beta[3], "XZ + ", epsilon )))
-  
-  # there is a trick to make this less work with getting se around multiplicative interaction terms... for lesson 3!
-  # x1 <- ifelse(dat$z == 'group1', x, 0)
-  # x2 <- ifelse(dat$z == 'group2', x, 0)
-  # x3 <- ifelse(dat$z == 'group3', x, 0)
-  #
-  # fit3 <- lm(y ~ z + x1 + x2 + x3, data = dat)
-  # summary(fit3)
-  fit3cf <- coefficients(fit3)
-  b0   <- fit3cf[1]
-  b1   <- fit3cf[2]
-  b2.1 <- fit3cf[3]
-  b2.2 <- fit3cf[4]
-  b3.1 <- fit3cf[5]
-  b3.2 <- fit3cf[6]
-  
-  abline(b0, b1)
-  abline(b0+b2.1, b1+b3.1)
-  abline(b0+b2.2, b1+b3.2, col = 'darkgreen')
-  
-  # at this point may expect a question about change in X = estimated change in Y for each
-  
-  ######################################################################################################
-  #### model 5 is linear mixed effects regression (lmer) with varying intercept and unvarying slope ####
-  ######################################################################################################
-  my_plot(dat)
-  # all the tutes I read said to start with a 'null' random intercepts model
-  fitnull <- lmer(y ~ (1|z), data = dat)
-  summary(fitnull)
-  random <- ranef(fitnull)
-  fixed <- fixef(fitnull)
-  gamma1 <- fixed[1] + random[[1]][1,1]  # this is beta0 + mu0 where Z = group1
-  gamma2 <- fixed[1] + random[[1]][2,1]  # this is beta0 + mu0 where Z = group2
-  gamma3 <- fixed[1] + random[[1]][3,1]  # this is beta0 + mu0 where Z = group3
-  
-  abline(gamma1, 0, col = 'red', lty = 'dashed')
-  abline(gamma2, 0, col = 'red', lty = 'dashed')
-  abline(gamma3, 0, col = 'red', lty = 'dashed')
-  
-  # versus the LM version
-  fitnull1 <- lm(y ~ 1 + z, data = dat)
-  summary(fitnull1)
-  
-  
-  # but we know we have slopes so lets get going
-  my_plot(dat)
-  fit5 <- lmer(y ~ x + (1|z), data = dat)
-  summary(fit5)
-  
-  title(expression(paste("Regression model Y = ", beta[0] + beta[1],"X + (", mu[0], "Z + ", epsilon, ")")))
-  
-  # we can extract the components thus
-  random <- ranef(fit5)
-  random
-  fixed <- fixef(fit5)
-  fixed
-  
-  gamma1 <- fixed[1] + random[[1]][1,1]  # this is beta0 + mu0 where Z = group1
-  gamma2 <- fixed[1] + random[[1]][2,1]  # this is beta0 + mu0 where Z = group2
-  gamma3 <- fixed[1] + random[[1]][3,1]  # this is beta0 + mu0 where Z = group3
-  beta_x <- unlist(fixed)[2]
-  
-  abline(gamma1, beta_x, col = 'red', lty = 'dashed')
-  abline(gamma2, beta_x, col = 'red', lty = 'dashed')
-  abline(gamma3, beta_x, col = 'red', lty = 'dashed')
-  
-  # model 6  is lmer with varying intercept and varying slope
-  my_plot(dat)
-  fit6 <- lmer(y ~ x + (1 + x |z), data = dat)
-  summary(fit6)
-  
-  title(expression(paste("Regression model Y = ", beta[0] + beta[1],"X + (", mu[0], "Z + ", mu[1], "X + ", epsilon, ")")))
-  
-  random <- ranef(fit6)
-  random
-  fixed <- fixef(fit6)
-  fixed
-  
-  gamma1 <- fixed[1] + random[[1]][1,1]
-  gamma2 <- fixed[1] + random[[1]][2,1]
-  gamma3 <- fixed[1] + random[[1]][3,1]
-  beta_x1 <- fixed[2] + random[[1]][1,2]
-  beta_x2 <- fixed[2] + random[[1]][2,2]
-  beta_x3 <- fixed[2] + random[[1]][2,2]
-  
-  abline(gamma1, beta_x1, col = 'red', lty = 'dashed')
-  abline(gamma2, beta_x2, col = 'red', lty = 'dashed')
-  abline(gamma3, beta_x3, col = 'red', lty = 'dashed')
-  
-#+end_src
-** COMMENT Case study of kids in schools
-* Intercepts and coefficients that vary by group
-** Ross River virus and urban vs rural mosquito habitat 
-See do_model_checking_glmer
-
-
-#########################
-# model 4 is multilevel
 
