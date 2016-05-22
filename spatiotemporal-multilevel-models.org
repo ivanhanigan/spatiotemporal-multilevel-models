@@ -1680,9 +1680,10 @@ write.csv(dat, "data/simulated_data.csv", row.names = F)
   abline(gamma3, beta_x3, col = 'red', lty = 'dashed')
   
 #+end_src
-** COMMENT Case study of kids in schools
+
 * Intercepts and coefficients that vary by group
 ** Ross River virus and urban vs rural mosquito habitat 
+*** COMMENT Notes made after hacking in the origi vally repo
 See do_model_checking_glmer
 
 
@@ -2932,4 +2933,8 @@ I will use the same NMMAPSlite to show how I'd approach a simple "Spatio-Tempora
 #+end_src
 *** Spatial Lag Model Plots
 [[file:NMMAPS-example/images/nmmaps-eg-sp-lag.png]]
+
+* Spatial error models
+- TODO
+
 
