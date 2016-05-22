@@ -1467,6 +1467,13 @@ We will cover what is a Random Effect and how it differs from a Fixed effect. So
 
 We will spend a little time talking about how to partition variation and get estimates of the random and fixed effects. An important element will be our discussion of similarities between mixed-effects models with basic regression. There will also be brief discussion of extending the regression to non-gaussian responses (GLMERs).
 
+## Workflow
+
+- in the folder multi-level-basics
+- is a main.R script
+- which will run the following codes
+
+### [code/make-simulated-data.R](/spatiotemporal-multilevel-models/make-simulated-data.html)
 
 #+end_src
 
@@ -1484,24 +1491,41 @@ I was interested to read in Gelman and Hill (Data analysis using regression and 
 ** COMMENT Code
 THis is made originally in index2.org, statistical modelling, ** 2015-09-12-effect-modification-and-mediation, after brambor2006
 *** COMMENT make_simulated_data
-#+name:make_simulated_data
-#+begin_src R :session *R* :tangle make_simulated_data.R :exports none :eval no
-#### name:make_simulated_data ####
-x  <- seq(0, 6, by = 0.05)
-set.seed(42)
-y <- -0.5 + sample(rnorm(length(x),0,0.05))
-set.seed(123)
-y2 <- (-0.33 + 0.1*x) + sample(rnorm(length(x),0,0.05))
-set.seed(1)
-y3 <- (-0.5 + 0.1*x) + sample(rnorm(length(x),0,0.05))
-
-dat <- data.frame(y = y, x, z = 'group1')
-dat <- rbind(dat, data.frame(y = y2, x, z = 'group2'))
-dat <- rbind(dat, data.frame(y = y3, x, z = 'group3'))
-str(dat)
-write.csv(dat, "data/simulated_data.csv", row.names = F)
-
+#+name:make-simulated-data
+#+begin_src R :session *R* :tangle multi-level-basics/code/make_simulated_data.R :exports none :eval no
+  #### name:make_simulated_data ####
+  x  <- seq(0, 6, by = 0.05)
+  set.seed(42)
+  y <- -0.5 + sample(rnorm(length(x),0,0.05))
+  set.seed(123)
+  y2 <- (-0.33 + 0.1*x) + sample(rnorm(length(x),0,0.05))
+  set.seed(1)
+  y3 <- (-0.5 + 0.1*x) + sample(rnorm(length(x),0,0.05))
+  
+  dat <- data.frame(y = y, x, z = 'group1')
+  dat <- rbind(dat, data.frame(y = y2, x, z = 'group2'))
+  dat <- rbind(dat, data.frame(y = y3, x, z = 'group3'))
+  str(dat)
+  write.csv(dat, "data/simulated_data.csv", row.names = F)
+  
 #+end_src
+*** make-simulated-data md
+#+HEADERS: :tangle make-simulated-data.md :noweb tangle :padline no
+#+BEGIN_SRC markdown
+---
+layout: default
+title: Make simulated data
+---
+
+We simulate some data
+
+{% highlight r %}
+<<make-simulated-data>>
+{% endhighlight %}
+
+
+
+#+END_SRC
 
 *** COMMENT brambor
 #+name: brambor
