@@ -3,10 +3,11 @@ layout: default
 title: README
 ---
 
+This is an Open Notebook with some material from other sites (attributed).
 
 In this notebook we will introduce what multi-level data and models are and why they are useful in epidemiology contexts. 
 
-A secure online Rstudio server (in a web browser) is available at [https://rstudio.coesra.org.au](https://rstudio.coesra.org.au) hosted by Uni Queensland.
+A secure online Rstudio server (in a web browser) is available at [https://rstudio.coesra.org.au](https://rstudio.coesra.org.au) hosted by Uni Queensland's [Collaborative Environment for Ecosystem Science Research and Analysis - CoESRA](http://www.coesra.org.au).
 
 We begin with the general linear model framework GLM and then move to mixed-effects models. It is important to realise that these models are called different things in different disciplines: (generalized) linear mixed (effects) models (GLMM), hierarchical (generalized) linear models, etc. The terminology for the model parameters is equally diverse, usually including the terms random effects and fixed effects. So we focus on the key concepts.
 

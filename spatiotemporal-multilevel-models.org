@@ -1425,19 +1425,18 @@ categories:
 - [http://ivanhanigan.github.io/spatiotemporal-multilevel-models/spatiotemporal-multilevel-models.html](http://ivanhanigan.github.io/spatiotemporal-multilevel-models/spatiotemporal-multilevel-models.html)
 
 #+end_src
-
-* Introduction to R
-** README
+* README
 #+begin_src R :session *R* :tangle README.md :exports none :eval no :padline no
 ---
 layout: default
 title: README
 ---
 
+This is an Open Notebook with some material from other sites (attributed).
 
 In this notebook we will introduce what multi-level data and models are and why they are useful in epidemiology contexts. 
 
-A secure online Rstudio server (in a web browser) is available at [https://rstudio.coesra.org.au](https://rstudio.coesra.org.au) hosted by Uni Queensland.
+A secure online Rstudio server (in a web browser) is available at [https://rstudio.coesra.org.au](https://rstudio.coesra.org.au) hosted by Uni Queensland's [Collaborative Environment for Ecosystem Science Research and Analysis - CoESRA](http://www.coesra.org.au).
 
 We begin with the general linear model framework GLM and then move to mixed-effects models. It is important to realise that these models are called different things in different disciplines: (generalized) linear mixed (effects) models (GLMM), hierarchical (generalized) linear models, etc. The terminology for the model parameters is equally diverse, usually including the terms random effects and fixed effects. So we focus on the key concepts.
 
@@ -1449,10 +1448,21 @@ We will discuss how to interpret these results in a population health context.
 
 
 #+end_src
-* Mixed effects vs basic regression
-** COMMENT compare-basic-regression-and-me
-#+name:compare-basic-regression-and-me
-#+begin_src R :session *R* :tangle compare-basic-regression-and-me.md :exports none :eval no :padline no
+
+* TBA
+#+begin_src R :session *R* :tangle TBA.md :exports none :eval no :padline no
+---
+layout: default
+title: To be arranged
+---
+
+This page is not written yet
+
+#+end_src
+* 1 Introduction to R
+* 2 general-regression-vs-mixed-effects 
+** COMMENT compare
+#+begin_src R :session *R* :tangle general-regression-vs-mixed-effects.md :exports none :eval no :padline no
 ---
 layout: default
 title: Compare basic regression with mixed-effects modelling
@@ -1750,15 +1760,19 @@ We simulate some data
   
 #+end_src
 
-* Intercepts and coefficients that vary by group
-** COMMENT 
-#+begin_src R :session *R* :tangle intercepts-and-coefficients-that-vary.md :exports none :eval no :padline no
+* 3 schools 
+* 4 spatial-data-analysis 
+Intercepts and coefficients that vary by group
+** COMMENT spatial-data-analysis
+#+begin_src R :session *R* :tangle spatial-data-analysis.md :exports none :eval no :padline no
 ---
 layout: default
-title: Intercepts and coefficients that vary by group
+title: Spatial data analysis
 ---
 
-In this example we explore the Ross River virus infections from Western Australia
+We look at intercepts and coefficients that vary by geographic groups.
+
+In this example we explore the Ross River virus infections from Western Australia.
 
 #+end_src
 
@@ -1770,7 +1784,9 @@ See do_model_checking_glmer
 
 #########################
 # model 4 is multilevel
-* Spatially structured timeseries 
+* 5 your own data
+* 6 Spatiotemporal data analysis
+** Spatially structured timeseries 
 I will use the NMMAPSlite datasets for a simple example of what I describe as "Spatially Structured Timeseries" as opposed to "Spatio-Temporal" which I think more explicitly includes spatial structure in the model.
 ** Outcome Data
 *** Original Data
@@ -2871,13 +2887,13 @@ cd NMMAPS-example
 scp ivan_hanigan@130.56.102.53:projects/spatiotemporal-regression-models/NMMAPS-example/analyte.csv analyte.csv
 cd ..
 #+end_src
-* Spatial lag and timeseries 
+** Spatial lag and timeseries 
 I will use the same NMMAPSlite to show how I'd approach a simple "Spatio-Temporal" model.
 
-** TODO The following is a stub of an idea.  For further development
-** Data
-*** Zones
-**** Spatial Neighbours Code
+*** TODO The following is a stub of an idea.  For further development
+*** Data
+**** Zones
+***** Spatial Neighbours Code
 #+name:spatwat
 #+begin_src R :session *shell* :tangle NMMAPS-example/case-study-2-load.r :exports reports :eval no
   ################################################################
@@ -2916,9 +2932,9 @@ I will use the same NMMAPSlite to show how I'd approach a simple "Spatio-Tempora
   
 #+end_src
 
-**** Spatial Neighbours Output
+***** Spatial Neighbours Output
 [[file:NMMAPS-example/images/nmmaps-eg-neighbourhood.png]]
-*** Outcome
+**** Outcome
 #+name:load-suicide
 #+begin_src R :session *R* :tangle NMMAPS-example/case-study-2-load.r :exports reports :eval no
   #### Now do the Neighbourhood autoregressive lagged variable  ####
@@ -2985,8 +3001,8 @@ I will use the same NMMAPSlite to show how I'd approach a simple "Spatio-Tempora
 #+end_src
 
 
-** Analysis
-*** Model with Spatial Lag
+*** Analysis
+**** Model with Spatial Lag
 #+begin_src R :session *R* :tangle NMMAPS-example/case-study-2-do.r :exports reports :eval no
   # func
   require(splines)
@@ -3013,10 +3029,10 @@ I will use the same NMMAPSlite to show how I'd approach a simple "Spatio-Tempora
   
   
 #+end_src
-*** Spatial Lag Model Plots
+**** Spatial Lag Model Plots
 [[file:NMMAPS-example/images/nmmaps-eg-sp-lag.png]]
 
-* Spatial error models
+** Spatial error models
 - TODO
 
 
