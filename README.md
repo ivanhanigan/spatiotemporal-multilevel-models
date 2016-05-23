@@ -13,9 +13,3 @@ We will spend a little time talking about how to partition variation and get est
 We will discuss how to interpret these results in a population health context.
 
 An online analysis server (Rstudio in a web browser) and data repository (geoserver) are also provided
-
-# Spatiotemporal multilevel modelling
-
-This is an Open Notebook for my work on spatiotemporal multilevel modelling tips and tricks.
-
-Ivan Hanigan
