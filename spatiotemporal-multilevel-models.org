@@ -16,16 +16,7 @@ browseURL("index.html")
 #+RESULTS: showme
 : 0
 
-* COMMENT README
-#+name:README
-#+begin_src markdown :tangle README.md :exports reports :eval no
-# Spatiotemporal multilevel modelling
-
-This is an Open Notebook for my work on spatiotemporal multilevel modelling tips and tricks.
-
-Ivan Hanigan
-#+end_src
-** Version Statement
+* Version Statement
 #+begin_src R :session *R* :exports none
   commit_msg <- "Add ML modelling"
   commit_msg <- as.data.frame(c(as.character(Sys.Date()), commit_msg))
@@ -1435,12 +1426,12 @@ categories:
 
 #+end_src
 
-* Introduction
-** About
-#+begin_src R :session *R* :tangle about.md :exports none :eval no :padline no
+* Introduction to R
+** README
+#+begin_src R :session *R* :tangle README.md :exports none :eval no :padline no
 ---
 layout: default
-title: About
+title: README
 ---
 
 
@@ -1454,7 +1445,7 @@ We will discuss how to interpret these results in a population health context.
 
 An online analysis server (Rstudio in a web browser) and data repository (geoserver) are also provided
 #+end_src
-* Compare basic regression with mixed-effects modelling
+* Mixed effects vs basic regression
 ** COMMENT compare-basic-regression-and-me
 #+name:compare-basic-regression-and-me
 #+begin_src R :session *R* :tangle compare-basic-regression-and-me.md :exports none :eval no :padline no
@@ -1494,6 +1485,7 @@ THis is made originally in index2.org, statistical modelling, ** 2015-09-12-effe
 #+name:make-simulated-data
 #+begin_src R :session *R* :tangle multi-level-basics/code/make_simulated_data.R :exports none :eval no
   #### name:make_simulated_data ####
+  setwd("multi-level-basics")
   x  <- seq(0, 6, by = 0.05)
   set.seed(42)
   y <- -0.5 + sample(rnorm(length(x),0,0.05))

@@ -1,5 +1,6 @@
 
 #### name:make_simulated_data ####
+setwd("multi-level-basics")
 x  <- seq(0, 6, by = 0.05)
 set.seed(42)
 y <- -0.5 + sample(rnorm(length(x),0,0.05))
