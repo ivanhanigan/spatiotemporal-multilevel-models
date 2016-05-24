@@ -3,7 +3,7 @@ layout: default
 title: README
 ---
 
-This is an Open Notebook with some material from other sites (attributed).
+This is an Open Notebook (Licence CC-BY-4.0) with some material from other sites (attributed).
 
 In this notebook we will introduce what multi-level data and models are and why they are useful in epidemiology contexts. 
 
