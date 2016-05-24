@@ -1428,7 +1428,7 @@ categories:
 * README and index
 ** txt
 #+name:readme
-#+begin_src R :session *R* :tangle README.md :exports none :eval no :padline no
+#+begin_src R :session *R* :tangle no :exports none :eval no :padline no
 
 This is an Open Notebook (Licence CC-BY-4.0) with some material from other sites (attributed).
 
