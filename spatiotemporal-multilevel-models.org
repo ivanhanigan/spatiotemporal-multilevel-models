@@ -1425,12 +1425,10 @@ categories:
 - [http://ivanhanigan.github.io/spatiotemporal-multilevel-models/spatiotemporal-multilevel-models.html](http://ivanhanigan.github.io/spatiotemporal-multilevel-models/spatiotemporal-multilevel-models.html)
 
 #+end_src
-* README
+* README and index
+** txt
+#+name:readme
 #+begin_src R :session *R* :tangle README.md :exports none :eval no :padline no
----
-layout: default
-title: README
----
 
 This is an Open Notebook (Licence CC-BY-4.0) with some material from other sites (attributed).
 
@@ -1445,6 +1443,33 @@ We will cover what is a Random Effect and how it differs from a Fixed effect. So
 We will spend a little time talking about how to partition variation and get estimates of the random and fixed effects. An important element will be our discussion of similarities between mixed-effects models with basic regression. There will also be brief discussion of extending the regression to non-gaussian responses (GLMERs).
 
 We will discuss how to interpret these results in a population health context.
+
+
+#+end_src
+
+** README.md
+#+HEADERS: :tangle README.md :noweb tangle :padline no
+#+BEGIN_SRC markdown
+---
+layout: default
+title: README
+---
+
+
+<<readme>>
+
+
+#+end_src
+** index.md
+#+HEADERS: :tangle index.md :noweb tangle :padline no
+#+BEGIN_SRC markdown
+---
+layout: default
+title: README
+---
+
+
+<<readme>>
 
 
 #+end_src
