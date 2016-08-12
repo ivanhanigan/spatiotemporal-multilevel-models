@@ -5,11 +5,11 @@
 #+LaTeX_CLASS_OPTIONS: [a4paper]
 #+LATEX: \tableofcontents
 -----
-* COMMENT showme
+* COMMENT showme DEPRECATED
 #+name:showme
-#+begin_src R :session *R* :tangle no :exports none :eval yes
+#+begin_src R :session *R* :tangle no :exports none :eval no
 #### name:showme ####
-setwd("~/Dropbox/projects/spatiotemporal-regression-models/")
+setwd("~/Dropbox/projects/spatiotemporal-multilevel-models/")
 browseURL("index.html")
 #+end_src
 
