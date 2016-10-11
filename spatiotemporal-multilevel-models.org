@@ -1425,6 +1425,17 @@ categories:
 - [http://ivanhanigan.github.io/spatiotemporal-multilevel-models/spatiotemporal-multilevel-models.html](http://ivanhanigan.github.io/spatiotemporal-multilevel-models/spatiotemporal-multilevel-models.html)
 
 #+end_src
+
+* bookdown instructions
+- create files in -raw
+- build the book (rstudio is easy)
+cd spatiotemporal-multilevel-models-book/
+cp -R ../spatiotemporal-multilevel-models-raw/_book/* ./
+
+_config.yml  general-regression-versus-mixed-effects-models.html  index.html  introduction-1.html  introduction-to-r.html  libs  LICENSE  _main_files  README.md  search_index.json  _site
+
+- git push to gh-pages branch
+* Jekyll website
 * README and index
 ** txt
 #+name:readme
@@ -1662,7 +1673,7 @@ We simulate some data
 
 *** COMMENT brambor
 #+name: brambor
-#+begin_src R :session *R* :tangle brambor.R :exports none :eval yes
+#+begin_src R :session *R* :tangle no :exports none :eval yes
   #### name:after_brambor ####
   
   x  <- seq(0, 6, by = 0.05)
@@ -1721,7 +1732,7 @@ We simulate some data
 
 *** COMMENT after_brambor
 #+name: after_brambor
-#+begin_src R :session *R* :tangle after_brambor.R :exports none :eval yes
+#+begin_src R :session *R* :tangle no :exports none :eval yes
   #### name: multilevel model with varying intercepts and varying slopes ####
   library(lme4)
   dat <- read.csv("simulated_data.csv")
@@ -2083,7 +2094,7 @@ That is such a shame, lucky I saved some of the data using the following code:
 #+end_src
 *** Map Shapefile 2
 #+name:Map Shapefile 2
-#+begin_src R :session *R* :tangle Map Shapefile 2.R :exports none :eval no
+#+begin_src R :session *R* :tangle no :exports none :eval no
   #### name:Map Shapefile 2 ####
   dir("data")
   flist_geo <- readOGR("data", "cities")
@@ -3177,3 +3188,12 @@ I will use the same NMMAPSlite to show how I'd approach a simple "Spatio-Tempora
 - TODO
 
 
+* 7 Causal inference using multilevel models
+** Statistical and causal models
+Terminology "statistical and causal inference" or "probabilistic and causal reasoning"... 
+
+Pearl, J., Glymour, M., & Jewell, N. P. (2016). Chapter 1: Preliminaries: Statistical and Causal Models. In Causal Inference in Statistics: A Primer. (pp. 1–34). West Sussex, United Kingdom: John Wiley & Sons. 
+
+see page 5 of 37 
+e.g. "there is no way to represent any causal information in contingency tables on which statistical inference is often based. There are, however, extra-statistical methods that can be used to express and interpret causal assumptions."
+* 8 The importance of scale 
