@@ -1498,7 +1498,7 @@ This page is not written yet
 * 1 Introduction to R
 ** introR
 #+name:introR
-#+begin_src R :session *R* :tangle no :exports none :eval no
+#+begin_src R :session *R* :tangle intro-to-r.R :exports none :eval no
   ## Intro to R ##
   # objects
   # e.g. numbers
@@ -1588,10 +1588,13 @@ layout: default
 title: Introduction to R
 ---
 
+Download this script [here](./intro-to-r.R)
 
 {% highlight r %}
 <<introR>>
 {% endhighlight %}
+
+
 
 #+end_src
 

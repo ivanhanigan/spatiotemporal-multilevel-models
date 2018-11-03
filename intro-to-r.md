@@ -4,6 +4,7 @@ title: Introduction to R
 ---
 
 
+
 {% highlight r %}
 ## Introduction to R ##
 # objects
@@ -83,3 +84,5 @@ dat <- read.dta13(infile)
 str(dat)
 
 {% endhighlight %}
+
+
