@@ -1,6 +1,6 @@
 
 # Spatiotemporal Regression Modelling
 
-This is an Open Notebook for my work on Spatiotemporal Regression Modelling tips and tricks.
+This is an Open Notebook for my work on Spatiotemporal Multilevel Modelling tips and tricks.
 
 Ivan Hanigan
