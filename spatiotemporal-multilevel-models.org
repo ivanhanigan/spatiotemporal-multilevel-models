@@ -1499,83 +1499,83 @@ This page is not written yet
 ** introR
 #+name:introR
 #+begin_src R :session *R* :tangle no :exports none :eval no
-## Intro to R ##
-# objects
-# e.g. numbers
-a <- 1
-a
-# or characters
-a <- "abc"
-a
-# and vectors
-x <- 1:100
-x
-# math functions and simulating from a range of distributions
-y <- x^2 + sample(rnorm(10000, 0, 1000), 100)
-# and plotting
-plot(x, y)
-
-# some packages are shipped with the base installation
-library(mgcv)
-# with statistical methods such as generalised additive models and penalised splines
-fit <- gam(y ~ s(x))
-summary(fit)
-plot(fit)
-
-# there are many other packages on CRAN
-# we can use tests to see if we need to install packages on this computer
-if(!require(season)){
-  install.packages("season")
-}; library(season)
-# sometimes with well documented help files
-??season
-
-# these can also contain data
-data(CVDdaily)
-?CVDdaily
-# str means structure
-str(CVDdaily)
-summary(CVDdaily)
-
-# sometimes you specify different plot types
-plot(CVDdaily$date, CVDdaily$cvd, type='l')
-# other times R knows based on the type of data
-plot(CVDdaily$dow, CVDdaily$cvd)
-
-# generalised linear models with non-gausian responses
-fit2 <- glm(cvd ~ tmpd + dow, data = CVDdaily, family = "poisson")
-summary(fit2)
-
-# partial residual plots are fun
-termplot(fit2, terms = 1, se = T)
-
-# and so are parametric smoothing splines
-library(splines)
-fit3 <- glm(cvd ~ ns(tmpd, df = 4) + dow, data = CVDdaily, family = "poisson")
-summary(fit3)
-
-# partial residual plots are fun
-termplot(fit3, terms = 1, se = T)
-
-# and post estimation statistics 
-aic_table <- data.frame(aic2 = AIC(fit2), aic3 = AIC(fit3))
-aic_min <- min(aic_table)
-(aic_table - aic_min)
-# model fit3 is substantially better than fit2
-
-# and diagnostics like cooks distance and leverage
-par(mfrow = c(2,2))
-plot(fit3)
-
-# and R can read most file formats
-library(foreign)
-# or even stata13/14 files 
-library(readstata13)
-infile <- dir(file.path(system.file(package = "readstata13"), "extdata"), full.names = T, pattern = ".dta")
-infile
-dat <- read.dta13(infile)
-str(dat)
-
+  ## Intro to R ##
+  # objects
+  # e.g. numbers
+  a <- 1
+  a
+  # or characters
+  a <- "abc"
+  a
+  # and vectors
+  x <- 1:100
+  x
+  # math functions and simulating from a range of distributions
+  y <- x^2 + sample(rnorm(10000, 0, 1000), 100)
+  # and plotting
+  plot(x, y)
+  
+  # some packages are shipped with the base installation
+  library(mgcv)
+  # with statistical methods such as generalised additive models and penalised splines
+  fit <- gam(y ~ s(x))
+  summary(fit)
+  plot(fit)
+  
+  # there are many other packages on CRAN
+  # we can use tests to see if we need to install packages on this computer
+  if(!require(season)){
+    install.packages("season")
+  }; library(season)
+  # sometimes with well documented help files
+  ??season
+  
+  # these can also contain data
+  data(CVDdaily)
+  ?CVDdaily
+  # str means structure
+  str(CVDdaily)
+  summary(CVDdaily)
+  
+  # sometimes you specify different plot types
+  plot(CVDdaily$date, CVDdaily$cvd, type='l')
+  # other times R knows based on the type of data
+  plot(CVDdaily$dow, CVDdaily$cvd)
+  
+  # generalised linear models with non-gausian responses
+  fit2 <- glm(cvd ~ tmpd + dow, data = CVDdaily, family = "poisson")
+  summary(fit2)
+  
+  # partial residual plots are fun
+  termplot(fit2, terms = 1, se = T)
+  
+  # and so are parametric smoothing splines
+  library(splines)
+  fit3 <- glm(cvd ~ ns(tmpd, df = 4) + dow, data = CVDdaily, family = "poisson")
+  summary(fit3)
+  
+  # partial residual plots are fun
+  termplot(fit3, terms = 1, se = T)
+  
+  # and post estimation statistics 
+  aic_table <- data.frame(aic2 = AIC(fit2), aic3 = AIC(fit3))
+  aic_min <- min(aic_table)
+  (aic_table - aic_min)
+  # model fit3 is substantially better than fit2
+  
+  # and diagnostics like cooks distance and leverage
+  par(mfrow = c(2,2))
+  plot(fit3)
+  
+  # and R can read most file formats
+  library(foreign)
+  # or even stata13/14 files 
+  library(readstata13)
+  infile <- dir(file.path(system.file(package = "readstata13"), "extdata"), full.names = T, pattern = ".dta")
+  infile
+  dat <- read.dta13(infile)
+  str(dat)
+  
 #+end_src
 
 ** introRm
@@ -1593,6 +1593,42 @@ title: Introduction to R
 <<introR>>
 {% endhighlight %}
 
+#+end_src
+
+*** COMMENT monthly-gam
+#+name:monthly-gam
+#+begin_src R :session *R* :tangle no :exports none :eval no
+  'name:monthly-gam'
+  if(!require(season)){install.packages("season")}
+  library(season)
+  if(!require(sqldf)){install.packages("sqldf")}
+  library(sqldf)
+  library(mgcv)
+  data(CVDdaily)
+  ?CVDdaily
+  str(CVDdaily)
+  summary(CVDdaily)
+  plot(CVDdaily$date, CVDdaily$cvd, type='l')
+  CVDdaily$yy <- as.numeric(substr(as.character(CVDdaily$date), 1,4))
+  head(CVDdaily)
+  ?aggregate
+  dat <- sqldf("select yy, month, sum(cvd) as cvd, avg(o3mean) as o3
+   from CVDdaily
+  group by yy, month
+  order by yy, month")
+  dat$time  <- 1:nrow(dat)
+  head(dat)
+  hist(dat$cvd)
+  fit <- gam(cvd ~ o3 + s(month, bs = 'cc', k = 4, fx=T) + s(time, k = 6, fx=T), data = dat,
+             family = poisson(link=log))
+  summary(fit)
+  # edf reports k minus one for s(), looks like k - 2 for cyclic basis
+  # bs='cc'
+  png("~/season03.png")
+  par(mfrow=c(2,2))
+  plot(fit, all.terms = T)
+  dev.off()
+  
 #+end_src
 
     
@@ -1928,7 +1964,6 @@ In this example we explore the Ross River virus infections from Western Australi
 
 #+end_src
 
-
 ** Ross River virus and urban vs rural mosquito habitat 
 *** COMMENT Notes made after hacking in the origi vally repo
 See do_model_checking_glmer
@@ -1936,6 +1971,9 @@ See do_model_checking_glmer
 
 #########################
 # model 4 is multilevel
+** Standardised rates
+/home/ivan_hanigan/projects/RatesTheory
+
 * 5 your own data
 * 6 Spatiotemporal data analysis
 ** Spatially structured timeseries 
@@ -3196,4 +3234,22 @@ Pearl, J., Glymour, M., & Jewell, N. P. (2016). Chapter 1: Preliminaries: Statis
 
 see page 5 of 37 
 e.g. "there is no way to represent any causal information in contingency tables on which statistical inference is often based. There are, however, extra-statistical methods that can be used to express and interpret causal assumptions."
-* 8 The importance of scale 
+
+The approaches taken to address the limitation conform to
+recommended statistical practices that address the
+fundamental problem of causal inference:
+  
+We can not observe what happens to an individual after taking the treatment (at a particular point in time) and what happens to that same individual after not taking the treatment (at the same point in time) . . . . 
+
+estimating causal effects requires one or some combination of the following: close substitutes for the [counterfactual] potential outcomes, randomization, or statistical adjustment. (Gelman and Hill 2007 p.171, also see their recommendations for Bayesian and Frequentist tools for causal inference using regression and multilevel models discussed in Chapters 9, 10 and 23)
+
+  
+
+
+* 8 The importance of scale
+** paper
+~/projects_ceraph/importance_of_scale
+** chapter 
+The problem will be lack of authorisation to share.
+Therefore need to build clear descriptions, and maybe produce simulation for students?
+
