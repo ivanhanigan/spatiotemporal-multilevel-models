@@ -5,7 +5,7 @@ title: Introduction to R
 
 
 {% highlight r %}
-## Intro to R ##
+## Introduction to R ##
 # objects
 # e.g. numbers
 a <- 1
