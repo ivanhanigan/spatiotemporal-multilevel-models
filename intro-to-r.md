@@ -3,10 +3,10 @@ layout: default
 title: Introduction to R
 ---
 
-
+Download this script [here](./intro-to-r.R)
 
 {% highlight r %}
-## Introduction to R ##
+## Intro to R ##
 # objects
 # e.g. numbers
 a <- 1
@@ -84,5 +84,3 @@ dat <- read.dta13(infile)
 str(dat)
 
 {% endhighlight %}
-
-
