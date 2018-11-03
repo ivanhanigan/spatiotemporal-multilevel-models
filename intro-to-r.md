@@ -5,6 +5,10 @@ title: Introduction to R
 
 Download this script [here](./intro-to-r.R)
 
+
+<iframe style="border: none;" height="400" width="600" src="./GMT20181019-002609_CAR-webinar_1920x1200.mp4"></iframe>
+
+
 {% highlight r %}
 ## Intro to R ##
 # objects
