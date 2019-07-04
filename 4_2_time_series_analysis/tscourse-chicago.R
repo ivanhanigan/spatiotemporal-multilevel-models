@@ -1,4 +1,3 @@
-
 "
 Modified from
 Ana Vicedo-Cabrera, Francesco Sera, Antonio Gasparrini, London School of Hygiene and Tropical Medicine
