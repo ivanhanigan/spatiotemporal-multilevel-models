@@ -17,13 +17,14 @@ plot(x, y)
 
 # some packages are shipped with the base installation
 library(mgcv)
-# with statistical methods such as generalised additive models and penalised splines
+# with statistical methods such as generalised additive models and
+# penalised splines
 fit <- gam(y ~ s(x))
 summary(fit)
 plot(fit)
 
-# there are many other packages on CRAN
-# we can use tests to see if we need to install packages on this computer
+# there are many other packages on CRAN we can use tests to see if we
+# need to install packages on this computer
 if(!require(season)){
   install.packages("season")
 }; library(season)
@@ -51,7 +52,8 @@ termplot(fit2, terms = 1, se = T)
 
 # and so are parametric smoothing splines
 library(splines)
-fit3 <- glm(cvd ~ ns(tmpd, df = 4) + dow, data = CVDdaily, family = "poisson")
+fit3 <- glm(cvd ~ ns(tmpd, df = 4) + dow,
+            data = CVDdaily, family = "poisson")
 summary(fit3)
 
 # partial residual plots are fun
