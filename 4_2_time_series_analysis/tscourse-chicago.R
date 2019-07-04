@@ -117,7 +117,10 @@ mmonth <- glm(death ~ date + factor(month), data, family=poisson)
 ## relax assumption about regular seasonal pattern
 mmonthinyear <- glm(death ~ factor(month)*factor(year), data, family=poisson)
 ## allow smooth temporal trends
-spltime <- bs(data$date, df=7*8)
+## NOTE that it is almost tradition to use 7df per year
+ny <- length(unique(data$year))
+ny
+spltime <- bs(data$date, df=7*ny)
 mspline <- glm(death ~ spltime, data, family=poisson)
 
 png("figs/tsplot-deaths-temp-seas.png", width = 1000, height = 650, res = 100)
@@ -158,15 +161,27 @@ box()
 mtext(estat$model, 1, at = 1:nrow(estat))
 dev.off()
 
-## Model selection
+## as a brief diversion, this is how to fit a penalised spline in GAM
+## using cross validation to determine best curve for temp
+## we will fix the smooth on time
+library(mgcv)
+mgam <- gam(death ~ s(temp) + s(time, fx = T, k=7*ny), data, family=poisson)
+summary(mgam)
+png("figs/tsreg-deaths-temp-gam.png", height = 300, width = 1000, res = 100)
+par(mfrow = c(1,2), mar = c(4,4,1,1))
+plot(mgam, all.terms = T)
+dev.off()
+
+## back to TSCOURSE
+#### Model selection ####
 
 ## LR test
 anova(mmonth, mmonthinyear, test="LRT")
 ## suggests that model 2 (month*year) is preferred
 
 ## Akaike Information Criterion
-AIC(mnone, mlin, mmonth, mmonthinyear, mspline)
-## suggests that model 2 (month*year) is preferred
+AIC(mnone, mlin, mmonth, mmonthinyear, mspline, mgam)
+## suggests that non-linear term is strongly preferred
 
 ## Original authors extended the CO analysis by adding Temp, we could
 ## add something, like PM10, but for now I just skip this all
@@ -184,39 +199,114 @@ AIC(mnone, mlin, mmonth, mmonthinyear, mspline)
 
 ## drop1(mtmean, test="LRT")
 
+#### Model diagnostics ####
+## Original authors checked for overdispersion, we will skip this
+## overdisp <- update(mtmean, family=quasipoisson)
+## summary(overdisp)$dispersion
+## ci.exp(mtmean, subset="temp")
+## ci.exp(overdisp, subset="temp")
 
+## layout(1:2)
+## pacf(data$death, ylim=c(-0.1,1), main="Original response variable")
+## pacf(residuals(mtmean), ylim=c(-0.1,1), na.action=na.pass, main="Residuals from the regression model")
+## layout(1)
 
-overdisp <- update(mtmean, family=quasipoisson)
-summary(overdisp)$dispersion
-ci.exp(mtmean, subset="temp")
-ci.exp(overdisp, subset="temp")
+## dataseas <- subset(data, month%in%6:9)
 
-layout(1:2)
-pacf(data$death, ylim=c(-0.1,1), main="Original response variable")
-pacf(residuals(mtmean), ylim=c(-0.1,1), na.action=na.pass, main="Residuals from the regression model")
-layout(1)
+## splyday <- ns(dataseas$yday, df=4)
+## spltimelong <- bs(dataseas$date, df=2*8)
+## mseas <- glm(death ~ temp + splyday + spltimelong + ns(tmean, df=3), dataseas,
+##   family=poisson)
+## ci.exp(mseas, subset="temp")
 
-dataseas <- subset(data, month%in%6:9)
-
-splyday <- ns(dataseas$yday, df=4)
-spltimelong <- bs(dataseas$date, df=2*8)
-mseas <- glm(death ~ temp + splyday + spltimelong + ns(tmean, df=3), dataseas,
-  family=poisson)
-ci.exp(mseas, subset="temp")
-
-mseas2 <- glm(death ~ temp + splyday*factor(year) + ns(tmean, df=3), dataseas,
-  family=poisson)
-ci.exp(mseas2, subset="temp")
+## mseas2 <- glm(death ~ temp + splyday*factor(year) + ns(tmean, df=3), dataseas,
+##   family=poisson)
+## ci.exp(mseas2, subset="temp")
 
 #### Excess Heat Factor ####
-
+if(!require(devtools)) install.packages("devtools"); library(devtools)
 if(!require(ExcessHeatIndices)){devtools::install_github("swish-climate-impact-assessment/ExcessHeatIndices");require(ExcessHeatIndices)}
 require(ExcessHeatIndices)
 summary(data$date)
-
+## by default the frequency distribution is taken from the full time period
 data$EHF <- EHF(ta = data$temp)
 data$EHFduration <- EHFduration(data$EHF)
 data$EHFload <- EHFload(data$EHF, data$EHFduration)
 
-data[data$date >= as.Date("1995-07-01") &
-     data$date < as.Date("1995-07-30"),]
+## for a plot we need the interim steps too
+data$t3 <- zoo::rollapplyr(data$temp, width = 3, FUN = mean, fill = NA)
+data$t30 <- zoo::rollapplyr(c(rep(NA, 3), data$temp[1:(length(data$temp)-3)]), width = 30, FUN = mean, fill = NA)
+t95 <- quantile(data$temp, 0.95, na.rm = T)
+data$EHIsig <- data$t3 - t95
+data$EHIaccl <- data$t3 - data$t30
+## EHF <- EHIsig * pmax(1, EHIaccl)
+
+
+qc <- data[data$date >= as.Date("1995-06-01") & data$date < as.Date("1995-07-30"),]
+
+
+png("figs/tsplot-ehf-demo.png", width = 1300, height = 690, res = 100)
+par(mfrow = c(3,1), mar = c(4,4,3,1))
+with(qc,
+     plot(date, temp, type = 'b', lty = 2, main = "", ylim = c(10,40))
+)
+
+with(qc,
+     lines(date, t3, type = 'l')
+     )
+with(qc,
+     lines(date, t30, type = 'l', lwd = 1.5)
+)
+abline(t95, 0, col = 'red')
+legend("topright", legend = c("avtemp", "3movav", "30movav", "T95th"), lty = c(2,1,1,1), lwd = c(1,1,2,1), col = c(1,1,1, 'red'), pch = c(1,NA,NA,NA), bg="white", cex = .8)
+
+with(qc,
+     plot(date, EHIaccl, type = 'h',  main = "EHI acclimatisation (3movav - 30movav)", ylim = c(-12,12), lwd = 4, col = 'grey')
+     )
+with(qc[qc$EHIaccl > 0,],
+     lines(date, EHIaccl, type = 'h', lwd = 4, col = 'black')
+     )
+abline(0,0)
+
+with(qc,
+     plot(date, EHIsig,type = 'h', main = "EHI significant (3movav - T95th)", ylim = c(-12,12), lwd = 4, col = 'grey')
+     )
+with(qc[qc$EHIsig > 0,],
+     lines(date, EHIsig, type = 'h', lwd = 4, col = 'black')
+     )
+abline(0,0)
+dev.off()
+
+png("figs/tsplot-ehf-demo-duration.png", width = 1300, height = 690, res = 100)
+par(mfrow = c(3,1), mar = c(4,4,3,1))
+with(qc,
+     plot(date, EHF,type = 'l', main = "EHF (EHIsig x max(1,EHIaccl))", ylim = c(-30,60), lwd = 2, col = 'grey')
+     )
+with(qc[qc$EHF > 0,],
+     points(date, EHF, pch = 16, lwd = 2, col = 'black')
+     )
+abline(0,0)
+
+with(qc,
+     plot(date, EHFduration,type = 'l', main = "EHF duration (consecutive days with EHF > 0)")#, ylim = c(10,50))
+)
+
+with(qc,
+     plot(date, EHFload,type = 'l', main = "EHF load (cumulative sum during periods with EHF > 0)")#, ylim = c(10,50))
+)
+
+dev.off()
+
+#### EHF indicator variable ####
+data$heatwave <- as.factor(ifelse(data$EHFduration > 0, 1, 0))
+mgamehf <- glm(death ~ heatwave + ns(temp, df=4) + ns(time, df=7*ny), data, family=poisson)
+summary(mgamehf)
+estat_hwave <- ci.hack(mgamehf, subset = "heatwave1")
+knitr::kable(estat_hwave, digits = 3)
+
+png("figs/tsreg-deaths-temp-glm-heatwave.png", height = 400, width = 1000, res = 100)
+par(mfrow = c(2,2), mar = c(4,4,1,1))
+termplot(mgamehf, se = T, terms = 1, col.term = "black", col.se = "black")
+termplot(mgamehf, se = T, terms = 2, col.term = "black", col.se = "black")
+termplot(mgamehf, se = T, terms = 3, col.term = "black", col.se = "black")
+dev.off()
