@@ -1,0 +1,20 @@
+{
+    "collab_server" : "",
+    "contents" : "\n#### name:after_brambor ####\n\nx  <- seq(0, 6, by = 0.05)\n\nset.seed(42)\ny <- -0.5 + sample(rnorm(length(x),0,0.05))\nset.seed(42)\ny2 <- (-0.33 + 0.1*x) + sample(rnorm(length(x),0,0.05))\n\n\n#pdf(\"effect_modification.pdf\")#,  width = 1000, height = 550)\npar(mar = c(3,3,2,1))\nplot(1, type=\"n\", xlim=c(-0.3,6), ylim=c(-1,0.5), xlab=\"\", ylab=\"\", axes = F)\naxis(1, labels = F); axis(2, labels = F)\nmtext(\"Y\", 2, 1 , at = 0, las = 2)\nmtext(\"X\", 1, 1 , at = 3)\ntitle(expression(paste(\"Regression model Y = \", beta[0] + beta[1],\"X + \", beta[2], \"Z + \", beta[3], \"XZ + \", epsilon )))\n#, 3, 0, at = 1, cex = .85)\n#segments(-3, -0.5, 3, -0.5, lwd=2)    \npoints(x,y, pch = 1, cex = .5)\nfit <- lm(y~x)\nsummary(fit)\nabline(fit)\n\n\n#curve(exp=-.008*x + .137*2  + .100*2*x,  from=-3, to=3, lwd=2, add=TRUE)\npoints(x, y2, pch = 3, cex = .5)\nfit2  <- lm(y2~x)\nsummary(fit2)\nabline(fit2)\n\ntext(x = 2.8, y = 0.2, expression(paste(\"Y = (\", beta[0] + beta[2],\") + (\", beta[1] + beta [3],\")X when Z = 1\")))\ntext(x = 1.9, y = 0.1, expression(paste(\"Slope = \", beta[1] + beta[3])))\n\n#text(x = -3.4, y = -0.4, '{', srt = 0, cex = 3)\ntext(x = -0.3, y = -.75, expression(beta[0]))\ntext(x = -0.3, y = -0.4, expression(beta[2]))\nb0 <- coefficients(fit)[1]\nb2 <- coefficients(fit2)[1]\ntext(x = 3.57, y = -0.7,  expression(paste(\"Y = \", beta[0] + beta[1] ,\"X when Z = 0\")))\ntext(x = 3, y = -0.8, expression(paste(\"Slope = \", beta[1])))\n\nsegments(0, b0, 0, b2, lty = 1, col = 'grey', lwd = 6)\nsegments(-.9, b2, 0, b2, lty = 3)\nsegments(-.9, b0, 0, b0, lty = 3)\n#mtext(expression(beta[2]),2,2, at = -0.4, las = 2)\n#text(x = -3.4, y = -.75, '{', srt = 0, cex = 3)\n\nsegments(0, b2, 0, -1, lty = 3)\n#mtext(expression(beta[0]),2,2, at = -0.75, las = 2)\n#dev.off()\n#browseURL(\"effect_modification.pdf\")\n",
+    "created" : 1462940140871.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2340081758",
+    "id" : "E82F728C",
+    "lastKnownWriteTime" : 1462940138,
+    "last_content_update" : 1462940138,
+    "path" : "~/projects/multilevel-basics/brambor.R",
+    "project_path" : "brambor.R",
+    "properties" : {
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

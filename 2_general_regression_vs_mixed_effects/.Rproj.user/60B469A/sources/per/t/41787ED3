@@ -1,0 +1,20 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1487221529330.000,
+    "dirty" : true,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3089799239",
+    "id" : "41787ED3",
+    "lastKnownWriteTime" : 1464044564,
+    "last_content_update" : 1487221635953,
+    "path" : "~/projects_ceraph/CeRAPH_MLM_workshop/2_general_regression_vs_mixed_effects/intercepts_and_slopes_in_mixed_effects.R",
+    "project_path" : "intercepts_and_slopes_in_mixed_effects.R",
+    "properties" : {
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

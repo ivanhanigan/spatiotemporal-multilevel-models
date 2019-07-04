@@ -1,0 +1,20 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1487221525433.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "515147352",
+    "id" : "E308D8C0",
+    "lastKnownWriteTime" : 1464044564,
+    "last_content_update" : 1464044564,
+    "path" : "~/projects_ceraph/CeRAPH_MLM_workshop/2_general_regression_vs_mixed_effects/general_regression_vs_mixed_effects.R",
+    "project_path" : "general_regression_vs_mixed_effects.R",
+    "properties" : {
+    },
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

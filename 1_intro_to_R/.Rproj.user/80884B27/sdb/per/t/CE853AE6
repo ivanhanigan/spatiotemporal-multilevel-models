@@ -1,0 +1,20 @@
+{
+    "collab_server" : "",
+    "contents" : "---\nlayout: default\ntitle: README\n---\n\nThis is an Open Notebook with some material from other sites (attributed).\n\nIn this notebook we will introduce what multi-level data and models are and why they are useful in epidemiology contexts. \n\nA secure online Rstudio server (in a web browser) is available at [https://rstudio.coesra.org.au](https://rstudio.coesra.org.au) hosted by Uni Queensland's [Collaborative Environment for Ecosystem Science Research and Analysis - CoESRA](http://www.coesra.org.au).\n\nWe begin with the general linear model framework GLM and then move to mixed-effects models. It is important to realise that these models are called different things in different disciplines: (generalized) linear mixed (effects) models (GLMM), hierarchical (generalized) linear models, etc. The terminology for the model parameters is equally diverse, usually including the terms random effects and fixed effects. So we focus on the key concepts.\n\nWe will cover what is a Random Effect and how it differs from a Fixed effect. Some example syntax in R and Stata will show how to get a handle on models that have random intercepts and additionally, random slopes.\n\nWe will spend a little time talking about how to partition variation and get estimates of the random and fixed effects. An important element will be our discussion of similarities between mixed-effects models with basic regression. There will also be brief discussion of extending the regression to non-gaussian responses (GLMERs).\n\nWe will discuss how to interpret these results in a population health context.\n",
+    "created" : 1464039728292.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2617475803",
+    "id" : "CE853AE6",
+    "lastKnownWriteTime" : 1464039758,
+    "last_content_update" : 1464039758,
+    "path" : "~/projects/README.md",
+    "project_path" : null,
+    "properties" : {
+    },
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "markdown"
+}

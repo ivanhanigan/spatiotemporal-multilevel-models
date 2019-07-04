@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "# aim: compare methods for computing CI around proportions\nlibrary(prevalence)\nlibrary(samplesize4surveys)\n\nmoe_2014 <- e4p(N = 19915, n = 701, P = 0.5)\n\n# However I think your use of the e4p function to calculate the margin of error gives a very conservative estimate. First, be careful hard coding the proportion, it may fluctuate as you get near the two extremes. But second, I’m not sure the population is the finite numbers you used, since the report is making inferences about all companies and the population you used it recipients targeted for the survey. The result is a conservative estimate of the margin of error, which is fine since it’s still showing overlap and the flaw in the original approach.\n# As an example, reversing the numbers, we get 36% of 692 respondents answered that question (about 249), and then we have to reverse the actual counts. So for the first selection, 75% of 249 selected it, so 187 out of 249. The binomial confidence interval around that goes from 0.692 to 0.803. Meaning the margin of error is roughly 5%, a little worse than the 3.6% you conservatively calculated. But the end result is the same, the original research is bit overzealous in the conclusions they draw.\n\nmoe_2015 <- e4p(18705, 692, 0.5)\n\n",
+    "created" : 1463108237635.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "598280357",
+    "id" : "87738C01",
+    "lastKnownWriteTime" : 1463521011,
+    "last_content_update" : 1463521011217,
+    "path" : "/projects/ivan_hanigan/e4p.R",
+    "project_path" : null,
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

@@ -1,0 +1,20 @@
+{
+    "collab_server" : "",
+    "contents" : "x  <- seq(0, 6, by = 0.05)\nset.seed(42)\ny <- -0.5 + sample(rnorm(length(x),0,0.05))\nset.seed(123)\ny2 <- (-0.33 + 0.1*x) + sample(rnorm(length(x),0,0.05))\nset.seed(1)\ny3 <- (-0.5 + 0.1*x) + sample(rnorm(length(x),0,0.05))\n\ndat <- data.frame(y = y, x, z = 'group1')\ndat <- rbind(dat, data.frame(y = y2, x, z = 'group2'))\ndat <- rbind(dat, data.frame(y = y3, x, z = 'group3'))\nstr(dat)\nwrite.csv(dat, \"data/simulated_data.csv\", row.names = F)\n",
+    "created" : 1463541409793.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3013932465",
+    "id" : "7AC18C9A",
+    "lastKnownWriteTime" : 1463541433,
+    "last_content_update" : 1463541433660,
+    "path" : "~/projects/multilevel-basics/make_simulated_data.R",
+    "project_path" : "make_simulated_data.R",
+    "properties" : {
+    },
+    "relative_order" : 5,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
