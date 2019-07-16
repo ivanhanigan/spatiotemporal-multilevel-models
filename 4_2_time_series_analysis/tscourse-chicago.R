@@ -46,7 +46,7 @@ png("figs/tsplot-deaths-temp.png", width = 1000, height = 650, res = 100)
 layout(1:2)
 par(mex=0.7)
 plot(data$date,data$death,ylab="Deaths",xlab="Date",cex=0.6,col=2,
- main="Time series of daily deaths")
+ main="Time series of daily deaths", type = "l")
 ## NB I changed from CO to temp
 plot(data$date,data$temp,ylab="Temperature",xlab="Date",cex=0.6,col=4,
  main="Time series of daily temp level")
@@ -237,6 +237,7 @@ data$EHFload <- EHFload(data$EHF, data$EHFduration)
 data$t3 <- zoo::rollapplyr(data$temp, width = 3, FUN = mean, fill = NA)
 data$t30 <- zoo::rollapplyr(c(rep(NA, 3), data$temp[1:(length(data$temp)-3)]), width = 30, FUN = mean, fill = NA)
 t95 <- quantile(data$temp, 0.95, na.rm = T)
+t99 <- quantile(data$temp, 0.99, na.rm = T)
 data$EHIsig <- data$t3 - t95
 data$EHIaccl <- data$t3 - data$t30
 ## EHF <- EHIsig * pmax(1, EHIaccl)
@@ -258,6 +259,7 @@ with(qc,
      lines(date, t30, type = 'l', lwd = 1.5)
 )
 abline(t95, 0, col = 'red')
+abline(t99, 0, col = 'red', lwd = 2, lty = 2)
 legend("topright", legend = c("avtemp", "3movav", "30movav", "T95th"), lty = c(2,1,1,1), lwd = c(1,1,2,1), col = c(1,1,1, 'red'), pch = c(1,NA,NA,NA), bg="white", cex = .8)
 
 with(qc,
@@ -310,3 +312,31 @@ termplot(mgamehf, se = T, terms = 1, col.term = "black", col.se = "black")
 termplot(mgamehf, se = T, terms = 2, col.term = "black", col.se = "black")
 termplot(mgamehf, se = T, terms = 3, col.term = "black", col.se = "black")
 dev.off()
+
+### 3 days or more abnove 95 
+data$heatwave2 <- as.factor(ifelse(data$EHFduration >= 3, 1, 0))
+mgamehf <- glm(death ~ heatwave2 + ns(temp, df=4) + ns(time, df=7*ny), data, family=poisson)
+summary(mgamehf)
+#estat_hwave <- ci.hack(mgamehf, subset = "heatwave1")
+#knitr::kable(estat_hwave, digits = 3)
+
+# png("figs/tsreg-deaths-temp-glm-heatwave.png", height = 400, width = 1000, res = 100)
+# par(mfrow = c(2,2), mar = c(4,4,1,1))
+termplot(mgamehf, se = T, terms = 1, col.term = "black", col.se = "black")
+termplot(mgamehf, se = T, terms = 2, col.term = "black", col.se = "black")
+# termplot(mgamehf, se = T, terms = 3, col.term = "black", col.se = "black")
+# dev.off()
+
+### duration as a term
+mgamehf <- glm(death ~ EHFduration + ns(temp, df=4) + ns(time, df=7*ny), data, family=poisson)
+summary(mgamehf)
+termplot(mgamehf, se = T, terms = 1, col.term = "black", col.se = "black")
+termplot(mgamehf, se = T, terms = 2, col.term = "black", col.se = "black")
+
+mgamehf <- gam(death ~ s(EHFload, fx = T, k = 6) + ns(temp, df=4) + ns(time, df=7*ny), data, family=poisson)
+#mgamehf <- glm(death ~ ns(EHFload, df = 9) + ns(temp, df=4) + ns(time, df=7*ny), data, family=poisson)
+summary(mgamehf)
+plot(mgamehf, se = T, terms = 1, col.term = "black", col.se = "black")
+##termplot(mgamehf, se = T, terms = 1, col.term = "black", col.se = "black")
+termplot(mgamehf, se = T, terms = 2, col.term = "black", col.se = "black")
+
