@@ -31,6 +31,11 @@ str(chicagoNMMAPS)
 ## data <- read.csv("data/london.csv")
 data <- chicagoNMMAPS
 head(data, 3)
+tail(data, 6)
+data[1,1:4]
+data[1:25,"yday"]
+data$yday[1:25]
+
 summary(data)
 data$date <- as.Date(data$date, format="%d/%m/%Y")
 data$year <- year(data$date)
@@ -38,6 +43,8 @@ data$month <- month(data$date)
 data$day <- day(data$date)
 data$yday <- yday(data$date)
 data$dow <- wday(data$date, label=T)
+str(data)
+summary(data$yday)
 
 ## I like to create the figures as PNG files, and put them into a
 ## folder called figs so create that
@@ -86,7 +93,7 @@ dev.off()
 
 ## mnone <- glm(death ~ co, data, family=poisson)
 mnone <- glm(death ~ temp, data, family=poisson)
-
+str(mnone)
 summary(mnone)
 ## this needs a bit of work to interpret as they are on the log scale
 ## the authors of TSCOURSE used the Epi package, but I couldn't
