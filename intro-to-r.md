@@ -3,7 +3,6 @@ layout: default
 title: Introduction to R
 ---
 
-<iframe style="border: none;" height="400" width="600" src="./images/20190312_data_inventory.mp4"></iframe>
 
 
 Download this script [here](./intro-to-r.R)
