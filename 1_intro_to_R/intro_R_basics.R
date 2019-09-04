@@ -27,6 +27,12 @@ help(plot)
 # R also has built in examples in the documentation
 example(mean)
 
+# R offers a great inbuilt tutorial called swirl
+library("swirl")
+swirl()
+?swirl_options
+help(swirl)
+
 # There is also heaps of information on the internet
 
 
