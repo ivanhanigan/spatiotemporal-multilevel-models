@@ -2019,11 +2019,12 @@ plot(dat)
 
 # Please have a go! It is fun.
 #+end_src
-*** R codes
+*** R stats modelling
 #+name:introR
 #+begin_src R :session *R* :tangle 1_intro_to_R/intro_spatiotemporal_multilevel_models.R :exports none :eval no
-  ## Intro to R ##
-  # objects
+  ## Intro to R stats modelling ##
+  # by ivanhanigan
+  # recall objects
   # e.g. numbers
   a <- 1
   a
@@ -2038,11 +2039,14 @@ plot(dat)
   # and plotting
   plot(x, y)
 
-  # some packages are shipped with the base installation
+  # stats models also create objects
+
+  # use the mgcv package shipped with the base installation
   library(mgcv)
   # with statistical methods such as generalised additive models and
   # penalised splines
   fit <- gam(y ~ s(x))
+  # created an object that holds the results of the stats model 
   summary(fit)
   plot(fit)
 
@@ -2092,26 +2096,10 @@ plot(dat)
   par(mfrow = c(2,2))
   plot(fit3)
 
-  # and R can read most file formats
-  library(foreign)
-  # or even stata13/14 files 
-  library(readstata13)
-  infile <- dir(file.path(system.file(package = "readstata13"), "extdata"), full.names = T, pattern = ".dta")
-  infile
-  dat <- read.dta13(infile)
-  str(dat)
-
-#+end_src
-
-*** monthly-gam
-#+name:monthly-gam
-#+begin_src R :session *R* :tangle no :exports none :eval no
-  'name:monthly-gam'
-  if(!require(season)){install.packages("season")}
-  library(season)
+  ## let's look at a monthly analysis, and data aggregations
   if(!require(sqldf)){install.packages("sqldf")}
   library(sqldf)
-  library(mgcv)
+
   data(CVDdaily)
   ?CVDdaily
   str(CVDdaily)
@@ -2139,14 +2127,46 @@ plot(dat)
   
 #+end_src
 
+*** snip
+  # and R can read most file formats
+  library(foreign)
+  # or even stata13/14 files 
+  library(readstata13)
+  infile <- dir(file.path(system.file(package = "readstata13"), "extdata"), full.names = T, pattern = ".dta")
+  infile
+  dat <- read.dta13(infile)
+  str(dat)
+
+  'name:monthly-gam'
+  library(mgcv)
+  if(!require(season)){install.packages("season")}
+  library(season)
+
 ** introRmd
 *** intro-to-r
-#+name:intro-to-r
+#+name:intro-to-r-2
 #+HEADERS: :tangle intro-to-r.md :noweb tangle :padline no
 #+BEGIN_SRC markdown
 ---
 layout: default
 title: Introduction to R
+---
+
+## Scripts that can be used for training
+
+- [R basics](./intro-to-r-2.html)
+- [R stats modelling](./intro-to-r-3.html)
+
+
+
+#+end_src
+*** intro-to-r-2
+#+name:intro-to-r-2
+#+HEADERS: :tangle intro-to-r-2.md :noweb tangle :padline no
+#+BEGIN_SRC markdown
+---
+layout: default
+title: Introduction to R basics
 ---
 
 
@@ -2159,7 +2179,26 @@ Download the script developed by Christy [here](./1_intro_to_R/intro_R_basics.R)
 
 #+end_src
 
-    
+*** intro-to-r-3
+#+name:intro-to-r-3
+#+HEADERS: :tangle intro-to-r-3.md :noweb tangle :padline no
+#+BEGIN_SRC markdown
+---
+layout: default
+title: Introduction to R stats modelling
+---
+
+
+Download the script developed by ivan [here](./1_intro_to_R/intro_spatiotemporal_multilevel_models.R)
+
+
+{% highlight r %}
+<<introR>>
+{% endhighlight %}
+
+#+end_src
+
+        
 * 2 general-regression-vs-mixed-effects 
 ** COMMENT compare
 #+begin_src R :session *R* :tangle general-regression-vs-mixed-effects.md :exports none :eval no :padline no

@@ -1,4 +1,13 @@
+---
+layout: default
+title: Introduction to R stats modelling
+---
 
+
+Download the script developed by ivan [here](./1_intro_to_R/intro_spatiotemporal_multilevel_models.R)
+
+
+{% highlight r %}
 ## Intro to R stats modelling ##
 # by ivanhanigan
 # recall objects
@@ -101,3 +110,5 @@ png("~/season03.png")
 par(mfrow=c(2,2))
 plot(fit, all.terms = T)
 dev.off()
+
+{% endhighlight %}
