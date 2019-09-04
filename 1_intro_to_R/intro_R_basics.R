@@ -1,13 +1,3 @@
----
-layout: default
-title: Introduction to R
----
-
-
-Download the script developed by Christy [here](./1_intro_to_R/intro_R_basics.R)
-
-
-{% highlight r %}
 ## A BRIEF INTRODUCTION TO R ##
 # prepared by ChristyGeromboux
 #-------------------------------------
@@ -518,4 +508,3 @@ plot(dat)
 #  almost anything you want!
 
 # Please have a go! It is fun.
-{% endhighlight %}
