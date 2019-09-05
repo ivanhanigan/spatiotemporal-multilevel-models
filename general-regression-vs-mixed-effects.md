@@ -9,6 +9,7 @@ We will spend a little time talking about how to partition variation and get est
 
 ## Suggested workflow (run these scripts in this order)
 
+- Get the data file [simulated_data.csv](./2_general_regression_vs_mixed_effects/data/simulated_data.csv)
 - [intercepts_and_slopes_in_general_regression.R](./2_general_regression_vs_mixed_effects/intercepts_and_slopes_in_general_regression.R)
 - [intercepts_and_slopes_in_mixed_effects.R](./2_general_regression_vs_mixed_effects/intercepts_and_slopes_in_mixed_effects.R)
 - [general_regression_vs_mixed_effects.R](./2_general_regression_vs_mixed_effects/general_regression_vs_mixed_effects.R)
