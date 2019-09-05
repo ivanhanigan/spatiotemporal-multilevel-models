@@ -2213,13 +2213,10 @@ We will spend a little time talking about how to partition variation and get est
 
 ## Suggested workflow (run these scripts in this order)
 
-- [intercepts_and_slopes_in_general_regression.R](./intercepts_and_slopes_in_general_regression.R)
-
-### intercepts_and_slopes_in_mixed_effects.R
-
-### general_regression_vs_mixed_effects.R
-
-### Check out make-simulated-data.R to see how the data were constructed
+- [intercepts_and_slopes_in_general_regression.R](./2_general_regression_vs_mixed_effects/intercepts_and_slopes_in_general_regression.R)
+- [intercepts_and_slopes_in_mixed_effects.R](./2_general_regression_vs_mixed_effects/intercepts_and_slopes_in_mixed_effects.R)
+- [general_regression_vs_mixed_effects.R](./2_general_regression_vs_mixed_effects/general_regression_vs_mixed_effects.R)
+- Check out [make_simulated_data.R](./2_general_regression_vs_mixed_effects/make_simulated_data.R) to see how the data were constructed
 
 #+end_src
 

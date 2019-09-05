@@ -1,7 +1,6 @@
 ## A BRIEF INTRODUCTION TO R ##
-# prepared by ChristyGeromboux
 #-------------------------------------
-# We have seen a brief introduction to RStudio. Now let's use it.
+# We have seen a brief introduction to R and RStudio. Now let's use it.
 
 ## RUNNING CODE ##
 #-------------------------------------
@@ -31,7 +30,6 @@ example(mean)
 # R offers a great inbuilt tutorial called swirl
 library("swirl")
 swirl()
-?swirl_options
 help(swirl)
 
 # There is also heaps of information on the internet
@@ -104,8 +102,8 @@ y
 
 # numerics (double floating point real numbers)
 num <- 2
-num <- 3.5
 num <- 0.4e10
+num <- 3.5
 
 # characters strings
 text <- "Hello world"
@@ -120,15 +118,16 @@ cmplx
 
 # integers
 int <- 3L  # Note the L here just denotes an integer. 
+int
 
 
 ## CASTING BETWEEN TYPES
 #------------------------------------- 
 
 class(int)
-class(num)
-x <- as.integer(num)
+x <- as.numeric(int)
 class(x)
+x
 
 class(num)
 x <- as.character(num)
@@ -139,6 +138,7 @@ x  # When you print the variable x it now has it has quotes
 # integer + numeric = numeric
 x <- int + num
 class(x)
+x
 
 # imaginary + numeric = imaginary
 x <- cmplx + num
@@ -226,6 +226,7 @@ x<=y
 #-------------------------------------
 # R has a built in concept for infinity
 x<-1/Inf
+x
 
 
 ## LOGICAL OPERATORS
@@ -265,9 +266,9 @@ if (x > y) {
 #-------------------------------------
 # Iterates through code for a fixed number of times
 x<-NA
-for (i in 1:27) {
+for (i in 1:20) {
   x<-paste(x," NA")
-  if (i == 27) {
+  if (i == 20) {
     x<-paste(x," BATMAN!")
   }
 } 
@@ -330,13 +331,17 @@ y
 
 x + y
 x * y
+x / y
 
 a<-10
+a + x
 a * x
 
 # this works well when you are adding or multiplying vectors where the
 # number elements in one is a multiple of the number of element in the other
 z <- c(10, 100)
+x
+z
 x + z
 x * z
 
@@ -382,7 +387,8 @@ class(y)
 # you can also give names to the elements of your list 
 # and you can use the $ operator to refer to them
 x<- list(num=5, pet="rabbit", eats_meat=FALSE)
-my_pet<-x$pet
+my_pet <- x$pet
+my_pet
 class(my_pet)
 
 # Note this is not allowed
@@ -394,7 +400,7 @@ x$a
 #-------------------------------------
 
 x<-c(-10:10)
-even_x<- (x %% 2)==0 # here %% = modulus 
+even_x <- (x %% 2)==0 # here %% = modulus 
 even_x # this is a logical vector representing if the values of x are divisible by 2
 z<-x[even_x]
 z
@@ -449,7 +455,6 @@ cw<-ChickWeight
 
 # Let's take a quick look at the data
 head(ChickWeight)
-str(ChickWeight)
 summary(ChickWeight)
 
 # Now let's create some plots
