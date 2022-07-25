@@ -1,34 +1,18 @@
-#### name: basic regression model with varying intercepts and varying slopes ####
+#### name: general regression model with varying intercepts and varying slopes ####
+## this example comes from https://github.com/ivanhanigan/spatiotemporal-multilevel-models
+## 2_general_regression_vs_mixed_effects/intercepts_and_slopes_in_general_regression_Annotated.R
 
-#### 1.1 load in data
+#### load and clean in data ####
 
-dat <- read.csv("C:/Users/hs419/OneDrive - Macquarie University/data/practice/2_general_regression_vs_mixed_effects/data/simulated_data.csv")
+dat <- read.csv("data/simulated_data.csv")
+dat$z <- factor(dat$z)
 
-
-## which data to use in this model? 
-# single incident data  - 
-# daily count 
-
-# if it's just age / gender then go with possion daily count....
-
-## note that this model isn't telling you if gender etc is significant, but rather how different they are from each other. 
-
-
-#### 1.2 exploatory work 
+#### 1.2 exploratory work 
 
 str(dat)
 summary(dat)
 
-#### 1.2.1 plot for exploration 
-
-plot(dat$x, dat$y)
-plot(dat$z, dat$y)
-plot(density(dat$y))
-with(dat, plot(x, y, col = z))
-legend("topleft", legend = 1:3, fill = 1:3)
-
-
-#### 1.3 subset the data to just including group 3 
+#### subset the data to just including group 3 
 # this was only dropped to make it simplier
 
 dat <- dat[dat$z != "group3",]
@@ -40,18 +24,30 @@ table(dat$z)
 dat$z <- factor(dat$z)
 table(dat$z)
 
+#### 1.2.1 plot for exploration 
+
+plot(dat$x, dat$y)
+plot(dat$z, dat$y)
+plot(density(dat$y))
+with(dat, plot(x, y, col = z))
+legend("topleft", legend = 1:2, fill = 1:2)
+
+
+
+
 #### 1.4 running a basic linear model ####
 
 
 fit1 <- lm(y ~ x, data = dat)
 
 summary(fit1)
+## the results show that both the intercept and x are significant, and the R2 is 0.12
 
 fit1cf <- coefficients(fit1)
 fit1cf
-# view the matrix - intercept and slope (coefficient is slope)
+# view the parameter estimates - intercept and slope (coefficient is slope)
 
-## the results show that both the intecept and x are significant, and the R2 is 0.12
+
 
 #### 1.4.1 plotting basic linear model 
 
