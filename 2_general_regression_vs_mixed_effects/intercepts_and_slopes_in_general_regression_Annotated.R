@@ -55,9 +55,10 @@ stargazer(fit1, type = "text")
 #### intercept and slope (coefficient is slope)
 fit1cf <- coefficients(fit1)
 ##fit1cf
+par(mar=c(4,4,2,1))
 with(dat, plot(x, y, col = z))
 abline(fit1cf[1], fit1cf[2])
-
+title(expression(paste("Y = ", beta[0] + beta[1] ,"X")))
 ## this is a wrong model! Because it's getting the middle and not capturing the difference in groups 
 
 #### do build a plot manually ####
