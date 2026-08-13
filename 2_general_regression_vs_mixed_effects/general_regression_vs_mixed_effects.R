@@ -3,6 +3,7 @@ library(lme4)
 dat <- read.csv("data/simulated_data.csv")
 # step one: exploratory work
 str(dat)
+dat$z <- as.factor(dat$z)
 summary(dat)
 plot(dat$x, dat$y)
 plot(dat$z, dat$y)
@@ -34,12 +35,12 @@ my_plot <- function(dat){
 my_plot(dat)
 #dev.off()
 
-#  model 1: OLS with unvarying intercept and slope (fixed) 
+#  model 1: OLS with unvarying intercept and slope
 fit <- lm(y~x, data = dat)
 summary(fit)
 abline(fit, lwd = 2, lty = 2)
 
-# model 2: varying intercept (random) and unvarying slope (fixed)
+# model 2: varying intercept and unvarying slope
 my_plot(dat)
 fit2  <- lm(y ~ x + z, data = dat)
 summary(fit2)
@@ -63,7 +64,7 @@ abline(b0+b2.2, b1)
 # TODO maybe stop to talk about the tests of 'if group makes a difference?' here, which justify going the next
 
 #######################################################################################
-#### model 3: LM approach to varying intercept (random) and varying slope (random) ####
+#### model 3: LM approach to varying intercept and varying slope ####
 #######################################################################################
 # clear out the plot
 my_plot(dat)
@@ -155,11 +156,8 @@ gamma2 <- fixed[1] + random[[1]][2,1]
 gamma3 <- fixed[1] + random[[1]][3,1]
 beta_x1 <- fixed[2] + random[[1]][1,2]
 beta_x2 <- fixed[2] + random[[1]][2,2]
-beta_x3 <- fixed[2] + random[[1]][2,2]
+beta_x3 <- fixed[2] + random[[1]][3,2]
 
 abline(gamma1, beta_x1, col = 'red', lty = 'dashed')
 abline(gamma2, beta_x2, col = 'red', lty = 'dashed')
 abline(gamma3, beta_x3, col = 'red', lty = 'dashed')
-
-
-
